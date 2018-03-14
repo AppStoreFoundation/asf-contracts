@@ -9,7 +9,6 @@ contract AppCoins2 {
 contract AppCoinsIABInterface {
     function division(uint numerator, uint denominator) public constant returns (uint);
     function buy(uint _amount, string _sku, address _addr_appc, address _dev, address _appstore, address _oem) public constant returns (bool);
-    event Buy(uint _amount, string _sku, address _from, address _dev, address _appstore, address _oem);
 }
 
 contract AppCoinsIAB is AppCoinsIABInterface {
