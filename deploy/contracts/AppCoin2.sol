@@ -7,10 +7,9 @@ pragma solidity ^0.4.19;
 
 contract ERC20Interface {
     function balanceOf (address _owner) public constant returns(uint256 balance);
-    function transfer(address _to, uint256 _value, bytes data) public returns (bool success);
-    function transferFrom(address _from, address _to, uint256 _value, bytes data) public returns (uint);
-    function getSender() public returns (address _sender);
-    event Transfer(address indexed _from, address indexed _to, uint256 _value, bytes data);
+    function transfer(address _to, uint256 _value) public returns (bool success);
+    function transferFrom(address _from, address _to, uint256 _value) public returns (uint);
+    event Transfer(address indexed _from, address indexed _to, uint256 _value);
 }
 
 contract AppCoin2 is ERC20Interface{
@@ -50,14 +49,10 @@ contract AppCoin2 is ERC20Interface{
         return balances[_owner];
     }
 
-    function getSender() public returns (address _sender) {
-    	     return msg.sender;
-    }
-
     /**
      * Internal transfer, only can be called by this contract
      */
-    function _transfer(address _from, address _to, uint _value, bytes data) internal returns (bool) {
+    function _transfer(address _from, address _to, uint _value) internal returns (bool) {
         // Prevent transfer to 0x0 address. Use burn() instead
         require(_to != 0x0);
         // Check if the sender has enough
@@ -70,7 +65,7 @@ contract AppCoin2 is ERC20Interface{
         balances[_from] -= _value;
         // Add the same to the recipient
         balances[_to] += _value;
-        Transfer(_from, _to, _value, data);
+        Transfer(_from, _to, _value);
         // Asserts are used to use static analysis to find bugs in your code. They should never fail
         assert(balances[_from] + balances[_to] == previousBalances);	
     }
@@ -87,13 +82,13 @@ contract AppCoin2 is ERC20Interface{
     //     _transfer(msg.sender, _to, _value);
     // }
 
-    function transfer (address _to, uint256 _amount, bytes data) returns (bool success) {
+    function transfer (address _to, uint256 _amount) returns (bool success) {
         if (balances[msg.sender] >= _amount
                 && _amount > 0
                 && balances[_to] + _amount > balances[_to]) {
             balances[msg.sender] -= _amount;
             balances[_to] += _amount;
-            Transfer(msg.sender, _to, _amount, data);
+            Transfer(msg.sender, _to, _amount);
             return true;
         } else {
             return false;
@@ -109,10 +104,10 @@ contract AppCoin2 is ERC20Interface{
      * @param _to The address of the recipient
      * @param _value the amount to send
      */
-    function transferFrom(address _from, address _to, uint256 _value, bytes data) public returns (uint) {
+    function transferFrom(address _from, address _to, uint256 _value) public returns (uint) {
         // require(_value <= allowance[_from][msg.sender]);     // Check allowance
         allowance[_from][msg.sender] -= _value;
-         _transfer(_from, _to, _value, data);
+         _transfer(_from, _to, _value);
         return allowance[_from][msg.sender];
     }
 
