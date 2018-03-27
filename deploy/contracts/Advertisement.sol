@@ -88,5 +88,65 @@ contract Advertisement {
 			startDate,
 			endDate);
 	}
+
+	function getTotalCampaignsByCountry (string country) returns (uint total) {
+		bytes memory countryInBytes = bytes(country);
+		total = campaigns[countryInBytes].length;
+	}
+
+	function getPackageNameOfCampaign (string country, uint index) 
+			returns(string packageName) {
+		bytes memory countryInBytes = bytes(country);
 	
+		packageName = campaigns[countryInBytes][index].filters.packageName;		
+	}
+
+	function getCountriesOfCampaign (string country, uint index) 
+			returns(string countries){
+		bytes memory countryInBytes = bytes(country);
+		
+		countries = campaigns[countryInBytes][index].filters.countries;
+	}
+
+	function getVercodesOfCampaign (string country, uint index) 
+			returns(uint[] vercodes) {
+		bytes memory countryInBytes = bytes(country);
+
+		vercodes = campaigns[countryInBytes][index].filters.vercodes;
+	}
+
+	function getPriceOfCampaign (string country, uint index) 
+			returns(uint price) {
+		bytes memory countryInBytes = bytes(country);
+
+		price = campaigns[countryInBytes][index].price;		
+	}
+	
+	function getStartDateOfCampaign (string country, uint index) 
+			returns(uint startDate) {
+		bytes memory countryInBytes = bytes(country);
+		
+		startDate = campaigns[countryInBytes][index].startDate;		
+	}
+	
+	function getEndDateOfCampaign (string country, uint index) 
+			returns(uint endDate) {
+		bytes memory countryInBytes = bytes(country);
+		
+		endDate = campaigns[countryInBytes][index].endDate;		
+	}
+	
+	function getBudgetOfCampaign (string country, uint index) 
+			returns(uint budget) {
+		bytes memory countryInBytes = bytes(country);
+
+		budget = campaigns[countryInBytes][index].budget;
+	}
+
+	function getOwnerOfCampaign (string country, uint index) 
+			returns(address owner) {
+		bytes memory countryInBytes = bytes(country);
+
+		owner = campaigns[countryInBytes][index].owner;
+	}
 }
