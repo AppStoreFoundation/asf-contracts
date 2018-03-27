@@ -61,10 +61,16 @@ contract Advertisement {
 		uint countryLength = 0;
 		for (uint i=0; i<countriesInBytes.length; i++){
 
-			if(countriesInBytes[i]==","){
-				//if ',' is found, new String ahead
-				campaigns[country].push(newCampaign);	
+			//if ',' is found, new country ahead
+			if(countriesInBytes[i]=="," || i == countriesInBytes.length-1){
+			
+				if(i == countriesInBytes.length-1){
+					country[countryLength]=countriesInBytes[i];
+				}
+
+				campaigns[country].push(newCampaign);
 				country = new bytes(32);
+				countryLength = 0;
 			} else {
 				country[countryLength]=countriesInBytes[i];
 				
