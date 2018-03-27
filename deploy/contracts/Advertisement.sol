@@ -56,17 +56,18 @@ contract Advertisement {
 		newCampaign.budget = msg.value;
 		newCampaign.owner = msg.sender;
 
-		bytes memory country;
+		bytes memory country =  new bytes(32);
 		bytes memory countriesInBytes = bytes(countries);
 		uint countryLength = 0;
 		for (uint i=0; i<countriesInBytes.length; i++){
 
-			if(countriesInBytes[i]==','){
+			if(countriesInBytes[i]==","){
 				//if ',' is found, new String ahead
-				campaigns[country].push(newCampaign);
-				delete country;
+				campaigns[country].push(newCampaign);	
+				country = new bytes(32);
 			} else {
 				country[countryLength]=countriesInBytes[i];
+				
 				countryLength++;
 			}
 
