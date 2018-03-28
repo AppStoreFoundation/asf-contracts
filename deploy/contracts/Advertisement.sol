@@ -1,6 +1,15 @@
 pragma solidity ^0.4.8;
+
+contract AppCoins2 {
+    mapping (address => mapping (address => uint256)) public allowance;
+    function balanceOf (address _owner) public constant returns (uint256);
+    function transferFrom(address _from, address _to, uint256 _value) public returns (uint);
+}
+
 /**
- * The AdCampaign contract does this and that...
+ * The Advertisement contract collects campaigns registered by developers
+ * and executes payments to users using campaign registered applications 
+ * after proof of Attention.
  */
 contract Advertisement {
 
@@ -31,19 +40,38 @@ contract Advertisement {
 
 	ValidationRules public rules;
 	mapping (bytes => Campaign[]) campaigns;
+	AppCoins2 appc2;
 
+	// This notifies clients about a newly created campaign
 	event CampaignCreated(string packageName, string countries, 
 							uint[] vercodes, uint price, uint budget,
 							uint startDate, uint endDate);
-
+	/**
+	* Constructor function
+	*
+	* Initializes contract with default validation rules
+	*/
 	function Advertisement () public {
 		rules = ValidationRules(false,true,true,2,1);
 	}
 
 
+	/**
+	* Sets AppCoin2 contract address to transfer AppCoins 
+	* to contract on campaign creation
+	*/
+	function setAppCoins2Address (address addrAppc) external {
+		appc2 = AppCoins2(addrAppc);
+	}
+	
+
+	/**
+	* Creates a campaign for a certain package name with
+	* a defined price and budget and emits a CampaignCreated event
+	*/
 	function createCampaign (string packageName, string countries, 
-							uint[] vercodes, uint price, 
-							uint startDate, uint endDate) public payable {
+							uint[] vercodes, uint price, uint budget, 
+							uint startDate, uint endDate) external {
 		Campaign memory newCampaign;
 		newCampaign.filters.packageName = packageName;
 		newCampaign.filters.countries = countries;
@@ -53,7 +81,11 @@ contract Advertisement {
 		newCampaign.endDate = endDate;
 		
 		//Transfers the budget to contract address
-		newCampaign.budget = msg.value;
+        require(appc2.allowance(msg.sender, address(this)) >= budget);
+
+        appc2.transferFrom(msg.sender, address(this), budget);
+
+		newCampaign.budget = budget;
 		newCampaign.owner = msg.sender;
 
 		bytes memory country =  new bytes(32);
@@ -73,7 +105,7 @@ contract Advertisement {
 				countryLength = 0;
 			} else {
 				country[countryLength]=countriesInBytes[i];
-				
+		
 				countryLength++;
 			}
 
