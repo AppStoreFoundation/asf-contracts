@@ -41,6 +41,7 @@ contract Advertisement {
 	ValidationRules public rules;
 	mapping (bytes => Campaign[]) campaigns;
 	AppCoins2 appc2;
+	bytes2[] countryList;
 
 	// This notifies clients about a newly created campaign
 	event CampaignCreated(string packageName, string countries, 
@@ -102,7 +103,7 @@ contract Advertisement {
 					country[countryLength]=countriesInBytes[i];
 				}
 
-				campaigns[country].push(newCampaign);
+				addCampaign(country,newCampaign);
 
 				country =  new bytes(2);
 				countryLength = 0;
@@ -123,6 +124,29 @@ contract Advertisement {
 			endDate);
 		
 	}
+
+	function addCampaign (bytes country, Campaign newCampaign) internal {
+		// Adds a country to countryList if the country is not in this list
+		if (campaigns[country].length == 0){
+			bytes2 countryCode;
+			
+			assembly {
+        		countryCode := mload(add(country, 32))
+    		}
+			
+			countryList.push(countryCode);
+		}
+		
+		//Adds Campaign to campaign list
+		campaigns[country].push(newCampaign);
+
+	}
+
+	function getCountryList () public view returns(bytes2[]) {
+			return countryList;
+	}
+	
+	
 
 	function getTotalCampaignsByCountry (string country) 
 			public view returns (uint){
