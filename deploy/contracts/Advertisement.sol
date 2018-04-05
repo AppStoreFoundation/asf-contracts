@@ -41,6 +41,7 @@ contract Advertisement {
 	ValidationRules public rules;
 	mapping (bytes => Campaign[]) campaigns;
 	AppCoins2 appc2;
+	bytes2[] countryList;
 
 	// This notifies clients about a newly created campaign
 	event CampaignCreated(string packageName, string countries, 
@@ -88,9 +89,11 @@ contract Advertisement {
 		newCampaign.budget = budget;
 		newCampaign.owner = msg.sender;
 
-		bytes memory country =  new bytes(32);
+		//Assuming each country is represented in ISO country codes
+		bytes memory country =  new bytes(2);
 		bytes memory countriesInBytes = bytes(countries);
 		uint countryLength = 0;
+
 		for (uint i=0; i<countriesInBytes.length; i++){
 
 			//if ',' is found, new country ahead
@@ -100,12 +103,12 @@ contract Advertisement {
 					country[countryLength]=countriesInBytes[i];
 				}
 
-				campaigns[country].push(newCampaign);
-				country = new bytes(32);
+				addCampaign(country,newCampaign);
+
+				country =  new bytes(2);
 				countryLength = 0;
 			} else {
 				country[countryLength]=countriesInBytes[i];
-		
 				countryLength++;
 			}
 
@@ -119,6 +122,92 @@ contract Advertisement {
 			newCampaign.budget,
 			startDate,
 			endDate);
+		
+	}
+
+	function addCampaign (bytes country, Campaign newCampaign) internal {
+		// Adds a country to countryList if the country is not in this list
+		if (campaigns[country].length == 0){
+			bytes2 countryCode;
+			
+			assembly {
+        		countryCode := mload(add(country, 32))
+    		}
+			
+			countryList.push(countryCode);
+		}
+		
+		//Adds Campaign to campaign list
+		campaigns[country].push(newCampaign);
+
+	}
+
+	function getCountryList () public view returns(bytes2[]) {
+			return countryList;
 	}
 	
+	
+
+	function getTotalCampaignsByCountry (string country) 
+			public view returns (uint){
+		bytes memory countryInBytes = bytes(country);
+
+		return campaigns[countryInBytes].length;
+	}
+
+	function getPackageNameOfCampaign (string country, uint index) 
+			public view returns(string) {
+		bytes memory countryInBytes = bytes(country);
+	
+		return campaigns[countryInBytes][index].filters.packageName;		
+	}
+
+	function getCountriesOfCampaign (string country, uint index) 
+			public view returns(string){
+		bytes memory countryInBytes = bytes(country);
+		
+		return campaigns[countryInBytes][index].filters.countries;
+	}
+
+	function getVercodesOfCampaign (string country, uint index) 
+			public view returns(uint[]) {
+		bytes memory countryInBytes = bytes(country);
+
+		return campaigns[countryInBytes][index].filters.vercodes;
+	}
+
+	function getPriceOfCampaign (string country, uint index) 
+			public view returns(uint) {
+		bytes memory countryInBytes = bytes(country);
+
+		return campaigns[countryInBytes][index].price;		
+	}
+	
+	function getStartDateOfCampaign (string country, uint index) 
+			public view returns(uint) {
+		bytes memory countryInBytes = bytes(country);
+		
+		return campaigns[countryInBytes][index].startDate;		
+	}
+	
+	function getEndDateOfCampaign (string country, uint index) 
+			public view returns(uint) {
+		bytes memory countryInBytes = bytes(country);
+		
+		return campaigns[countryInBytes][index].endDate;		
+	}
+	
+	function getBudgetOfCampaign (string country, uint index) 
+			public view returns(uint) {
+		bytes memory countryInBytes = bytes(country);
+
+		return campaigns[countryInBytes][index].budget;
+	}
+
+	function getOwnerOfCampaign (string country, uint index) 
+			public view returns(address) {
+		bytes memory countryInBytes = bytes(country);
+
+		return campaigns[countryInBytes][index].owner;
+	}
 }
