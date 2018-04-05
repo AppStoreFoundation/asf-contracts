@@ -1,2 +1,2 @@
-# AppCoins-contracts
+# Contracts
 Repo containing the smart contracts of the AppCoins protocol
