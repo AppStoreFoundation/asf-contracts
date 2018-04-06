@@ -1,6 +1,6 @@
 pragma solidity ^0.4.8;
 
-contract AppCoins2 {
+contract AppCoins {
     mapping (address => mapping (address => uint256)) public allowance;
     function balanceOf (address _owner) public constant returns (uint256);
     function transferFrom(address _from, address _to, uint256 _value) public returns (uint);
@@ -42,7 +42,7 @@ contract Advertisement {
 	bytes32[] bidIdList;
 	mapping (bytes32 => Campaign) campaigns;
 	mapping (bytes => bytes32[]) campaignsByCountry;
-	AppCoins2 appc2;
+	AppCoins appc;
 	bytes2[] countryList;
 
 	// This notifies clients about a newly created campaign
@@ -61,11 +61,11 @@ contract Advertisement {
 
 
 	/**
-	* Sets AppCoin2 contract address to transfer AppCoins 
+	* Sets AppCoins contract address to transfer AppCoins 
 	* to contract on campaign creation
 	*/
-	function setAppCoins2Address (address addrAppc) external {
-		appc2 = AppCoins2(addrAppc);
+	function setAppCoinsAddress (address addrAppc) external {
+		appc = AppCoins(addrAppc);
 	}
 	
 
@@ -85,9 +85,9 @@ contract Advertisement {
 		newCampaign.endDate = endDate;
 		
 		//Transfers the budget to contract address
-        require(appc2.allowance(msg.sender, address(this)) >= budget);
+        require(appc.allowance(msg.sender, address(this)) >= budget);
 
-        appc2.transferFrom(msg.sender, address(this), budget);
+        appc.transferFrom(msg.sender, address(this), budget);
 
 		newCampaign.budget = budget;
 		newCampaign.owner = msg.sender;

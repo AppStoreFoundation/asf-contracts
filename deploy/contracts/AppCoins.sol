@@ -3,8 +3,6 @@
 
 pragma solidity ^0.4.19;
 
-// interface tokenRecipient { function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData) public; }
-
 contract ERC20Interface {
     function balanceOf (address _owner) public constant returns(uint256 balance);
     function transfer(address _to, uint256 _value) public returns (bool success);
@@ -12,7 +10,7 @@ contract ERC20Interface {
     event Transfer(address indexed _from, address indexed _to, uint256 _value);
 }
 
-contract AppCoin2 is ERC20Interface{
+contract AppCoins is ERC20Interface{
     // Public variables of the token
     address public owner;
     string public name;
@@ -36,7 +34,7 @@ contract AppCoin2 is ERC20Interface{
      *
      * Initializes contract with initial supply tokens to the creator of the contract
      */
-    function AppCoin2() public {
+    function AppCoins() public {
         owner = msg.sender;
     	name = "AppCoins";
 	symbol = "APPC";
@@ -81,7 +79,6 @@ contract AppCoin2 is ERC20Interface{
     // function transfer(address _to, uint256 _value) public {
     //     _transfer(msg.sender, _to, _value);
     // }
-
     function transfer (address _to, uint256 _amount) returns (bool success) {
         if (balances[msg.sender] >= _amount
                 && _amount > 0
@@ -105,7 +102,7 @@ contract AppCoin2 is ERC20Interface{
      * @param _value the amount to send
      */
     function transferFrom(address _from, address _to, uint256 _value) public returns (uint) {
-        // require(_value <= allowance[_from][msg.sender]);     // Check allowance
+        require(_value <= allowance[_from][msg.sender]);     // Check allowance
         allowance[_from][msg.sender] -= _value;
          _transfer(_from, _to, _value);
         return allowance[_from][msg.sender];
@@ -124,25 +121,6 @@ contract AppCoin2 is ERC20Interface{
         allowance[msg.sender][_spender] = _value;
         return true;
     }
-
-    /**
-     * Set allowance for other address and notify
-     *
-     * Allows `_spender` to spend no more than `_value` tokens on your behalf, and then ping the contract about it
-     *
-     * @param _spender The address authorized to spend
-     * @param _value the max amount they can spend
-     * @param _extraData some extra information to send to the approved contract
-     */
-    // function approveAndCall(address _spender, uint256 _value, bytes _extraData)
-    //     public
-    //     returns (bool success) {
-    //     tokenRecipient spender = tokenRecipient(_spender);
-    //     if (approve(_spender, _value)) {
-    //         spender.receiveApproval(msg.sender, _value, this, _extraData);
-    //         return true;
-    //     }
-    // }
 
     /**
      * Destroy tokens

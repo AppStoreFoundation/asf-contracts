@@ -1,6 +1,6 @@
 pragma solidity ^0.4.19;
 
-contract AppCoins2 {
+contract AppCoins {
     mapping (address => mapping (address => uint256)) public allowance;
     function balanceOf (address _owner) public constant returns (uint256);
     function transferFrom(address _from, address _to, uint256 _value) public returns (uint);
@@ -29,8 +29,8 @@ contract AppCoinsIAB is AppCoinsIABInterface {
         require(_appstore != 0x0);
         require(_oem != 0x0);
 
-        AppCoins2 appc2 = AppCoins2(_addr_appc);
-        uint256 aux = appc2.allowance(msg.sender, address(this));
+        AppCoins appc = AppCoins2(_addr_appc);
+        uint256 aux = appc.allowance(msg.sender, address(this));
         require(aux >= _amount);
 
         uint[] memory amounts = new uint[](3);
@@ -38,9 +38,9 @@ contract AppCoinsIAB is AppCoinsIABInterface {
         amounts[1] = division(_amount * appstore_share, 100);
         amounts[2] = division(_amount * oem_share, 100);
 
-        appc2.transferFrom(msg.sender, _dev, amounts[0]);
-        appc2.transferFrom(msg.sender, _appstore, amounts[1]);
-        appc2.transferFrom(msg.sender, _oem, amounts[2]);
+        appc.transferFrom(msg.sender, _dev, amounts[0]);
+        appc.transferFrom(msg.sender, _appstore, amounts[1]);
+        appc.transferFrom(msg.sender, _oem, amounts[2]);
 
         Buy(_amount, _sku, msg.sender, _dev, _appstore, _oem);
 
