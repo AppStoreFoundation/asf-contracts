@@ -1,11 +1,11 @@
 // AppCoins contract with share splitting among different wallets
 // Not fully ERC20 compliant due to tests purposes
 
-pragma solidity ^0.4.19;
+pragma solidity ^0.4.21;
 
 contract ERC20Interface {
-    function name() public constant returns(string);
-    function symbol() public constant returns(string);
+    function name() public view returns(bytes32);
+    function symbol() public view returns(bytes32);
     function balanceOf (address _owner) public constant returns(uint256 balance);
     function transfer(address _to, uint256 _value) public returns (bool success);
     function transferFrom(address _from, address _to, uint256 _value) public returns (uint);
@@ -15,8 +15,8 @@ contract ERC20Interface {
 contract AppCoins is ERC20Interface{
     // Public variables of the token
     address public owner;
-    string private token_name;
-    string private token_symbol;
+    bytes32 private token_name;
+    bytes32 private token_symbol;
     uint8 public decimals = 18;
     // 18 decimals is the strongly suggested default, avoid changing it
     uint256 public totalSupply;
@@ -45,11 +45,11 @@ contract AppCoins is ERC20Interface{
         balances[owner] = totalSupply;                // Give the creator all initial tokens
     }
 
-    function name() public constant returns(string) {
+    function name() public view returns(bytes32) {
         return token_name;
     }
 
-    function symbol() public constant returns(string) {
+    function symbol() public view returns(bytes32) {
         return token_symbol;
     }
 
