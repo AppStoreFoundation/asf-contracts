@@ -29,7 +29,7 @@ contract AppCoinsIAB is AppCoinsIABInterface {
         require(_appstore != 0x0);
         require(_oem != 0x0);
 
-        AppCoins appc = AppCoins2(_addr_appc);
+        AppCoins appc = AppCoins(_addr_appc);
         uint256 aux = appc.allowance(msg.sender, address(this));
         require(aux >= _amount);
 
