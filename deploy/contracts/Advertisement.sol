@@ -28,7 +28,7 @@ contract Advertisement {
 	}
 
 	struct Campaign {	
-		bytes8 bid_id;
+		bytes32 bidId;
 		uint price;
 		uint budget;
 		uint startDate;
@@ -39,13 +39,16 @@ contract Advertisement {
 	}
 
 	ValidationRules public rules;
-	mapping (bytes => Campaign[]) campaigns;
+	bytes32[] bidIdList;
+	mapping (bytes32 => Campaign) campaigns;
+	mapping (bytes => bytes32[]) campaignsByCountry;
 	AppCoins2 appc2;
 	bytes2[] countryList;
 
 	// This notifies clients about a newly created campaign
-	event CampaignCreated(string packageName, string countries, 
-							uint[] vercodes, uint price, uint budget,
+	event CampaignCreated(bytes32 bidId, string packageName,
+							string countries, uint[] vercodes, 
+							uint price, uint budget,
 							uint startDate, uint endDate);
 	/**
 	* Constructor function
@@ -88,10 +91,31 @@ contract Advertisement {
 
 		newCampaign.budget = budget;
 		newCampaign.owner = msg.sender;
+		newCampaign.bidId = keccak256(newCampaign);
+
+		addCampaign(newCampaign);
+	
+		CampaignCreated(
+			newCampaign.bidId,
+			packageName,
+			countries,
+			vercodes,
+			price,
+			budget,
+			startDate,
+			endDate);
+		
+	}
+
+	function addCampaign(Campaign campaign) internal {
+		//Add to bidIdList
+		bidIdList.push(campaign.bidId);
+		//Add to campaign map
+		campaigns[campaign.bidId] = campaign;
 
 		//Assuming each country is represented in ISO country codes
 		bytes memory country =  new bytes(2);
-		bytes memory countriesInBytes = bytes(countries);
+		bytes memory countriesInBytes = bytes(campaign.filters.countries);
 		uint countryLength = 0;
 
 		for (uint i=0; i<countriesInBytes.length; i++){
@@ -103,7 +127,7 @@ contract Advertisement {
 					country[countryLength]=countriesInBytes[i];
 				}
 
-				addCampaign(country,newCampaign);
+				addCampaignToCountryMap(campaign,country);
 
 				country =  new bytes(2);
 				countryLength = 0;
@@ -114,20 +138,12 @@ contract Advertisement {
 
 		}
 		
-		CampaignCreated(
-			packageName,
-			countries,
-			vercodes,
-			price,
-			newCampaign.budget,
-			startDate,
-			endDate);
-		
 	}
+	
 
-	function addCampaign (bytes country, Campaign newCampaign) internal {
+	function addCampaignToCountryMap (Campaign newCampaign,bytes country) internal {
 		// Adds a country to countryList if the country is not in this list
-		if (campaigns[country].length == 0){
+		if (campaignsByCountry[country].length == 0){
 			bytes2 countryCode;
 			
 			assembly {
@@ -137,8 +153,8 @@ contract Advertisement {
 			countryList.push(countryCode);
 		}
 		
-		//Adds Campaign to campaign list
-		campaigns[country].push(newCampaign);
+		//Adds Campaign to campaignsByCountry map
+		campaignsByCountry[country].push(newCampaign.bidId);
 
 	}
 
@@ -152,62 +168,60 @@ contract Advertisement {
 			public view returns (uint){
 		bytes memory countryInBytes = bytes(country);
 
-		return campaigns[countryInBytes].length;
+		return campaignsByCountry[countryInBytes].length;
 	}
 
-	function getPackageNameOfCampaign (string country, uint index) 
+	function getPackageNameOfCampaign (bytes32 bidId) 
 			public view returns(string) {
-		bytes memory countryInBytes = bytes(country);
 	
-		return campaigns[countryInBytes][index].filters.packageName;		
+		return campaigns[bidId].filters.packageName;		
 	}
 
-	function getCountriesOfCampaign (string country, uint index) 
+	function getCountriesOfCampaign (bytes32 bidId) 
 			public view returns(string){
-		bytes memory countryInBytes = bytes(country);
 		
-		return campaigns[countryInBytes][index].filters.countries;
+		return campaigns[bidId].filters.countries;
 	}
 
-	function getVercodesOfCampaign (string country, uint index) 
+	function getVercodesOfCampaign (bytes32 bidId) 
 			public view returns(uint[]) {
-		bytes memory countryInBytes = bytes(country);
 
-		return campaigns[countryInBytes][index].filters.vercodes;
+		return campaigns[bidId].filters.vercodes;
 	}
 
-	function getPriceOfCampaign (string country, uint index) 
+	function getPriceOfCampaign (bytes32 bidId) 
 			public view returns(uint) {
-		bytes memory countryInBytes = bytes(country);
 
-		return campaigns[countryInBytes][index].price;		
+		return campaigns[bidId].price;		
 	}
 	
-	function getStartDateOfCampaign (string country, uint index) 
+	function getStartDateOfCampaign (bytes32 bidId) 
 			public view returns(uint) {
-		bytes memory countryInBytes = bytes(country);
 		
-		return campaigns[countryInBytes][index].startDate;		
+		return campaigns[bidId].startDate;		
 	}
 	
-	function getEndDateOfCampaign (string country, uint index) 
+	function getEndDateOfCampaign (bytes32 bidId) 
 			public view returns(uint) {
-		bytes memory countryInBytes = bytes(country);
 		
-		return campaigns[countryInBytes][index].endDate;		
+		return campaigns[bidId].endDate;		
 	}
 	
-	function getBudgetOfCampaign (string country, uint index) 
+	function getBudgetOfCampaign (bytes32 bidId) 
 			public view returns(uint) {
-		bytes memory countryInBytes = bytes(country);
 
-		return campaigns[countryInBytes][index].budget;
+		return campaigns[bidId].budget;
 	}
 
-	function getOwnerOfCampaign (string country, uint index) 
+	function getOwnerOfCampaign (bytes32 bidId) 
 			public view returns(address) {
-		bytes memory countryInBytes = bytes(country);
 
-		return campaigns[countryInBytes][index].owner;
+		return campaigns[bidId].owner;
 	}
+
+	function getBidIdList ()  
+			public view returns(bytes32[]) {
+		return bidIdList;
+	}
+	
 }
