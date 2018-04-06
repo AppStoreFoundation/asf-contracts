@@ -4,6 +4,8 @@
 pragma solidity ^0.4.19;
 
 contract ERC20Interface {
+    function name() public constant returns(string);
+    function symbol() public constant returns(string);
     function balanceOf (address _owner) public constant returns(uint256 balance);
     function transfer(address _to, uint256 _value) public returns (bool success);
     function transferFrom(address _from, address _to, uint256 _value) public returns (uint);
@@ -13,8 +15,8 @@ contract ERC20Interface {
 contract AppCoins is ERC20Interface{
     // Public variables of the token
     address public owner;
-    string public name;
-    string public symbol;
+    string private token_name;
+    string private token_symbol;
     uint8 public decimals = 18;
     // 18 decimals is the strongly suggested default, avoid changing it
     uint256 public totalSupply;
@@ -36,11 +38,19 @@ contract AppCoins is ERC20Interface{
      */
     function AppCoins() public {
         owner = msg.sender;
-    	name = "AppCoins";
-	symbol = "APPC";
+        token_name = "AppCoins";
+        token_symbol = "APPC";
         uint256 _totalSupply = 1000000;
         totalSupply = _totalSupply * 10 ** uint256(decimals);  // Update total supply with the decimal amount
         balances[owner] = totalSupply;                // Give the creator all initial tokens
+    }
+
+    function name() public constant returns(string) {
+        return token_name;
+    }
+
+    function symbol() public constant returns(string) {
+        return token_symbol;
     }
 
     function balanceOf (address _owner) public constant returns(uint256 balance) {
@@ -63,7 +73,7 @@ contract AppCoins is ERC20Interface{
         balances[_from] -= _value;
         // Add the same to the recipient
         balances[_to] += _value;
-        Transfer(_from, _to, _value);
+        emit Transfer(_from, _to, _value);
         // Asserts are used to use static analysis to find bugs in your code. They should never fail
         assert(balances[_from] + balances[_to] == previousBalances);	
     }
@@ -79,13 +89,13 @@ contract AppCoins is ERC20Interface{
     // function transfer(address _to, uint256 _value) public {
     //     _transfer(msg.sender, _to, _value);
     // }
-    function transfer (address _to, uint256 _amount) returns (bool success) {
+    function transfer (address _to, uint256 _amount) public returns (bool success) {
         if (balances[msg.sender] >= _amount
                 && _amount > 0
                 && balances[_to] + _amount > balances[_to]) {
             balances[msg.sender] -= _amount;
             balances[_to] += _amount;
-            Transfer(msg.sender, _to, _amount);
+            emit Transfer(msg.sender, _to, _amount);
             return true;
         } else {
             return false;
@@ -133,7 +143,7 @@ contract AppCoins is ERC20Interface{
         require(balances[msg.sender] >= _value);   // Check if the sender has enough
         balances[msg.sender] -= _value;            // Subtract from the sender
         totalSupply -= _value;                      // Updates totalSupply
-        Burn(msg.sender, _value);
+        emit Burn(msg.sender, _value);
         return true;
     }
 
@@ -151,7 +161,7 @@ contract AppCoins is ERC20Interface{
         balances[_from] -= _value;                         // Subtract from the targeted balance
         allowance[_from][msg.sender] -= _value;             // Subtract from the sender's allowance
         totalSupply -= _value;                              // Update totalSupply
-        Burn(_from, _value);
+        emit Burn(_from, _value);
         return true;
     }
 }
