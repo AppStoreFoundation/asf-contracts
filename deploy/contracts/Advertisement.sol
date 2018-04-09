@@ -91,8 +91,8 @@ contract Advertisement {
 
 		newCampaign.budget = budget;
 		newCampaign.owner = msg.sender;
-		newCampaign.bidId = keccak256(newCampaign);
 
+		newCampaign.bidId = uintToBytes(bidIdList.length);
 		addCampaign(newCampaign);
 	
 		CampaignCreated(
@@ -145,11 +145,10 @@ contract Advertisement {
 		// Adds a country to countryList if the country is not in this list
 		if (campaignsByCountry[country].length == 0){
 			bytes2 countryCode;
-			
 			assembly {
-        		countryCode := mload(add(country, 32))
-    		}
-			
+			       countryCode := mload(add(country, 32))
+			}
+
 			countryList.push(countryCode);
 		}
 		
@@ -162,6 +161,11 @@ contract Advertisement {
 			return countryList;
 	}
 	
+	function getCampaignsByCountry(string country) public view returns (bytes32[]){
+		bytes memory countryInBytes = bytes(country);
+
+		return campaignsByCountry[countryInBytes];
+	}
 	
 
 	function getTotalCampaignsByCountry (string country) 
@@ -224,4 +228,8 @@ contract Advertisement {
 		return bidIdList;
 	}
 	
+	function uintToBytes (uint256 i) constant returns(bytes32 b)  {
+		b = bytes32(i);
+	}
+
 }
