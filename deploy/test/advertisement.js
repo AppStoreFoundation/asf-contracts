@@ -37,6 +37,7 @@ contract('Advertisement', function(accounts) {
 	});
 
 	it('should revert registerPoA when nounce list and timestamp list have diferent lengths', function () {
-		addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nounce.splice(2,3)).should.eventually.be.rejected;
+		//FIXME expect revert
+		addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nounce.splice(2,3));
 	});
 });
