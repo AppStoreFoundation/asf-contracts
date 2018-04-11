@@ -32,6 +32,7 @@ contract('Advertisement', function(accounts) {
 
 	it('should emit an event when PoA is received', function () {
 		return addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nounce).then( instance => {
+			console.log(instance.logs[0])
 			expect(instance.logs.length).to.be.equal(1);
 		});
 	});
