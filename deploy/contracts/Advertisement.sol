@@ -50,6 +50,8 @@ contract Advertisement {
 							string countries, uint[] vercodes, 
 							uint price, uint budget,
 							uint startDate, uint endDate);
+
+	event PoARegistered(bytes32 bidId, string packageName);
 	/**
 	* Constructor function
 	*
@@ -156,6 +158,15 @@ contract Advertisement {
 		campaignsByCountry[country].push(newCampaign.bidId);
 
 	}
+
+	function registerPoA (string packageName, bytes32 bidId, uint[] timestampList, uint[] nounces) external {
+		
+		require (timestampList.length == nounces.length);
+
+		PoARegistered(bidId,packageName);
+		
+	}
+	
 
 	function getCountryList () public view returns(bytes2[]) {
 			return countryList;
