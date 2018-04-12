@@ -5,8 +5,13 @@ var web3 = require('web3');
 var expect = chai.expect;
 var chaiAsPromissed = require('chai-as-promised');
 chai.use(chaiAsPromissed);
+
 var appcInstance;
 var addInstance;
+
+var expectRevert = RegExp('revert');
+
+
 contract('Advertisement', function(accounts) {
   beforeEach(async () => {
 		
@@ -22,23 +27,26 @@ contract('Advertisement', function(accounts) {
 		examplePoA.packageName = "com.facebook.orca";
 		examplePoA.bid = web3.utils.toHex("0x00000001");
 		examplePoA.timestamp = new Array();
-		examplePoA.nounce = new Array();
+		examplePoA.nonce = new Array();
 		for(var i = 0; i < 12; i++){
 			examplePoA.timestamp.push(new Date().getTime()+20*i);
-			examplePoA.nounce.push(Math.floor(Math.random()*500*i));
+			examplePoA.nonce.push(Math.floor(Math.random()*500*i));
 		}
 
 	});
 
 	it('should emit an event when PoA is received', function () {
-		return addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nounce).then( instance => {
-			console.log(instance.logs[0])
+		return addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce).then( instance => {
 			expect(instance.logs.length).to.be.equal(1);
 		});
 	});
 
-	it('should revert registerPoA when nounce list and timestamp list have diferent lengths', function () {
-		//FIXME expect revert
-		addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nounce.splice(2,3));
+	it('should revert registerPoA when nonce list and timestamp list have diferent lengths', async function () {
+		var reverted = false;
+		await addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce.splice(2,3)).catch(
+			(err) => {
+				reverted = expectRevert.test(err.message);
+			});
+		expect(reverted).to.be.equal(true,"Revert expected");	
 	});
 });
