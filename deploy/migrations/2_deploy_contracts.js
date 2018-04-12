@@ -33,6 +33,7 @@ module.exports = function(deployer, network) {
             if(!AppCoinsAddress) {
                 throw 'AppCoins Address not found!'
             }
+            
             deployer.deploy(AppCoinsIAB);
             deployer.deploy(Advertisement, AppCoins.address);
             break;

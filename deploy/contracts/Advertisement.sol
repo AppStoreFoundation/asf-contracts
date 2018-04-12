@@ -69,6 +69,7 @@ contract Advertisement {
         appc = AppCoins(addrAppc);
     }
 
+
     modifier onlyOwner() {
         require(msg.sender == owner);
         _;
