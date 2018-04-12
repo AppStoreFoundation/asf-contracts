@@ -52,7 +52,7 @@ contract Advertisement {
 							uint startDate, uint endDate);
 
 	event PoARegistered(bytes32 bidId, string packageName,
-						uint[] timestampList,uint[] nounceList);
+						uint[] timestampList,uint[] nonceList);
 	/**
 	* Constructor function
 	*
@@ -160,11 +160,11 @@ contract Advertisement {
 
 	}
 
-	function registerPoA (string packageName, bytes32 bidId, uint[] timestampList, uint[] nounces) external {
+	function registerPoA (string packageName, bytes32 bidId, uint[] timestampList, uint[] nonces) external {
 		
-		require (timestampList.length == nounces.length);
+		require (timestampList.length == nonces.length);
 
-		PoARegistered(bidId,packageName,timestampList,nounces);
+		PoARegistered(bidId,packageName,timestampList,nonces);
 		
 	}
 	
