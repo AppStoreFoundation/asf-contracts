@@ -51,7 +51,8 @@ contract Advertisement {
 							uint price, uint budget,
 							uint startDate, uint endDate);
 
-	event PoARegistered(bytes32 bidId, string packageName);
+	event PoARegistered(bytes32 bidId, string packageName,
+						uint[] timestampList,uint[] nonceList);
 	/**
 	* Constructor function
 	*
@@ -159,7 +160,7 @@ contract Advertisement {
 
 	}
 
-	function registerPoA (string packageName, bytes32 bidId, uint[] timestampList, uint[] nounces) external {
+	function registerPoA (string packageName, bytes32 bidId, uint[] timestampList, uint[] nonces) external {
 		
 		require (timestampList.length == nounces.length);
 		//Expect ordered array arranged in ascending order

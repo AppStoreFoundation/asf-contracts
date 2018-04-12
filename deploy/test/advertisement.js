@@ -5,11 +5,11 @@ var web3 = require('web3');
 var expect = chai.expect;
 var chaiAsPromissed = require('chai-as-promised');
 chai.use(chaiAsPromissed);
+
 var appcInstance;
 var addInstance;
 var examplePoA;
 var wrongTimestampPoA;
-
 var expectRevert = RegExp('revert');
 
 contract('Advertisement', function(accounts) {
@@ -52,7 +52,7 @@ contract('Advertisement', function(accounts) {
 		});
 	});
 
-	it('should revert registerPoA when nounce list and timestamp list have diferent lengths', async function () {
+	it('should revert registerPoA when nonce list and timestamp list have diferent lengths', async function () {
 		var reverted = false;
 		await addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce.splice(2,3)).catch(
 			(err) => {
