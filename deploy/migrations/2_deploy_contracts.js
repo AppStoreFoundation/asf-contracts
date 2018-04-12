@@ -13,12 +13,14 @@ module.exports = function(deployer, network) {
             break;
 
         case 'ropsten':
-            AppCoinsAddress = '';
-            deployer.deploy(AppCoins).then(function() {
-                deployer.deploy(AppCoinsIAB);
-                deployer.deploy(Advertisement, AppCoins.address);
-            })
-            break;
+            AppCoinsAddress = '0xab949343E6C369C6B17C7ae302c1dEbD4B7B61c3';
+
+            if (!AppCoinsAddress) {
+                throw 'AppCoins Address not found!'
+            }
+
+            deployer.deploy(AppCoinsIAB);
+            deployer.deploy(Advertisement, AppCoinsAddress);
 
         case 'kovan':
             deployer.deploy(AppCoins).then(function() {
@@ -30,12 +32,12 @@ module.exports = function(deployer, network) {
         case 'main':
             var AppCoinsAddress = '';
 
-            if(!AppCoinsAddress) {
+            if (!AppCoinsAddress) {
                 throw 'AppCoins Address not found!'
             }
-            
+
             deployer.deploy(AppCoinsIAB);
-            deployer.deploy(Advertisement, AppCoins.address);
+            deployer.deploy(Advertisement, AppCoinsAddress);
             break;
 
         default:
