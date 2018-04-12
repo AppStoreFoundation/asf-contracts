@@ -58,7 +58,7 @@ contract('Advertisement', function(accounts) {
 			(err) => {
 				reverted = expectRevert.test(err.message);
 			});
-		expect(reverted).to.be.equal(true);	
+		expect(reverted).to.be.equal(true,"Revert expected");	
 	});
 
 	it('should revert registerPoA if timestamps are not spaced exactly 10 secounds from each other', async function () {
@@ -67,6 +67,6 @@ contract('Advertisement', function(accounts) {
 			(err) => {
 				reverted = expectRevert.test(err.message);
 			});
-		expect(reverted).to.be.equal(true);
+		expect(reverted).to.be.equal(true,"Revert expected");
 	})
 });
