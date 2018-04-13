@@ -70,21 +70,6 @@ contract Advertisement {
     }
 
 
-    modifier onlyOwner() {
-        require(msg.sender == owner);
-        _;
-    }
-
-
-    /**
-    * Sets AppCoins contract address to transfer AppCoins
-    * to contract on campaign creation
-    */
-    function setAppCoinsAddress (address addrAppc) public onlyOwner {
-        appc = AppCoins(addrAppc);
-    }
-
-
 	/**
 	* Creates a campaign for a certain package name with
 	* a defined price and budget and emits a CampaignCreated event
