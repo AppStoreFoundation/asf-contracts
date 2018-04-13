@@ -8,9 +8,9 @@ chai.use(chaiAsPromissed);
 
 var appcInstance;
 var addInstance;
-
+var examplePoA;
+var wrongTimestampPoA;
 var expectRevert = RegExp('revert');
-
 
 contract('Advertisement', function(accounts) {
   beforeEach(async () => {
@@ -28,9 +28,20 @@ contract('Advertisement', function(accounts) {
 		examplePoA.bid = web3.utils.toHex("0x00000001");
 		examplePoA.timestamp = new Array();
 		examplePoA.nonce = new Array();
+
+		wrongTimestampPoA = new Object();
+		wrongTimestampPoA.packageName = examplePoA.packageName;
+		wrongTimestampPoA.bid = web3.utils.toHex("0x00000002");
+		wrongTimestampPoA.timestamp = new Array();
+		wrongTimestampPoA.nonce = new Array();
+
 		for(var i = 0; i < 12; i++){
-			examplePoA.timestamp.push(new Date().getTime()+20*i);
+			var timeNow = new Date().getTime();
+			examplePoA.timestamp.push(timeNow+10000*i);
 			examplePoA.nonce.push(Math.floor(Math.random()*500*i));
+		
+			wrongTimestampPoA.timestamp.push(timeNow+40000*i);
+			wrongTimestampPoA.nonce.push(Math.floor(Math.random()*500*i));
 		}
 
 	});
@@ -49,4 +60,13 @@ contract('Advertisement', function(accounts) {
 			});
 		expect(reverted).to.be.equal(true,"Revert expected");	
 	});
+
+	it('should revert registerPoA if timestamps are not spaced exactly 10 secounds from each other', async function () {
+		var reverted = false;
+		await addInstance.registerPoA(wrongTimestampPoA.packageName,wrongTimestampPoA.bid,wrongTimestampPoA.timestamp,wrongTimestampPoA.nonce).catch(
+			(err) => {
+				reverted = expectRevert.test(err.message);
+			});
+		expect(reverted).to.be.equal(true,"Revert expected");
+	})
 });

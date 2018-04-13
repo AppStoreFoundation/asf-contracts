@@ -163,9 +163,12 @@ contract Advertisement {
 	function registerPoA (string packageName, bytes32 bidId, uint[] timestampList, uint[] nonces) external {
 		
 		require (timestampList.length == nonces.length);
+		//Expect ordered array arranged in ascending order
+		for(uint i = 0; i < timestampList.length-1; i++){
+			require((timestampList[i+1]-timestampList[i]) == 10000);
+		}
 
 		PoARegistered(bidId,packageName,timestampList,nonces);
-		
 	}
 	
 
