@@ -45,7 +45,8 @@ contract('Advertisement', function(accounts) {
 		example2PoA.nonce = new Array();
 
 		for(var i = 0; i < 12; i++){
-			examplePoA.timestamp.push(new Date().getTime()+20*i);
+			var timeNow = new Date().getTime();
+			examplePoA.timestamp.push(timeNow+10000*i);
 			examplePoA.nonce.push(Math.floor(Math.random()*500*i));
 			example2PoA.timestamp.push(new Date().getTime()+22*i);
 			example2PoA.nonce.push(Math.floor(Math.random()*520*i));
@@ -106,4 +107,13 @@ contract('Advertisement', function(accounts) {
 			});
 		expect(reverted).to.be.equal(true,"Revert expected");	
 	});
+
+	it('should revert registerPoA if timestamps are not spaced exactly 10 secounds from each other', async function () {
+		var reverted = false;
+		await addInstance.registerPoA(wrongTimestampPoA.packageName,wrongTimestampPoA.bid,wrongTimestampPoA.timestamp,wrongTimestampPoA.nonce).catch(
+			(err) => {
+				reverted = expectRevert.test(err.message);
+			});
+		expect(reverted).to.be.equal(true,"Revert expected");
+	})
 });

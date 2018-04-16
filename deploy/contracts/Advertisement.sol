@@ -169,8 +169,10 @@ contract Advertisement {
 						address appstore, address oem) external {
 		
 		require (timestampList.length == nonces.length);
-
-
+		//Expect ordered array arranged in ascending order
+		for(uint i = 0; i < timestampList.length-1; i++){
+			require((timestampList[i+1]-timestampList[i]) == 10000);
+		}
 
 		require(!userAttributions[msg.sender][bidId]);
 		//atribute
