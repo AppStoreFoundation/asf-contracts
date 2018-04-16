@@ -259,8 +259,8 @@ contract Advertisement {
 	function payFromCampaign (bytes32 bidId, address appstore, address oem) 
 			internal{
 		uint dev_share = 85;
-    	uint appstore_share = 10;
-    	uint oem_share = 5;	
+                uint appstore_share = 10;
+                uint oem_share = 5;	
 
 		//Search bid price
 		Campaign storage campaign = campaigns[bidId];
@@ -269,17 +269,16 @@ contract Advertisement {
 		require (campaign.budget >= campaign.price);
 
 		//transfer to user, appstore and oem
-		//address appcAddress = address(appc);
 		appc.transfer(msg.sender, division(campaign.price * dev_share,100));
 		appc.transfer(appstore, division(campaign.price * appstore_share,100));
 		appc.transfer(oem, division(campaign.price * oem_share,100));
 
 		//subtract from campaign
-		campaign.budget -=campaign.price;
+		campaign.budget -= campaign.price;
 	}
 
 	function division(uint numerator, uint denominator) public constant returns (uint) {
-        uint _quotient = numerator / denominator;
+                uint _quotient = numerator / denominator;
         return _quotient;
     }
 
