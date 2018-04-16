@@ -3,6 +3,7 @@ pragma solidity ^0.4.8;
 contract AppCoins {
     mapping (address => mapping (address => uint256)) public allowance;
     function balanceOf (address _owner) public constant returns (uint256);
+    function transfer(address _to, uint256 _value) public returns (bool success);
     function transferFrom(address _from, address _to, uint256 _value) public returns (uint);
 }
 
@@ -44,6 +45,9 @@ contract Advertisement {
 	mapping (bytes => bytes32[]) campaignsByCountry;
 	AppCoins appc;
 	bytes2[] countryList;
+	mapping (address => mapping (bytes32 => bool)) userAttributions;
+	
+	
 
 	// This notifies clients about a newly created campaign
 	event CampaignCreated(bytes32 bidId, string packageName,
@@ -160,12 +164,21 @@ contract Advertisement {
 
 	}
 
-	function registerPoA (string packageName, bytes32 bidId, uint[] timestampList, uint[] nonces) external {
+	function registerPoA (string packageName, bytes32 bidId, 
+						uint[] timestampList, uint[] nonces, 
+						address appstore, address oem) external {
 		
 		require (timestampList.length == nonces.length);
 
-		PoARegistered(bidId,packageName,timestampList,nonces);
-		
+
+
+		require(!userAttributions[msg.sender][bidId]);
+		//atribute
+		userAttributions[msg.sender][bidId] = true;
+
+		payFromCampaign(bidId,appstore, oem);
+
+		PoARegistered(bidId,packageName,timestampList,nonces);	
 	}
 	
 
@@ -173,7 +186,8 @@ contract Advertisement {
 			return countryList;
 	}
 	
-	function getCampaignsByCountry(string country) public view returns (bytes32[]){
+	function getCampaignsByCountry(string country) 
+			public view returns (bytes32[]){
 		bytes memory countryInBytes = bytes(country);
 
 		return campaignsByCountry[countryInBytes];
@@ -239,7 +253,34 @@ contract Advertisement {
 			public view returns(bytes32[]) {
 		return bidIdList;
 	}
-	
+
+	function payFromCampaign (bytes32 bidId, address appstore, address oem) 
+			internal{
+		uint dev_share = 85;
+    	uint appstore_share = 10;
+    	uint oem_share = 5;	
+
+		//Search bid price
+		Campaign storage campaign = campaigns[bidId];
+
+		require (campaign.budget > 0);
+		require (campaign.budget >= campaign.price);
+
+		//transfer to user, appstore and oem
+		//address appcAddress = address(appc);
+		appc.transfer(msg.sender, division(campaign.price * dev_share,100));
+		appc.transfer(appstore, division(campaign.price * appstore_share,100));
+		appc.transfer(oem, division(campaign.price * oem_share,100));
+
+		//subtract from campaign
+		campaign.budget -=campaign.price;
+	}
+
+	function division(uint numerator, uint denominator) public constant returns (uint) {
+        uint _quotient = numerator / denominator;
+        return _quotient;
+    }
+
 	function uintToBytes (uint256 i) constant returns(bytes32 b)  {
 		b = bytes32(i);
 	}
