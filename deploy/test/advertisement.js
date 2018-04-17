@@ -57,7 +57,6 @@ contract('Advertisement', function(accounts) {
 			example2PoA.nonce.push(Math.floor(Math.random()*520*i));
 			wrongTimestampPoA.timestamp.push(new Date().getTime()+i);
 			wrongTimestampPoA.nonce.push(Math.floor(Math.random()*520*i));
-			console.log(wrongTimestampPoA.timestamp[i]);
 		}
 	});
 
