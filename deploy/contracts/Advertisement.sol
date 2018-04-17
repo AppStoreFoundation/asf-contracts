@@ -37,6 +37,7 @@ contract Advertisement {
 		uint startDate;
 		uint endDate;
 		string ipValidator;
+		bool valid;
 		address  owner;
 		Filters filters;
 	}
@@ -59,8 +60,7 @@ contract Advertisement {
 							uint startDate, uint endDate);
 
 	event PoARegistered(bytes32 bidId, string packageName,
-						uint[] timestampList,uint[] nonceList);
-
+						uint[] timestampList,uint[] nonceList);	
 
     /**
     * Constructor function
@@ -181,7 +181,35 @@ contract Advertisement {
 		PoARegistered(bidId,packageName,timestampList,nonces);
 	}
 
+	function cancelCampaign (bytes32 bidId) external {
+		address campaignOwner = getOwnerOfCampaign(bidId);
+		
+		// Only contract owner or campaign owner can cancel a campaign
+		require (owner == msg.sender || campaignOwner == msg.sender); 
+		uint budget = getBudgetOfCampaign(bidId);
 
+		appc.transfer(msg.sender, budget);
+
+		setBudgetOfCampaign(bidId,0);
+		setCampaignValidity(bidId,false);
+
+
+
+	}
+	
+	function setBudgetOfCampaign (bytes32 bidId, uint budget) internal {
+		campaigns[bidId].budget = budget;	
+	}
+
+	function setCampaignValidity (bytes32 bidId, bool val) internal {
+		campaigns[bidId].valid = val;
+	}
+	
+	function getCampaignValidity(bytes32 bidId) public view returns(bool){
+		return campaigns[bidId].valid;
+	}
+
+	
 	function getCountryList () public view returns(bytes2[]) {
 			return countryList;
 	}
