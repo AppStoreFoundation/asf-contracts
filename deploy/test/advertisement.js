@@ -22,13 +22,12 @@ contract('Advertisement', function(accounts) {
 		
 		appcInstance = await AppCoins.new();
 		
-		addInstance = await	Advertisement.new();
+		addInstance = await	Advertisement.new(appcInstance.address);
 
 		campaignPrice = 50000000000000000;
 		campaignBudget = 1000000000000000000;
 
 		await appcInstance.approve(addInstance.address,campaignBudget);
-		await addInstance.setAppCoinsAddress(appcInstance.address);
 		await addInstance.createCampaign("com.facebook.orca","PT,UK,FR",[1,2],campaignPrice,campaignBudget,20,1922838059980);
 
 		examplePoA = new Object();
@@ -41,15 +40,23 @@ contract('Advertisement', function(accounts) {
 		example2PoA = new Object();		
 		example2PoA.packageName = "com.facebook.orca";
 		example2PoA.bid = examplePoA.bid;
-		example2PoA.timestamp = new Array();50000000000000000
+		example2PoA.timestamp = new Array();
 		example2PoA.nonce = new Array();
+
+		wrongTimestampPoA = new Object();
+		wrongTimestampPoA.packageName = "com.facebook.orca";
+		wrongTimestampPoA.bid = examplePoA.bid;
+		wrongTimestampPoA.timestamp = new Array();
+		wrongTimestampPoA.nonce = new Array();
 
 		for(var i = 0; i < 12; i++){
 			var timeNow = new Date().getTime();
 			examplePoA.timestamp.push(timeNow+10000*i);
 			examplePoA.nonce.push(Math.floor(Math.random()*500*i));
-			example2PoA.timestamp.push(new Date().getTime()+22*i);
+			example2PoA.timestamp.push(new Date().getTime()+10000*i);
 			example2PoA.nonce.push(Math.floor(Math.random()*520*i));
+			wrongTimestampPoA.timestamp.push(new Date().getTime()+i);
+			wrongTimestampPoA.nonce.push(Math.floor(Math.random()*520*i));
 		}
 	});
 

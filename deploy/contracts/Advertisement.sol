@@ -1,5 +1,6 @@
 pragma solidity ^0.4.8;
 
+
 contract AppCoins {
     mapping (address => mapping (address => uint256)) public allowance;
     function balanceOf (address _owner) public constant returns (uint256);
@@ -7,15 +8,16 @@ contract AppCoins {
     function transferFrom(address _from, address _to, uint256 _value) public returns (uint);
 }
 
+
 /**
  * The Advertisement contract collects campaigns registered by developers
- * and executes payments to users using campaign registered applications 
+ * and executes payments to users using campaign registered applications
  * after proof of Attention.
  */
 contract Advertisement {
 
 	struct Filters {
-		string countries; 
+		string countries;
 		string packageName;
 		uint[] vercodes;
 	}
@@ -28,7 +30,7 @@ contract Advertisement {
 		uint walletDailyConversions;
 	}
 
-	struct Campaign {	
+	struct Campaign {
 		bytes32 bidId;
 		uint price;
 		uint budget;
@@ -45,43 +47,39 @@ contract Advertisement {
 	mapping (bytes => bytes32[]) campaignsByCountry;
 	AppCoins appc;
 	bytes2[] countryList;
+    address public owner;
 	mapping (address => mapping (bytes32 => bool)) userAttributions;
-	
-	
+
+
 
 	// This notifies clients about a newly created campaign
 	event CampaignCreated(bytes32 bidId, string packageName,
-							string countries, uint[] vercodes, 
+							string countries, uint[] vercodes,
 							uint price, uint budget,
 							uint startDate, uint endDate);
 
 	event PoARegistered(bytes32 bidId, string packageName,
 						uint[] timestampList,uint[] nonceList);
-	/**
-	* Constructor function
-	*
-	* Initializes contract with default validation rules
-	*/
-	function Advertisement () public {
-		rules = ValidationRules(false,true,true,2,1);
-	}
 
 
-	/**
-	* Sets AppCoins contract address to transfer AppCoins 
-	* to contract on campaign creation
-	*/
-	function setAppCoinsAddress (address addrAppc) external {
-		appc = AppCoins(addrAppc);
-	}
-	
+    /**
+    * Constructor function
+    *
+    * Initializes contract with default validation rules
+    */
+    function Advertisement (address addrAppc) public {
+        rules = ValidationRules(false, true, true, 2, 1);
+        owner = msg.sender;
+        appc = AppCoins(addrAppc);
+    }
+
 
 	/**
 	* Creates a campaign for a certain package name with
 	* a defined price and budget and emits a CampaignCreated event
 	*/
-	function createCampaign (string packageName, string countries, 
-							uint[] vercodes, uint price, uint budget, 
+	function createCampaign (string packageName, string countries,
+							uint[] vercodes, uint price, uint budget,
 							uint startDate, uint endDate) external {
 		Campaign memory newCampaign;
 		newCampaign.filters.packageName = packageName;
@@ -90,7 +88,7 @@ contract Advertisement {
 		newCampaign.price = price;
 		newCampaign.startDate = startDate;
 		newCampaign.endDate = endDate;
-		
+
 		//Transfers the budget to contract address
         require(appc.allowance(msg.sender, address(this)) >= budget);
 
@@ -101,7 +99,7 @@ contract Advertisement {
 
 		newCampaign.bidId = uintToBytes(bidIdList.length);
 		addCampaign(newCampaign);
-	
+
 		CampaignCreated(
 			newCampaign.bidId,
 			packageName,
@@ -111,7 +109,7 @@ contract Advertisement {
 			budget,
 			startDate,
 			endDate);
-		
+
 	}
 
 	function addCampaign(Campaign campaign) internal {
@@ -129,7 +127,7 @@ contract Advertisement {
 
 			//if ',' is found, new country ahead
 			if(countriesInBytes[i]=="," || i == countriesInBytes.length-1){
-			
+
 				if(i == countriesInBytes.length-1){
 					country[countryLength]=countriesInBytes[i];
 				}
@@ -144,9 +142,9 @@ contract Advertisement {
 			}
 
 		}
-		
+
 	}
-	
+
 
 	function addCampaignToCountryMap (Campaign newCampaign,bytes country) internal {
 		// Adds a country to countryList if the country is not in this list
@@ -158,16 +156,16 @@ contract Advertisement {
 
 			countryList.push(countryCode);
 		}
-		
+
 		//Adds Campaign to campaignsByCountry map
 		campaignsByCountry[country].push(newCampaign.bidId);
 
 	}
 
-	function registerPoA (string packageName, bytes32 bidId, 
-						uint[] timestampList, uint[] nonces, 
+	function registerPoA (string packageName, bytes32 bidId,
+						uint[] timestampList, uint[] nonces,
 						address appstore, address oem) external {
-		
+
 		require (timestampList.length == nonces.length);
 		//Expect ordered array arranged in ascending order
 		for(uint i = 0; i < timestampList.length-1; i++){
@@ -180,87 +178,87 @@ contract Advertisement {
 
 		payFromCampaign(bidId,appstore, oem);
 
-		PoARegistered(bidId,packageName,timestampList,nonces);	
+		PoARegistered(bidId,packageName,timestampList,nonces);
 	}
-	
+
 
 	function getCountryList () public view returns(bytes2[]) {
 			return countryList;
 	}
-	
-	function getCampaignsByCountry(string country) 
+
+	function getCampaignsByCountry(string country)
 			public view returns (bytes32[]){
 		bytes memory countryInBytes = bytes(country);
 
 		return campaignsByCountry[countryInBytes];
 	}
-	
 
-	function getTotalCampaignsByCountry (string country) 
+
+	function getTotalCampaignsByCountry (string country)
 			public view returns (uint){
 		bytes memory countryInBytes = bytes(country);
 
 		return campaignsByCountry[countryInBytes].length;
 	}
 
-	function getPackageNameOfCampaign (bytes32 bidId) 
+	function getPackageNameOfCampaign (bytes32 bidId)
 			public view returns(string) {
-	
-		return campaigns[bidId].filters.packageName;		
+
+		return campaigns[bidId].filters.packageName;
 	}
 
-	function getCountriesOfCampaign (bytes32 bidId) 
+	function getCountriesOfCampaign (bytes32 bidId)
 			public view returns(string){
-		
+
 		return campaigns[bidId].filters.countries;
 	}
 
-	function getVercodesOfCampaign (bytes32 bidId) 
+	function getVercodesOfCampaign (bytes32 bidId)
 			public view returns(uint[]) {
 
 		return campaigns[bidId].filters.vercodes;
 	}
 
-	function getPriceOfCampaign (bytes32 bidId) 
+	function getPriceOfCampaign (bytes32 bidId)
 			public view returns(uint) {
 
-		return campaigns[bidId].price;		
+		return campaigns[bidId].price;
 	}
-	
-	function getStartDateOfCampaign (bytes32 bidId) 
+
+	function getStartDateOfCampaign (bytes32 bidId)
 			public view returns(uint) {
-		
-		return campaigns[bidId].startDate;		
+
+		return campaigns[bidId].startDate;
 	}
-	
-	function getEndDateOfCampaign (bytes32 bidId) 
+
+	function getEndDateOfCampaign (bytes32 bidId)
 			public view returns(uint) {
-		
-		return campaigns[bidId].endDate;		
+
+		return campaigns[bidId].endDate;
 	}
-	
-	function getBudgetOfCampaign (bytes32 bidId) 
+
+	function getBudgetOfCampaign (bytes32 bidId)
 			public view returns(uint) {
 
 		return campaigns[bidId].budget;
 	}
 
-	function getOwnerOfCampaign (bytes32 bidId) 
+	function getOwnerOfCampaign (bytes32 bidId)
 			public view returns(address) {
 
 		return campaigns[bidId].owner;
 	}
 
-	function getBidIdList ()  
+	function getBidIdList ()
 			public view returns(bytes32[]) {
 		return bidIdList;
 	}
 
-	function payFromCampaign (bytes32 bidId, address appstore, address oem) 
+	function payFromCampaign (bytes32 bidId, address appstore, address oem)
 			internal{
 		uint dev_share = 85;
                 uint appstore_share = 10;
-                uint oem_share = 5;	
+                uint oem_share = 5;
 
 		//Search bid price
 		Campaign storage campaign = campaigns[bidId];
