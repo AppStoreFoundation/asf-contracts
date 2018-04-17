@@ -72,13 +72,13 @@ contract('Advertisement', function(accounts) {
 	it('should cancel a campaign as contract owner', async function () {
 		var bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000001");
 		
-		var userInitBalance = await getBalance(accounts[0]);
+		var userInitBalance = await getBalance(accounts[1]);
 		var contractBalance = await getBalance(addInstance.address); 
 		var campaignBalance = JSON.parse(await addInstance.getBudgetOfCampaign(bid));
 
 		await addInstance.cancelCampaign(bid);
 		
-		var newUserBalance = await getBalance(accounts[0]);
+		var newUserBalance = await getBalance(accounts[1]);
 		var newContractBalance = await getBalance(addInstance.address); 
 		var newCampaignBalance = JSON.parse(await addInstance.getBudgetOfCampaign(bid));
 		var validity =  await addInstance.getCampaignValidity(examplePoA.bid);

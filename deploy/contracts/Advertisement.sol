@@ -188,7 +188,7 @@ contract Advertisement {
 		require (owner == msg.sender || campaignOwner == msg.sender); 
 		uint budget = getBudgetOfCampaign(bidId);
 
-		appc.transfer(msg.sender, budget);
+		appc.transfer(campaignOwner, budget);
 
 		setBudgetOfCampaign(bidId,0);
 		setCampaignValidity(bidId,false);
