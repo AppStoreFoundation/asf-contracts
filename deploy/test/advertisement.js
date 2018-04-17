@@ -117,7 +117,7 @@ contract('Advertisement', function(accounts) {
 
 	it('should revert registerPoA if timestamps are not spaced exactly 10 secounds from each other', async function () {
 		var reverted = false;
-		await addInstance.registerPoA(wrongTimestampPoA.packageName,wrongTimestampPoA.bid,wrongTimestampPoA.timestamp,wrongTimestampPoA.nonce).catch(
+		await addInstance.registerPoA(wrongTimestampPoA.packageName,wrongTimestampPoA.bid,wrongTimestampPoA.timestamp,wrongTimestampPoA.nonce,accounts[1],accounts[2]).catch(
 			(err) => {
 				reverted = expectRevert.test(err.message);
 			});
