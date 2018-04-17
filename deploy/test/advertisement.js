@@ -81,7 +81,7 @@ contract('Advertisement', function(accounts) {
 		var newUserBalance = await getBalance(accounts[1]);
 		var newContractBalance = await getBalance(addInstance.address); 
 		var newCampaignBalance = JSON.parse(await addInstance.getBudgetOfCampaign(bid));
-		var validity =  await addInstance.getCampaignValidity(examplePoA.bid);
+		var validity =  await addInstance.getCampaignValidity(bid);
 
 
 		expect(validity).to.be.equal(false);

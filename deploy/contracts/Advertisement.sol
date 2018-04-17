@@ -96,7 +96,7 @@ contract Advertisement {
 
 		newCampaign.budget = budget;
 		newCampaign.owner = msg.sender;
-
+		newCampaign.valid = true;
 		newCampaign.bidId = uintToBytes(bidIdList.length);
 		addCampaign(newCampaign);
 
