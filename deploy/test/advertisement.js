@@ -24,7 +24,7 @@ async function getBalance(account) {
 
 contract('Advertisement', function(accounts) {
   beforeEach(async () => {
-		
+
 		appcInstance = await AppCoins.new();
 		
 		addInstance = await	Advertisement.new(appcInstance.address);
@@ -60,11 +60,13 @@ contract('Advertisement', function(accounts) {
 
 		for(var i = 0; i < 12; i++){
 			var timeNow = new Date().getTime();
-			examplePoA.timestamp.push(timeNow+10000*i);
+			var time = timeNow+10000*i;
+			var wrongTime = new Date().getTime()+i;
+			examplePoA.timestamp.push(time);
 			examplePoA.nonce.push(Math.floor(Math.random()*500*i));
-			example2PoA.timestamp.push(new Date().getTime()+10000*i);
+			example2PoA.timestamp.push(time);
 			example2PoA.nonce.push(Math.floor(Math.random()*520*i));
-			wrongTimestampPoA.timestamp.push(new Date().getTime()+i);
+			wrongTimestampPoA.timestamp.push(wrongTime);
 			wrongTimestampPoA.nonce.push(Math.floor(Math.random()*520*i));
 		}
 	});
