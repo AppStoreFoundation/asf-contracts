@@ -169,7 +169,8 @@ contract Advertisement {
 		require (timestampList.length == nonces.length);
 		//Expect ordered array arranged in ascending order
 		for(uint i = 0; i < timestampList.length-1; i++){
-			require((timestampList[i+1]-timestampList[i]) == 10000);
+		        uint timestamp_diff = (timestampList[i+1]-timestampList[i]);
+			require((timestamp_diff / 1000) == 10);
 		}
 
 		require(!userAttributions[msg.sender][bidId]);
