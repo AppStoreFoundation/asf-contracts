@@ -172,6 +172,8 @@ contract Advertisement {
 			require((timestampList[i+1]-timestampList[i]) == 10000);
 		}
 
+		verifyNonces(packageName,timestampList,nonces);
+
 		require(!userAttributions[msg.sender][bidId]);
 		//atribute
 		userAttributions[msg.sender][bidId] = true;
@@ -303,10 +305,45 @@ contract Advertisement {
 		campaign.budget -= campaign.price;
 	}
 
+	function verifyNonces (string packageName,uint[] timestampList, uint[] nonces) internal {
+		
+		for(uint i = 0; i < nonces.length; i++){
+			bytes32[2] memory byteList;
+
+			byteList[0] = stringToBytes32(packageName);
+
+			byteList[1] = uintToBytes(timestampList[i]);
+			byteList[0] = sha256(byteList);
+			byteList[1] = uintToBytes(nonces[i]);
+			
+			bytes32 result = sha256(byteList);
+			bytes2[1] memory leadingBytes = [bytes2(0)];
+			bytes2 comp = 0x0000;
+			
+			assembly{
+				mstore(leadingBytes,result)
+			}
+
+			require(comp == leadingBytes[0]);			
+		}
+	}
+	
+
 	function division(uint numerator, uint denominator) public constant returns (uint) {
                 uint _quotient = numerator / denominator;
         return _quotient;
     }
+
+    function stringToBytes32(string memory source) returns (bytes32 result) {
+	    bytes memory tempEmptyStringTest = bytes(source);
+	    if (tempEmptyStringTest.length == 0) {
+	        return 0x0;
+	    }
+
+	    assembly {
+	        result := mload(add(source, 32))
+	    }
+	}
 
 	function uintToBytes (uint256 i) constant returns(bytes32 b)  {
 		b = bytes32(i);
