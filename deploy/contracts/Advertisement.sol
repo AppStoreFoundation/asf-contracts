@@ -60,8 +60,8 @@ contract Advertisement {
 							uint startDate, uint endDate);
 
 	event PoARegistered(bytes32 bidId, string packageName,
-						uint[] timestampList,uint[] nonceList);	
-
+						uint64[] timestampList,uint64[] nonceList);	
+	event TestList(uint pl,uint tl,bytes list);
     /**
     * Constructor function
     *
@@ -140,7 +140,6 @@ contract Advertisement {
 				country[countryLength]=countriesInBytes[i];
 				countryLength++;
 			}
-
 		}
 
 	}
@@ -163,16 +162,16 @@ contract Advertisement {
 	}
 
 	function registerPoA (string packageName, bytes32 bidId,
-						uint[] timestampList, uint[] nonces,
+						uint64[] timestampList, uint64[] nonces,
 						address appstore, address oem) external {
 
-		require (timestampList.length == nonces.length);
+	/*	require (timestampList.length == nonces.length);
 		//Expect ordered array arranged in ascending order
 		for(uint i = 0; i < timestampList.length-1; i++){
 			require((timestampList[i+1]-timestampList[i]) == 10000);
 		}
-
-		verifyNonces(packageName,timestampList,nonces);
+	*/
+		verifyNonces(bytes(packageName),timestampList,nonces);
 
 		require(!userAttributions[msg.sender][bidId]);
 		//atribute
@@ -305,17 +304,23 @@ contract Advertisement {
 		campaign.budget -= campaign.price;
 	}
 
-	function verifyNonces (string packageName,uint[] timestampList, uint[] nonces) internal {
+	function verifyNonces (bytes packageName,uint64[] timestampList, uint64[] nonces) public view {
 		
 		for(uint i = 0; i < nonces.length; i++){
-			bytes32[2] memory byteList;
+			bytes8 timestamp = bytes8(timestampList[i]);
+			bytes memory byteList = new bytes(packageName.length + timestamp.length);
 
-			byteList[0] = stringToBytes32(packageName);
+			for(uint j = 0; j < packageName.length;j++){
+				byteList[j] = packageName[j];
+			}
 
-			byteList[1] = uintToBytes(timestampList[i]);
-			byteList[0] = sha256(byteList);
+			for(j = 0; j < timestamp.length; j++ ){
+				byteList[j + packageName.length] = timestamp[j];
+			}
+
+			TestList(packageName.length,timestamp.length,byteList);
+		/*	byteList[0] = sha256(byteList);
 			byteList[1] = uintToBytes(nonces[i]);
-			
 			bytes32 result = sha256(byteList);
 			bytes2[1] memory leadingBytes = [bytes2(0)];
 			bytes2 comp = 0x0000;
@@ -323,8 +328,9 @@ contract Advertisement {
 			assembly{
 				mstore(leadingBytes,result)
 			}
-
+		
 			require(comp == leadingBytes[0]);			
+		*/
 		}
 	}
 	
@@ -333,17 +339,6 @@ contract Advertisement {
                 uint _quotient = numerator / denominator;
         return _quotient;
     }
-
-    function stringToBytes32(string memory source) returns (bytes32 result) {
-	    bytes memory tempEmptyStringTest = bytes(source);
-	    if (tempEmptyStringTest.length == 0) {
-	        return 0x0;
-	    }
-
-	    assembly {
-	        result := mload(add(source, 32))
-	    }
-	}
 
 	function uintToBytes (uint256 i) constant returns(bytes32 b)  {
 		b = bytes32(i);
