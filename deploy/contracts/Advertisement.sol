@@ -61,7 +61,8 @@ contract Advertisement {
 
 	event PoARegistered(bytes32 bidId, string packageName,
 						uint64[] timestampList,uint64[] nonceList);	
-	event TestList(uint pl,uint tl,bytes list);
+
+	event FinalHash(bytes32 list);
     /**
     * Constructor function
     *
@@ -308,6 +309,7 @@ contract Advertisement {
 		
 		for(uint i = 0; i < nonces.length; i++){
 			bytes8 timestamp = bytes8(timestampList[i]);
+			bytes8 nonce = bytes8(nonces[i]);
 			bytes memory byteList = new bytes(packageName.length + timestamp.length);
 
 			for(uint j = 0; j < packageName.length;j++){
@@ -318,10 +320,23 @@ contract Advertisement {
 				byteList[j + packageName.length] = timestamp[j];
 			}
 
-			TestList(packageName.length,timestamp.length,byteList);
-		/*	byteList[0] = sha256(byteList);
-			byteList[1] = uintToBytes(nonces[i]);
 			bytes32 result = sha256(byteList);
+			
+			bytes memory noncePlusHash = new bytes(result.length + nonce.length);
+
+			for(j = 0; j < nonce.length; j++){
+				noncePlusHash[j] = nonce[j];
+			} 
+
+			for(j = 0; j < result.length; j++){
+				noncePlusHash[j + nonce.length] = result[j];
+			}
+			
+			result = sha256(noncePlusHash);
+			
+			FinalHash(result);
+			
+/*
 			bytes2[1] memory leadingBytes = [bytes2(0)];
 			bytes2 comp = 0x0000;
 			
@@ -330,7 +345,7 @@ contract Advertisement {
 			}
 		
 			require(comp == leadingBytes[0]);			
-		*/
+*/		
 		}
 	}
 	
