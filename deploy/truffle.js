@@ -1,33 +1,36 @@
+require('dotenv').config();
+var HDWalletProvider = require("truffle-hdwallet-provider");
+
 module.exports = {
-      networks: {
-              development: {
-                        host: "localhost",
-                        port: 8545,
-                        network_id: "*" // Match any network id
-                      },
-              main: {
-                        host: "localhost", // Connect to geth on the specified
-                        port: 8545,
-                        from: "0x0000000000000000000000000000000000000000", // change for default address used for deployment
-                        network_id: 1,
-                        gasPrice: 3000000000, // Be careful, this is in Shannon
-                        gas: 2000000
-                      },
-              kovan: {
-                        host: "localhost", // Connect to geth on the specified
-                        port: 8545,
-                        from: "0x0000000000000000000000000000000000000000", // change for default address used for deployment
-                        network_id: 42,
-                        gas: 2000000, // Gas limit used for deploys
-                        gasPrice: 3000000000
-                     },
-	      ropsten: {
-                        host: "localhost", // Connect to geth on the specified
-                        port: 8545,
-                        from: "0x2c30194bd2e7b6b8ff1467c5af1650f53cd231be", // change for default address used for deployment
-                        network_id: 3,
-                        gas: 2000000, // Gas limit used for deploys
-                        gasPrice: 20000000000
-                      }
-             }
+    networks: {
+        development: {
+            host: "localhost",
+            port: 8545,
+            network_id: "*" // Match any network id
+        },
+        ropsten: {
+            provider: function() {
+              return new HDWalletProvider(process.env.INFURA_ROPSTEN_MNEMONIC, `https://ropsten.infura.io/${process.env.INFURA_KEY}`)
+            },
+            network_id: "3",
+            gas: 4000000, // Gas limit used for deploys
+            gasPrice: 20000000000
+        },
+        kovan: {
+            provider: function() {
+              return new HDWalletProvider(process.env.INFURA_KOVAN_MNEMONIC, `https://kovan.infura.io/${process.env.INFURA_KEY}`)
+            },
+            network_id: "42",
+            gas: 2000000, // Gas limit used for deploys
+            gasPrice: 3000000000
+        },
+        main: {
+            provider: function() {
+              return new HDWalletProvider(process.env.INFURA_MAINNET_MNEMONIC, `https://mainnet.infura.io/${process.env.INFURA_KEY}`)
+            },
+            network_id: "1",
+            gasPrice: 3000000000, // Be careful, this is in Shannon
+            gas: 2000000
+        }
+    }
 };
