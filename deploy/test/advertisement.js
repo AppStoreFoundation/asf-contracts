@@ -24,7 +24,59 @@ async function getBalance(account) {
 
 contract('Advertisement', function(accounts) {
   beforeEach(async () => {
-		
+	
+		nonceWrongTs = [ 70356,
+						45021,
+						32669,
+						37785,
+						15906,
+						10179,
+						17014,
+						167317,
+						63419,
+						381,
+						31182,
+						52274];
+
+		nonceList = [ 75824,
+					111779,
+					188882,
+					15136,
+					5936,
+					41188,
+					55418,
+					162348,
+					29001,
+					99111,
+					119649,
+					30337];
+
+		timestamp = [ 1524042553578,
+					  1524042563843,
+					  1524042574305,
+					  1524042584823,
+					  1524042595355,
+					  1524042605651,
+					  1524042615837,
+					  1524042626245,
+					  1524042636491,
+					  1524042646740,
+					  1524042657099,
+					  1524042667471 ];
+
+		wrongTimestamp = [ 1524042553761,
+						  1524042554294,
+						  1524042554557,
+						  1524042555200,
+						  1524042555437,
+						  1524042555714,
+						  1524042556061,
+						  1524042556318,
+						  1524042556654,
+						  1524042557044,
+						  1524042557465,
+						  1524042557509 ];
+
 		appcInstance = await AppCoins.new();
 		
 		addInstance = await	Advertisement.new(appcInstance.address);
@@ -58,14 +110,30 @@ contract('Advertisement', function(accounts) {
 		wrongTimestampPoA.timestamp = new Array();
 		wrongTimestampPoA.nonce = new Array();
 
+		wrongNoncePoA = new Object();
+		wrongNoncePoA.packageName = examplePoA.packageName;
+		wrongNoncePoA.bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000000");
+		wrongNoncePoA.timestamp = new Array();
+		// any nounce list except the correct one will work here 
+		wrongNoncePoA.nonce = new Array();
+
 		for(var i = 0; i < 12; i++){
-			var timeNow = new Date().getTime();
-			examplePoA.timestamp.push(timeNow+10000*i);
-			examplePoA.nonce.push(Math.floor(Math.random()*500*i));
-			example2PoA.timestamp.push(new Date().getTime()+10000*i);
-			example2PoA.nonce.push(Math.floor(Math.random()*520*i));
-			wrongTimestampPoA.timestamp.push(new Date().getTime()+i);
-			wrongTimestampPoA.nonce.push(Math.floor(Math.random()*520*i));
+			//var timeNow = new Date().getTime();
+			var time = timestamp[i];
+			//var time = 158326;
+
+			var wrongTime = wrongTimestamp[i];
+			//var correctNonce = Math.floor(Math.random()*520*i);
+			var correctNonce = nonceList[i];
+			var wrongTimeNonce = nonceWrongTs[i];
+			examplePoA.timestamp.push(time);
+			examplePoA.nonce.push(correctNonce);
+			example2PoA.timestamp.push(time);
+			example2PoA.nonce.push(correctNonce);
+			wrongTimestampPoA.timestamp.push(wrongTime);
+			wrongTimestampPoA.nonce.push(wrongTimeNonce);
+			wrongNoncePoA.timestamp.push(time);
+			wrongNoncePoA.nonce.push(nonceWrongTs[i]);
 		}
 	});
 
@@ -178,6 +246,15 @@ contract('Advertisement', function(accounts) {
 	it('should revert registerPoA if timestamps are not spaced exactly 10 secounds from each other', async function () {
 		var reverted = false;
 		await addInstance.registerPoA(wrongTimestampPoA.packageName,wrongTimestampPoA.bid,wrongTimestampPoA.timestamp,wrongTimestampPoA.nonce,accounts[1],accounts[2]).catch(
+			(err) => {
+				reverted = expectRevert.test(err.message);
+			});
+		expect(reverted).to.be.equal(true,"Revert expected");
+	})
+
+	it('should revert registerPoA if nounces do not generate correct leading zeros', async function () {
+		var reverted = false;
+		await addInstance.registerPoA(wrongNoncePoA.packageName,wrongNoncePoA.bid,wrongNoncePoA.timestamp,wrongNoncePoA.nonce,accounts[1],accounts[2]).catch(
 			(err) => {
 				reverted = expectRevert.test(err.message);
 			});

@@ -60,7 +60,7 @@ contract Advertisement {
 							uint startDate, uint endDate);
 
 	event PoARegistered(bytes32 bidId, string packageName,
-						uint[] timestampList,uint[] nonceList);	
+						uint64[] timestampList,uint64[] nonceList);	
 
     /**
     * Constructor function
@@ -140,7 +140,6 @@ contract Advertisement {
 				country[countryLength]=countriesInBytes[i];
 				countryLength++;
 			}
-
 		}
 
 	}
@@ -163,7 +162,7 @@ contract Advertisement {
 	}
 
 	function registerPoA (string packageName, bytes32 bidId,
-						uint[] timestampList, uint[] nonces,
+						uint64[] timestampList, uint64[] nonces,
 						address appstore, address oem) external {
 
 		require (timestampList.length == nonces.length);
@@ -172,6 +171,8 @@ contract Advertisement {
 		        uint timestamp_diff = (timestampList[i+1]-timestampList[i]);
 			require((timestamp_diff / 1000) == 10);
 		}
+		
+		verifyNonces(bytes(packageName),timestampList,nonces);
 
 		require(!userAttributions[msg.sender][bidId]);
 		//atribute
@@ -303,6 +304,48 @@ contract Advertisement {
 		//subtract from campaign
 		campaign.budget -= campaign.price;
 	}
+
+	function verifyNonces (bytes packageName,uint64[] timestampList, uint64[] nonces) internal {
+		
+		for(uint i = 0; i < nonces.length; i++){
+			bytes8 timestamp = bytes8(timestampList[i]);
+			bytes8 nonce = bytes8(nonces[i]);
+			bytes memory byteList = new bytes(packageName.length + timestamp.length);
+
+			for(uint j = 0; j < packageName.length;j++){
+				byteList[j] = packageName[j];
+			}
+
+			for(j = 0; j < timestamp.length; j++ ){
+				byteList[j + packageName.length] = timestamp[j];
+			}
+
+			bytes32 result = sha256(byteList);
+			
+			bytes memory noncePlusHash = new bytes(result.length + nonce.length);
+
+			for(j = 0; j < nonce.length; j++){
+				noncePlusHash[j] = nonce[j];
+			} 
+
+			for(j = 0; j < result.length; j++){
+				noncePlusHash[j + nonce.length] = result[j];
+			}
+			
+			result = sha256(noncePlusHash);
+			
+			bytes2[1] memory leadingBytes = [bytes2(0)];
+			bytes2 comp = 0x0000;
+			
+			assembly{
+				mstore(leadingBytes,result)
+			}
+		
+			require(comp == leadingBytes[0]);			
+		
+		}
+	}
+	
 
 	function division(uint numerator, uint denominator) public constant returns (uint) {
                 uint _quotient = numerator / denominator;
