@@ -24,6 +24,58 @@ async function getBalance(account) {
 
 contract('Advertisement', function(accounts) {
   beforeEach(async () => {
+	
+		nounceWrongTs = [ 70356,
+						45021,
+						32669,
+						37785,
+						15906,
+						10179,
+						17014,
+						167317,
+						63419,
+						381,
+						31182,
+						52274];
+
+		nonceList = [ 75824,
+					111779,
+					188882,
+					15136,
+					5936,
+					41188,
+					55418,
+					162348,
+					29001,
+					99111,
+					119649,
+					30337];
+
+		timestamp = [ 1524042553578,
+					  1524042563843,
+					  1524042574305,
+					  1524042584823,
+					  1524042595355,
+					  1524042605651,
+					  1524042615837,
+					  1524042626245,
+					  1524042636491,
+					  1524042646740,
+					  1524042657099,
+					  1524042667471 ];
+
+		wrongTimestamp = [ 1524042553761,
+						  1524042554294,
+						  1524042554557,
+						  1524042555200,
+						  1524042555437,
+						  1524042555714,
+						  1524042556061,
+						  1524042556318,
+						  1524042556654,
+						  1524042557044,
+						  1524042557465,
+						  1524042557509 ];
 
 		appcInstance = await AppCoins.new();
 		
@@ -59,15 +111,20 @@ contract('Advertisement', function(accounts) {
 		wrongTimestampPoA.nonce = new Array();
 
 		for(var i = 0; i < 12; i++){
-			var timeNow = new Date().getTime();
-			var time = timeNow+10000*i;
-			var wrongTime = new Date().getTime()+i;
+			//var timeNow = new Date().getTime();
+			var time = timestamp[i];
+			//var time = 158326;
+
+			var wrongTime = wrongTimestamp[i];
+			//var correctNonce = Math.floor(Math.random()*520*i);
+			var correctNonce = nonceList[i];
+			var wrongTimeNonce = nounceWrongTs[i];
 			examplePoA.timestamp.push(time);
-			examplePoA.nonce.push(Math.floor(Math.random()*500*i));
+			examplePoA.nonce.push(correctNonce);
 			example2PoA.timestamp.push(time);
-			example2PoA.nonce.push(Math.floor(Math.random()*520*i));
+			example2PoA.nonce.push(correctNonce);
 			wrongTimestampPoA.timestamp.push(wrongTime);
-			wrongTimestampPoA.nonce.push(Math.floor(Math.random()*520*i));
+			wrongTimestampPoA.nonce.push(wrongTimeNonce);
 		}
 	});
 
