@@ -62,7 +62,6 @@ contract Advertisement {
 	event PoARegistered(bytes32 bidId, string packageName,
 						uint64[] timestampList,uint64[] nonceList);	
 
-	event FinalHash(bytes32 list);
     /**
     * Constructor function
     *
@@ -166,12 +165,12 @@ contract Advertisement {
 						uint64[] timestampList, uint64[] nonces,
 						address appstore, address oem) external {
 
-	/*	require (timestampList.length == nonces.length);
+		require (timestampList.length == nonces.length);
 		//Expect ordered array arranged in ascending order
 		for(uint i = 0; i < timestampList.length-1; i++){
 			require((timestampList[i+1]-timestampList[i]) == 10000);
 		}
-	*/
+		
 		verifyNonces(bytes(packageName),timestampList,nonces);
 
 		require(!userAttributions[msg.sender][bidId]);
@@ -305,7 +304,7 @@ contract Advertisement {
 		campaign.budget -= campaign.price;
 	}
 
-	function verifyNonces (bytes packageName,uint64[] timestampList, uint64[] nonces) public view {
+	function verifyNonces (bytes packageName,uint64[] timestampList, uint64[] nonces) internal {
 		
 		for(uint i = 0; i < nonces.length; i++){
 			bytes8 timestamp = bytes8(timestampList[i]);
@@ -334,9 +333,6 @@ contract Advertisement {
 			
 			result = sha256(noncePlusHash);
 			
-			FinalHash(result);
-			
-/*
 			bytes2[1] memory leadingBytes = [bytes2(0)];
 			bytes2 comp = 0x0000;
 			
@@ -345,7 +341,7 @@ contract Advertisement {
 			}
 		
 			require(comp == leadingBytes[0]);			
-*/		
+		
 		}
 	}
 	
