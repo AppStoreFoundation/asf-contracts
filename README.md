@@ -3,7 +3,7 @@ Repo containing the smart contracts of the AppCoins protocol
 
 
 ### How to test:
-1. Go to the project folder deploy:
+1. Go to the project's folder deploy:
 ``` cd /path/to/the/project ```
 ``` cd deploy ```
 
