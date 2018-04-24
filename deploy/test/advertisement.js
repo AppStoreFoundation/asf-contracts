@@ -25,7 +25,7 @@ async function getBalance(account) {
 contract('Advertisement', function(accounts) {
   beforeEach(async () => {
 	
-		nounceWrongTs = [ 70356,
+		nonceWrongTs = [ 70356,
 						45021,
 						32669,
 						37785,
@@ -110,6 +110,13 @@ contract('Advertisement', function(accounts) {
 		wrongTimestampPoA.timestamp = new Array();
 		wrongTimestampPoA.nonce = new Array();
 
+		wrongNoncePoA = new Object();
+		wrongNoncePoA.packageName = examplePoA.packageName;
+		wrongNoncePoA.bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000000");
+		wrongNoncePoA.timestamp = new Array();
+		// any nounce list except the correct one will work here 
+		wrongNoncePoA.nonce = new Array();
+
 		for(var i = 0; i < 12; i++){
 			//var timeNow = new Date().getTime();
 			var time = timestamp[i];
@@ -118,13 +125,15 @@ contract('Advertisement', function(accounts) {
 			var wrongTime = wrongTimestamp[i];
 			//var correctNonce = Math.floor(Math.random()*520*i);
 			var correctNonce = nonceList[i];
-			var wrongTimeNonce = nounceWrongTs[i];
+			var wrongTimeNonce = nonceWrongTs[i];
 			examplePoA.timestamp.push(time);
 			examplePoA.nonce.push(correctNonce);
 			example2PoA.timestamp.push(time);
 			example2PoA.nonce.push(correctNonce);
 			wrongTimestampPoA.timestamp.push(wrongTime);
 			wrongTimestampPoA.nonce.push(wrongTimeNonce);
+			wrongNoncePoA.timestamp.push(time);
+			wrongNoncePoA.nonce.push(nonceWrongTs[i]);
 		}
 	});
 
@@ -237,6 +246,15 @@ contract('Advertisement', function(accounts) {
 	it('should revert registerPoA if timestamps are not spaced exactly 10 secounds from each other', async function () {
 		var reverted = false;
 		await addInstance.registerPoA(wrongTimestampPoA.packageName,wrongTimestampPoA.bid,wrongTimestampPoA.timestamp,wrongTimestampPoA.nonce,accounts[1],accounts[2]).catch(
+			(err) => {
+				reverted = expectRevert.test(err.message);
+			});
+		expect(reverted).to.be.equal(true,"Revert expected");
+	})
+
+	it('should revert registerPoA if nounces do not generate correct leading zeros', async function () {
+		var reverted = false;
+		await addInstance.registerPoA(wrongNoncePoA.packageName,wrongNoncePoA.bid,wrongNoncePoA.timestamp,wrongNoncePoA.nonce,accounts[1],accounts[2]).catch(
 			(err) => {
 				reverted = expectRevert.test(err.message);
 			});
