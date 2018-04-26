@@ -60,7 +60,8 @@ contract Advertisement {
 							uint startDate, uint endDate);
 
 	event PoARegistered(bytes32 bidId, string packageName,
-						uint64[] timestampList,uint64[] nonceList);	
+						uint64[] timestampList,uint64[] nonceList,
+						string walletName);	
 
     /**
     * Constructor function
@@ -163,7 +164,8 @@ contract Advertisement {
 
 	function registerPoA (string packageName, bytes32 bidId,
 						uint64[] timestampList, uint64[] nonces,
-						address appstore, address oem) external {
+						address appstore, address oem, 
+						string walletName) external {
 
 		require (timestampList.length == nonces.length);
 		//Expect ordered array arranged in ascending order
@@ -180,7 +182,7 @@ contract Advertisement {
 
 		payFromCampaign(bidId,appstore, oem);
 
-		PoARegistered(bidId,packageName,timestampList,nonces);
+		PoARegistered(bidId,packageName,timestampList,nonces, walletName);
 	}
 
 	function cancelCampaign (bytes32 bidId) external {
