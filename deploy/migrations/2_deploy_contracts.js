@@ -1,11 +1,47 @@
-var AppCoin = artifacts.require("./AppCoin.sol");
-var AppCoin2 = artifacts.require("./AppCoin2.sol");
+var AppCoins = artifacts.require("./AppCoins.sol");
 var AppCoinsIAB = artifacts.require("./AppCoinsIAB.sol");
 var Advertisement = artifacts.require("./Advertisement.sol");
 
-module.exports = function(deployer) {
-    deployer.deploy(AppCoin);
-    deployer.deploy(AppCoin2);
-    deployer.deploy(AppCoinsIAB);
-    deployer.deploy(Advertisement);
+module.exports = function(deployer, network) {
+
+    switch (network) {
+        case 'development':
+            deployer.deploy(AppCoins).then(function() {
+                deployer.deploy(AppCoinsIAB);
+                deployer.deploy(Advertisement, AppCoins.address);
+            })
+            break;
+
+        case 'ropsten':
+            AppCoinsAddress = '0xab949343E6C369C6B17C7ae302c1dEbD4B7B61c3';
+
+            if (!AppCoinsAddress) {
+                throw 'AppCoins Address not found!'
+            }
+
+            deployer.deploy(AppCoinsIAB);
+            deployer.deploy(Advertisement, AppCoinsAddress);
+
+        case 'kovan':
+            deployer.deploy(AppCoins).then(function() {
+                deployer.deploy(AppCoinsIAB);
+                deployer.deploy(Advertisement, AppCoins.address);
+            })
+            break;
+
+        case 'main':
+            var AppCoinsAddress = '';
+
+            if (!AppCoinsAddress) {
+                throw 'AppCoins Address not found!'
+            }
+
+            deployer.deploy(AppCoinsIAB);
+            deployer.deploy(Advertisement, AppCoinsAddress);
+            break;
+
+        default:
+            throw `Unknown network "${network}". See your Truffle configuration file for available networks.` ;
+
+    }
 };

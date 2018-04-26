@@ -1,0 +1,24 @@
+{
+  "name": "asf-contracts",
+  "version": "1.0.0",
+  "description": "Contracts for the AppStore Fundation",
+  "main": "truffle.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "chai": "^4.1.2",
+    "chai-as-promised": "^7.1.1",
+    "dotenv": "^5.0.1",
+    "truffle-hdwallet-provider": "0.0.3",
+    "web3": "^1.0.0-beta.34"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "truffle test"
+  },
+  "keywords": [
+    "asf",
+    "appcoins"
+  ]
+}
