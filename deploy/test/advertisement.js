@@ -117,6 +117,8 @@ contract('Advertisement', function(accounts) {
 		// any nounce list except the correct one will work here 
 		wrongNoncePoA.nonce = new Array();
 
+		walletName = "com.asfoundation.wallet.dev"
+
 		for(var i = 0; i < 12; i++){
 			//var timeNow = new Date().getTime();
 			var time = timestamp[i];
@@ -192,14 +194,14 @@ contract('Advertisement', function(accounts) {
 
 
 	it('should emit an event when PoA is received', function () {
-		return addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce,accounts[1],accounts[2]).then( instance => {
+		return addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce,accounts[1],accounts[2],walletName).then( instance => {
 			expect(instance.logs.length).to.be.equal(1);
 		});
 	});
 
 	it('should revert registerPoA when nonce list and timestamp list have diferent lengths', async function () {
 		var reverted = false;
-		await addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce.splice(2,3),accounts[1],accounts[2]).catch(
+		await addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce.splice(2,3),accounts[1],accounts[2],walletName).catch(
 			(err) => {
 				reverted = expectRevert.test(err.message);
 			});
@@ -214,7 +216,7 @@ contract('Advertisement', function(accounts) {
 		var campaignBudget = JSON.parse(await addInstance.getBudgetOfCampaign(examplePoA.bid));
 		var contractBalance = JSON.parse(await appcInstance.balanceOf(addInstance.address));
 		
-		await addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce,accounts[1],accounts[2]);
+		await addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce,accounts[1],accounts[2],walletName);
 		
 		var newUserBalance = await getBalance(accounts[0]);
 		var newAppStoreBalance = await getBalance(accounts[1]);
@@ -235,8 +237,8 @@ contract('Advertisement', function(accounts) {
 
 	it('should revert registerPoA when same user sends duplicate registerPoA', async function () {
 		var reverted = false;
-		await addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce,accounts[1],accounts[2]);
-		await addInstance.registerPoA(example2PoA.packageName,example2PoA.bid,example2PoA.timestamp,example2PoA.nonce,accounts[1],accounts[2]).catch(
+		await addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce,accounts[1],accounts[2],walletName);
+		await addInstance.registerPoA(example2PoA.packageName,example2PoA.bid,example2PoA.timestamp,example2PoA.nonce,accounts[1],accounts[2],walletName).catch(
 			(err) => {
 				reverted = expectRevert.test(err.message);
 			});
@@ -245,7 +247,7 @@ contract('Advertisement', function(accounts) {
 
 	it('should revert registerPoA if timestamps are not spaced exactly 10 secounds from each other', async function () {
 		var reverted = false;
-		await addInstance.registerPoA(wrongTimestampPoA.packageName,wrongTimestampPoA.bid,wrongTimestampPoA.timestamp,wrongTimestampPoA.nonce,accounts[1],accounts[2]).catch(
+		await addInstance.registerPoA(wrongTimestampPoA.packageName,wrongTimestampPoA.bid,wrongTimestampPoA.timestamp,wrongTimestampPoA.nonce,accounts[1],accounts[2],walletName).catch(
 			(err) => {
 				reverted = expectRevert.test(err.message);
 			});
@@ -254,7 +256,7 @@ contract('Advertisement', function(accounts) {
 
 	it('should revert registerPoA if nounces do not generate correct leading zeros', async function () {
 		var reverted = false;
-		await addInstance.registerPoA(wrongNoncePoA.packageName,wrongNoncePoA.bid,wrongNoncePoA.timestamp,wrongNoncePoA.nonce,accounts[1],accounts[2]).catch(
+		await addInstance.registerPoA(wrongNoncePoA.packageName,wrongNoncePoA.bid,wrongNoncePoA.timestamp,wrongNoncePoA.nonce,accounts[1],accounts[2],walletName).catch(
 			(err) => {
 				reverted = expectRevert.test(err.message);
 			});
