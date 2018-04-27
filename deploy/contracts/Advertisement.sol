@@ -167,7 +167,7 @@ contract Advertisement {
 						address appstore, address oem,
 						string walletName) external {
 
-        require (ignValid(bidId));
+        require (isCampaignValid(bidId));
 		require (timestampList.length == nonces.length);
 		//Expect ordered array arranged in ascending order
 		for(uint i = 0; i < timestampList.length-1; i++){
