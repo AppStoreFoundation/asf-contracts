@@ -61,7 +61,7 @@ contract Advertisement {
 
 	event PoARegistered(bytes32 bidId, string packageName,
 						uint64[] timestampList,uint64[] nonceList,
-						string walletName);	
+						string walletName);
 
     /**
     * Constructor function
@@ -164,16 +164,17 @@ contract Advertisement {
 
 	function registerPoA (string packageName, bytes32 bidId,
 						uint64[] timestampList, uint64[] nonces,
-						address appstore, address oem, 
+						address appstore, address oem,
 						string walletName) external {
 
+        require (isCampaignValid(bidId));
 		require (timestampList.length == nonces.length);
 		//Expect ordered array arranged in ascending order
 		for(uint i = 0; i < timestampList.length-1; i++){
 		        uint timestamp_diff = (timestampList[i+1]-timestampList[i]);
 			require((timestamp_diff / 1000) == 10);
 		}
-		
+
 		verifyNonces(bytes(packageName),timestampList,nonces);
 
 		require(!userAttributions[msg.sender][bidId]);
@@ -187,9 +188,9 @@ contract Advertisement {
 
 	function cancelCampaign (bytes32 bidId) external {
 		address campaignOwner = getOwnerOfCampaign(bidId);
-		
+
 		// Only contract owner or campaign owner can cancel a campaign
-		require (owner == msg.sender || campaignOwner == msg.sender); 
+		require (owner == msg.sender || campaignOwner == msg.sender);
 		uint budget = getBudgetOfCampaign(bidId);
 
 		appc.transfer(campaignOwner, budget);
@@ -200,20 +201,20 @@ contract Advertisement {
 
 
 	}
-	
+
 	function setBudgetOfCampaign (bytes32 bidId, uint budget) internal {
-		campaigns[bidId].budget = budget;	
+		campaigns[bidId].budget = budget;
 	}
 
 	function setCampaignValidity (bytes32 bidId, bool val) internal {
 		campaigns[bidId].valid = val;
 	}
-	
+
 	function getCampaignValidity(bytes32 bidId) public view returns(bool){
 		return campaigns[bidId].valid;
 	}
 
-	
+
 	function getCountryList () public view returns(bytes2[]) {
 			return countryList;
 	}
@@ -286,6 +287,12 @@ contract Advertisement {
 		return bidIdList;
 	}
 
+    function isCampaignValid(bytes32 bidId) public view returns(bool) {
+        Campaign storage campaign = campaigns[bidId];
+        uint nowInMilliseconds = now * 1000;
+        return campaign.valid && campaign.startDate < nowInMilliseconds && campaign.endDate > nowInMilliseconds;
+	}
+
 	function payFromCampaign (bytes32 bidId, address appstore, address oem)
 			internal{
 		uint dev_share = 85;
@@ -308,7 +315,7 @@ contract Advertisement {
 	}
 
 	function verifyNonces (bytes packageName,uint64[] timestampList, uint64[] nonces) internal {
-		
+
 		for(uint i = 0; i < nonces.length; i++){
 			bytes8 timestamp = bytes8(timestampList[i]);
 			bytes8 nonce = bytes8(nonces[i]);
@@ -323,31 +330,31 @@ contract Advertisement {
 			}
 
 			bytes32 result = sha256(byteList);
-			
+
 			bytes memory noncePlusHash = new bytes(result.length + nonce.length);
 
 			for(j = 0; j < nonce.length; j++){
 				noncePlusHash[j] = nonce[j];
-			} 
+			}
 
 			for(j = 0; j < result.length; j++){
 				noncePlusHash[j + nonce.length] = result[j];
 			}
-			
+
 			result = sha256(noncePlusHash);
-			
+
 			bytes2[1] memory leadingBytes = [bytes2(0)];
 			bytes2 comp = 0x0000;
-			
+
 			assembly{
 				mstore(leadingBytes,result)
 			}
-		
-			require(comp == leadingBytes[0]);			
-		
+
+			require(comp == leadingBytes[0]);
+
 		}
 	}
-	
+
 
 	function division(uint numerator, uint denominator) public constant returns (uint) {
                 uint _quotient = numerator / denominator;
