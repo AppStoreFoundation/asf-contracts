@@ -289,7 +289,8 @@ contract Advertisement {
 
     function isCampaignValid(bytes32 bidId) public view returns(bool) {
         Campaign storage campaign = campaigns[bidId];
-        return campaign.valid && campaign.startDate < now && campaign.endDate > now;
+        uint nowInMilliseconds = now * 1000;
+        return campaign.valid && campaign.startDate < nowInMilliseconds && campaign.endDate > nowInMilliseconds;
 	}
 
 	function payFromCampaign (bytes32 bidId, address appstore, address oem)
