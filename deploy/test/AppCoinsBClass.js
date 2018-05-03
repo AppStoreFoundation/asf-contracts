@@ -14,7 +14,7 @@ contract('AppCoinBClass', function(accounts) {
 		instance = await AppCoinB.new(appc.address);
 		var appcsToSend =  10 * Math.pow(10, 18);
 		await appc.approve(instance.address,appcsToSend,{from: accounts[0]});
-		await instance.convertAndTransfer(appcsToSend,{from: accounts[0]});
+		await instance.convertAndTransfer(accounts[0],appcsToSend,{from: accounts[0]});
 	})
 
 	it("Testing the TotalSupply get() along with checking if the owner has TotalSupply", async function(){
@@ -64,7 +64,7 @@ contract('AppCoinBClass', function(accounts) {
 		var initialBalanceA = Number(await appc.balanceOf.call(accounts[0],{from: accounts[0]}));
 		var initialBalanceB = Number(await instance.balanceOf.call(accounts[0],{from: accounts[0]}));
 		await appc.approve(instance.address,appcsToSend,{from: accounts[0]}).then( async () => {
-			return await instance.convertAndTransfer(appcsToSend,{from: accounts[0]});
+			return await instance.convertAndTransfer(accounts[0],appcsToSend,{from: accounts[0]});
 		});
 
 		var finalSupply = Number(await instance.totalSupply.call());
@@ -83,7 +83,7 @@ contract('AppCoinBClass', function(accounts) {
 	it("should decrease total supply when class B tokens are converted to class A tokens", async function(){
 		var appcsToSend =  10 * Math.pow(10, 18);
 		await appc.approve(instance.address,appcsToSend,{from: accounts[0]});
-		await instance.convertAndTransfer(appcsToSend,{from: accounts[0]});
+		await instance.convertAndTransfer(accounts[0],appcsToSend,{from: accounts[0]});
 		var initialSupply = Number(await instance.totalSupply.call());
 		var initialSupplyA = Number(await appc.totalSupply.call());
 		var initialBalanceA = Number(await appc.balanceOf.call(accounts[0],{from: accounts[0]}));

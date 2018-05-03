@@ -71,16 +71,18 @@ contract AppCoinsBClass is ERC20Interface {
     }
 
     /** 
-     *  Convert class A tokens to class B tokens 
+     *  Convert class A tokens to class B tokens and transfers 
+     *  them to the defined address
      *  
+     *  @param to The address of the receiver 
      *  @param _value the amount to convert 
     */
-    function convertAndTransfer(uint _value) external {
+    function convertAndTransfer(address to,uint _value) external {
         //Transfer A class AppCoins to B class AppCoins contract
         require(appc.allowance(msg.sender, address(this)) >= _value);
         appc.transferFrom(msg.sender, address(this), _value);
 
-        createToken(msg.sender,_value);
+        createToken(to,_value);
 	}
     /**
      *  Convert class B tokens to class A tokens 
