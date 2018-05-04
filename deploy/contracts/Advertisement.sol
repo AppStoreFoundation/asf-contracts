@@ -42,6 +42,7 @@ contract Advertisement {
 		Filters filters;
 	}
 
+
 	ValidationRules public rules;
 	bytes32[] bidIdList;
 	mapping (bytes32 => Campaign) campaigns;
@@ -50,7 +51,6 @@ contract Advertisement {
 	bytes2[] countryList;
     address public owner;
 	mapping (address => mapping (bytes32 => bool)) userAttributions;
-
 
 
 	// This notifies clients about a newly created campaign
@@ -62,7 +62,6 @@ contract Advertisement {
 	event PoARegistered(bytes32 bidId, string packageName,
 						uint64[] timestampList,uint64[] nonceList,
 						string walletName);
-
     /**
     * Constructor function
     *

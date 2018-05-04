@@ -16,6 +16,7 @@ contract ERC20Interface {
 contract AppCoins is ERC20Interface{
     // Public variables of the token
     address public owner;
+
     bytes32 private token_name;
     bytes32 private token_symbol;
     uint8 public decimals = 18;
@@ -76,7 +77,7 @@ contract AppCoins is ERC20Interface{
         balances[_to] += _value;
         Transfer(_from, _to, _value);
         // Asserts are used to use static analysis to find bugs in your code. They should never fail
-        assert(balances[_from] + balances[_to] == previousBalances);	
+        assert(balances[_from] + balances[_to] == previousBalances);
     }
 
     // /**
