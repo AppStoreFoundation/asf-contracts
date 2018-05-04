@@ -1,4 +1,4 @@
-pragma solidity ^0.4.8;
+pragma solidity ^0.4.19;
 
 
 contract AppCoins {
@@ -75,43 +75,57 @@ contract Advertisement {
     }
 
 
-	/**
-	* Creates a campaign for a certain package name with
-	* a defined price and budget and emits a CampaignCreated event
-	*/
-	function createCampaign (string packageName, string countries,
-							uint[] vercodes, uint price, uint budget,
-							uint startDate, uint endDate) external {
-		Campaign memory newCampaign;
-		newCampaign.filters.packageName = packageName;
-		newCampaign.filters.countries = countries;
-		newCampaign.filters.vercodes = vercodes;
-		newCampaign.price = price;
-		newCampaign.startDate = startDate;
-		newCampaign.endDate = endDate;
 
-		//Transfers the budget to contract address
-        require(appc.allowance(msg.sender, address(this)) >= budget);
+    /**
+    * Creates a campaign for a certain package name with
+    * a defined price and budget and emits a CampaignCreated event
+    */
+    function createCampaign (
+        string packageName,
+        string countries,
+        uint[] vercodes,
+        uint price,
+        uint budget,
+        uint startDate,
+        uint endDate)
+        external {
 
-        appc.transferFrom(msg.sender, address(this), budget);
+            require(budget >= price);
+            require(endDate >= startDate);
 
-		newCampaign.budget = budget;
-		newCampaign.owner = msg.sender;
-		newCampaign.valid = true;
-		newCampaign.bidId = uintToBytes(bidIdList.length);
-		addCampaign(newCampaign);
 
-		CampaignCreated(
-			newCampaign.bidId,
-			packageName,
-			countries,
-			vercodes,
-			price,
-			budget,
-			startDate,
-			endDate);
+            Campaign memory newCampaign;
 
-	}
+            newCampaign.filters.packageName = packageName;
+            newCampaign.filters.countries = countries;
+            newCampaign.filters.vercodes = vercodes;
+            newCampaign.price = price;
+            newCampaign.startDate = startDate;
+            newCampaign.endDate = endDate;
+
+            //Transfers the budget to contract address
+            require(appc.allowance(msg.sender, address(this)) >= budget);
+
+            appc.transferFrom(msg.sender, address(this), budget);
+
+            newCampaign.budget = budget;
+            newCampaign.owner = msg.sender;
+            newCampaign.valid = true;
+            newCampaign.bidId = uintToBytes(bidIdList.length);
+            addCampaign(newCampaign);
+
+            CampaignCreated(
+                newCampaign.bidId,
+                packageName,
+                countries,
+                vercodes,
+                price,
+                budget,
+                startDate,
+                endDate
+            );
+
+        }
 
 	function addCampaign(Campaign campaign) internal {
 		//Add to bidIdList
@@ -162,29 +176,30 @@ contract Advertisement {
 
 	}
 
-	function registerPoA (string packageName, bytes32 bidId,
-						uint64[] timestampList, uint64[] nonces,
-						address appstore, address oem,
-						string walletName) external {
+    function registerPoA (
+        string packageName, bytes32 bidId,
+        uint64[] timestampList, uint64[] nonces,
+        address appstore, address oem,
+        string walletName) external {
 
-        require (isCampaignValid(bidId));
-		require (timestampList.length == nonces.length);
-		//Expect ordered array arranged in ascending order
-		for(uint i = 0; i < timestampList.length-1; i++){
-		        uint timestamp_diff = (timestampList[i+1]-timestampList[i]);
-			require((timestamp_diff / 1000) == 10);
-		}
+        require(isCampaignValid(bidId));
+        require(timestampList.length == nonces.length);
+        //Expect ordered array arranged in ascending order
+        for (uint i = 0; i < timestampList.length - 1; i++) {
+            uint timestampDiff = (timestampList[i+1]-timestampList[i]);
+            require((timestampDiff / 1000) == 10);
+        }
 
-		verifyNonces(bytes(packageName),timestampList,nonces);
+        verifyNonces(bytes(packageName), timestampList, nonces);
 
-		require(!userAttributions[msg.sender][bidId]);
-		//atribute
-		userAttributions[msg.sender][bidId] = true;
+        require(!userAttributions[msg.sender][bidId]);
+        //atribute
+        userAttributions[msg.sender][bidId] = true;
 
-		payFromCampaign(bidId,appstore, oem);
+        payFromCampaign(bidId, appstore, oem);
 
-		PoARegistered(bidId,packageName,timestampList,nonces, walletName);
-	}
+        PoARegistered(bidId, packageName, timestampList, nonces, walletName);
+    }
 
 	function cancelCampaign (bytes32 bidId) external {
 		address campaignOwner = getOwnerOfCampaign(bidId);
@@ -206,9 +221,9 @@ contract Advertisement {
 		campaigns[bidId].budget = budget;
 	}
 
-	function setCampaignValidity (bytes32 bidId, bool val) internal {
-		campaigns[bidId].valid = val;
-	}
+    function setCampaignValidity (bytes32 bidId, bool val) internal {
+        campaigns[bidId].valid = val;
+    }
 
 	function getCampaignValidity(bytes32 bidId) public view returns(bool){
 		return campaigns[bidId].valid;
@@ -293,26 +308,30 @@ contract Advertisement {
         return campaign.valid && campaign.startDate < nowInMilliseconds && campaign.endDate > nowInMilliseconds;
 	}
 
-	function payFromCampaign (bytes32 bidId, address appstore, address oem)
-			internal{
-		uint dev_share = 85;
-                uint appstore_share = 10;
-                uint oem_share = 5;
+    function payFromCampaign (bytes32 bidId, address appstore, address oem)
+        internal {
+            uint devShare =  85;
+            uint appstoreShare = 10;
+            uint oemShare = 5;
 
-		//Search bid price
-		Campaign storage campaign = campaigns[bidId];
+            //Search bid price
+            Campaign storage campaign = campaigns[bidId];
 
-		require (campaign.budget > 0);
-		require (campaign.budget >= campaign.price);
+            require(campaign.budget > 0);
+            require(campaign.budget >= campaign.price);
 
-		//transfer to user, appstore and oem
-		appc.transfer(msg.sender, division(campaign.price * dev_share,100));
-		appc.transfer(appstore, division(campaign.price * appstore_share,100));
-		appc.transfer(oem, division(campaign.price * oem_share,100));
+            //transfer to user, appstore and oem
+            appc.transfer(msg.sender, division(campaign.price * devShare, 100));
+            appc.transfer(appstore, division(campaign.price * appstoreShare, 100));
+            appc.transfer(oem, division(campaign.price * oemShare, 100));
 
-		//subtract from campaign
-		campaign.budget -= campaign.price;
-	}
+            //subtract from campaign
+            campaign.budget -= campaign.price;
+
+            if (campaign.budget < campaign.price) {
+                setCampaignValidity(bidId, false);
+            }
+        }
 
 	function verifyNonces (bytes packageName,uint64[] timestampList, uint64[] nonces) internal {
 
