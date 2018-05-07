@@ -17,8 +17,6 @@ contract AppcoinsAddresses {
 
     event NewAddress(string index, address newAddress);
 
-    // event when the new address is created
-
     function AppcoinsAddresses() public {
         owner = msg.sender;
     }
