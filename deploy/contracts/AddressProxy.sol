@@ -138,7 +138,7 @@ contract AddressProxy {
         return compare(_a, _b) == 0;
     }
 
-    //  @dev Get the contractAddress object by walletName
+    //  @dev get the contractAddress by name
     //  @params {name} - name of the contract
     //  @return {uint} - id of the contract
     //  @return {bool} - true if the contract exists
