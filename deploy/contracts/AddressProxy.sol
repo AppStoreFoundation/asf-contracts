@@ -37,7 +37,7 @@ contract AddressProxy {
     }
 
     function addAddress(string name, address newAddress) public onlyOwner {
-        //  find if there is a contract with the same name
+        //  @dev find if there is a contract with the same name
         uint contractId;
         bool found;
         uint nowInMilliseconds = now * 1000;
