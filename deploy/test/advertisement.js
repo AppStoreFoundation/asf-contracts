@@ -23,7 +23,7 @@ async function getBalance(account) {
 
 
 contract('Advertisement', function(accounts) {
-  beforeEach(async () => {
+  beforeEach('Setting Advertisement test...',async () => {
 
 		nonceWrongTs = [ 70356,
 						45021,

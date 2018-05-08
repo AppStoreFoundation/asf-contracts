@@ -1,17 +1,17 @@
-var AppCoinB = artifacts.require("./AppCoinsBClass.sol");
-var AppCoin = artifacts.require("./AppCoins.sol");
-expect = require("chai").expect;
+var AppCoinsB = artifacts.require("./AppCoinsBClass.sol");
+var AppCoins = artifacts.require("./AppCoins.sol");
+var expect = require("chai").expect;
 
 var startTime, endTime;  // For time tracking
 
-contract('AppCoinBClass', function(accounts) {
-	
+contract('AppCoinsBClass', function(accounts) {
+
 	startTime = new Date();
 
 
-	beforeEach('Setting up for another test...', async function(){
-		appc = await AppCoin.new();
-		instance = await AppCoinB.new(appc.address);
+	beforeEach('Setting AppCoinsBClass test...', async function(){
+		appc = await AppCoins.new();
+		instance = await AppCoinsB.new(appc.address);
 		var appcsToSend =  10 * Math.pow(10, 18);
 		await appc.approve(instance.address,appcsToSend,{from: accounts[0]});
 		await instance.convertAndTransfer(accounts[0],appcsToSend,{from: accounts[0]});
@@ -52,7 +52,7 @@ contract('AppCoinBClass', function(accounts) {
 		var approval = await instance.approve.sendTransaction(accounts[1], appcs_to_send, {from: accounts[1]});
 
 		var transfer_from = await instance.transferFrom.sendTransaction(accounts[1], accounts[2], appcs_to_send, {from: accounts[1], to: accounts[2]});
-		
+
 		var account2 = await instance.balanceOf.call(accounts[2], {from: accounts[2]});
 
 		expect(Number(account2)).to.be.equal(appcs_to_send);
@@ -90,7 +90,7 @@ contract('AppCoinBClass', function(accounts) {
 		var initialBalanceB = Number(await instance.balanceOf.call(accounts[0],{from: accounts[0]}));
 
 		await instance.revertAndTransfer(accounts[0],appcsToSend,{from: accounts[0]});
-		
+
 		var finalSupply = Number(await instance.totalSupply.call());
 		var finalSupplyA = Number(await appc.totalSupply.call());
 		var finalBalanceA = Number(await appc.balanceOf.call(accounts[0],{from: accounts[0]}));
@@ -104,20 +104,17 @@ contract('AppCoinBClass', function(accounts) {
 		expect(finalBalanceB).to.be.equal(expectedBalanceB,"Balance in class B token should decrease");
 		expect(finalBalanceA).to.be.equal(expectedBalanceA,"Balance in class A token should increase");
 
-	});	
+	});
 
 	endTime = new Date();
-	console.log("Time spent in the tests: " + Math.round((endTime - startTime) / 1000));
 
 	it("Burning tokens from the contract itself", async function(){
 		var account0_initial = Number(await instance.balanceOf.call(accounts[0], {from: accounts[0]}));
 		var amount_to_burn = 2 * Math.pow(10, 18);  // Burning 2 appcoins
 		// Burn time. Should burn from accounts[0] being this the default account
 		var burn_result = await instance.burn.sendTransaction(amount_to_burn);
-		console.log("Burn result: " + burn_result);
-
 		var account0 = Number(await instance.balanceOf.call(accounts[0], {from: accounts[0]}));
-		console.log("Balance of 0: " + account0);
+
 		expect(account0).to.be.equal(account0_initial - amount_to_burn,"Should burn class B tokens");
 	})
 });
