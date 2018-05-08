@@ -15,9 +15,9 @@ contract AppCoinsAddresses {
     mapping(uint => ContractAddress) private appcoinsAddresses;
     uint[] public availableIds;
 
-    string public constant APPCOINS_ADDRESS_INDEX = "appcoins";
-    string public constant ADVERTISEMENT_ADDRESS_INDEX = "advertisement";
-    string public constant APPCOINSIAB_ADDRESS_INDEX = "appcoinsiab";
+    string public constant APPCOINS_CONTRACT_NAME = "appcoins";
+    string public constant ADVERTISEMENT_CONTRACT_NAME = "advertisement";
+    string public constant APPCOINSIAB_CONTRACT_NAME = "appcoinsiab";
 
     modifier onlyOwner() {
         require(msg.sender == owner);
@@ -84,27 +84,27 @@ contract AppCoinsAddresses {
     }
 
     function setAppCoinsAddress(address newAddress) public {
-        addAddress(APPCOINS_ADDRESS_INDEX, newAddress);
+        addAddress(APPCOINS_CONTRACT_NAME, newAddress);
     }
 
     function getAppCoinsAddress() public view returns(address) {
-        return getContractAddressByName(APPCOINS_ADDRESS_INDEX);
+        return getContractAddressByName(APPCOINS_CONTRACT_NAME);
     }
 
     function setAdvertisementAddress(address newAddress) public {
-        addAddress(ADVERTISEMENT_ADDRESS_INDEX, newAddress);
+        addAddress(ADVERTISEMENT_CONTRACT_NAME, newAddress);
     }
 
     function getAdvertisementAddress() public view returns(address) {
-        return getContractAddressByName(ADVERTISEMENT_ADDRESS_INDEX);
+        return getContractAddressByName(ADVERTISEMENT_CONTRACT_NAME);
     }
 
     function setAppCoinsIABAddress(address newAddress) public {
-        addAddress(APPCOINSIAB_ADDRESS_INDEX, newAddress);
+        addAddress(APPCOINSIAB_CONTRACT_NAME, newAddress);
     }
 
     function getAppCoinsIABAddress() public view returns(address) {
-        return getContractAddressByName(APPCOINSIAB_ADDRESS_INDEX);
+        return getContractAddressByName(APPCOINSIAB_CONTRACT_NAME);
     }
 
     //  @dev Does a byte-by-byte lexicographical comparison of two strings.
