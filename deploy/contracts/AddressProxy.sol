@@ -117,7 +117,6 @@ contract AddressProxy {
         bytes memory b = bytes(_b);
         uint minLength = a.length;
         if (b.length < minLength) minLength = b.length;
-        //@todo unroll the loop into increments of 32 and do full 32 byte comparisons
         for (uint i = 0; i < minLength; i++)
             if (a[i] < b[i])
                 return -1;
@@ -131,7 +130,7 @@ contract AddressProxy {
             return 0;
     }
 
-    // @dev Compares two strings and returns true iff they are equal.
+    // @dev Compares two strings and returns true if they are equal.
     function equal(string _a, string _b) internal pure returns (bool) {
         return compare(_a, _b) == 0;
     }
