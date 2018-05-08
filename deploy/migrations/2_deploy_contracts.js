@@ -1,7 +1,7 @@
 var AppCoins = artifacts.require("./AppCoins.sol");
 var AppCoinsBClass = artifacts.require("./AppCoinsBClass.sol");
 var AppCoinsIAB = artifacts.require("./AppCoinsIAB.sol");
-var AppCoinsAddresses = artifacts.require("./AppCoinsAddresses.sol");
+var AddressProxy = artifacts.require("./AddressProxy.sol");
 var Advertisement = artifacts.require("./Advertisement.sol");
 
 module.exports = function(deployer, network) {
@@ -13,7 +13,7 @@ module.exports = function(deployer, network) {
                 deployer.deploy(Advertisement, AppCoins.address);
                 deployer.deploy(AppCoinsBClass, AppCoins.address);
             })
-            deployer.deploy(AppCoinsAddresses);
+            deployer.deploy(AddressProxy);
             break;
 
         case 'ropsten':
@@ -26,7 +26,7 @@ module.exports = function(deployer, network) {
             deployer.deploy(AppCoinsIAB);
             deployer.deploy(Advertisement, AppCoinsAddress);
             deployer.deploy(AppCoinsBClass, AppCoinsAddress);
-            deployer.deploy(AppCoinsAddresses);
+            deployer.deploy(AddressProxy);
             break;
 
         case 'kovan':
@@ -47,7 +47,7 @@ module.exports = function(deployer, network) {
             deployer.deploy(AppCoinsIAB);
             deployer.deploy(Advertisement, AppCoinsAddress);
             deployer.deploy(AppCoinsBClass, AppCoinsAddress);
-            deployer.deploy(AppCoinsAddresses);
+            deployer.deploy(AddressProxy);
             break;
 
         default:

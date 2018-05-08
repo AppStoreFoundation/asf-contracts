@@ -1,7 +1,7 @@
 pragma solidity ^0.4.19;
 
 
-contract AppCoinsAddresses {
+contract AddressProxy {
 
     struct ContractAddress {
         uint id;
@@ -12,7 +12,7 @@ contract AppCoinsAddresses {
     }
 
     address public owner;
-    mapping(uint => ContractAddress) private appcoinsAddresses;
+    mapping(uint => ContractAddress) private contractsAddress;
     uint[] public availableIds;
 
     string public constant APPCOINS_CONTRACT_NAME = "appcoins";
@@ -28,7 +28,7 @@ contract AppCoinsAddresses {
     event AddressUpdated(uint id, string name, address at);
 
 
-    function AppCoinsAddresses() public {
+    function AddressProxy() public {
         owner = msg.sender;
     }
 
@@ -40,12 +40,11 @@ contract AppCoinsAddresses {
         //  find if there is a contract with the same name
         uint contractId;
         bool found;
+        uint nowInMilliseconds = now * 1000;
 
         (contractId, found) = getContractIdByName(name);
 
-        uint nowInMilliseconds = now * 1000;
         if (!found) {
-
             ContractAddress memory newContractAddress;
             uint newId = availableIds.length;
             newContractAddress.id = newId;
@@ -54,11 +53,10 @@ contract AppCoinsAddresses {
             newContractAddress.createdTime = nowInMilliseconds;
             newContractAddress.updatedTime = nowInMilliseconds;
             availableIds.push(newId);
-            appcoinsAddresses[newId] = newContractAddress;
+            contractsAddress[newId] = newContractAddress;
             emit AddressCreated(newContractAddress.id, newContractAddress.name, newContractAddress.at);
-
         } else {
-            ContractAddress storage contAdd = appcoinsAddresses[contractId];
+            ContractAddress storage contAdd = contractsAddress[contractId];
             contAdd.at = newAddress;
             contAdd.updatedTime = nowInMilliseconds;
             emit AddressUpdated(contAdd.id, contAdd.name, contAdd.at);
@@ -66,8 +64,12 @@ contract AppCoinsAddresses {
 
     }
 
+    function getContractNameById(uint id) public view returns(string) {
+        return contractsAddress[id].name;
+    }
+
     function getContractAddressById(uint id) public view returns(address) {
-        return appcoinsAddresses[id].at;
+        return contractsAddress[id].at;
     }
 
     function getContractAddressByName(string name) public view returns(address) {
@@ -138,9 +140,9 @@ contract AppCoinsAddresses {
         bool found = false;
         uint contractId = 0;
         for (uint i = 0; i < availableIds.length; i++) {
-            if (equal(appcoinsAddresses[availableIds[i]].name, name)) {
+            if (equal(contractsAddress[availableIds[i]].name, name)) {
                 found = true;
-                contractId = appcoinsAddresses[availableIds[i]].id;
+                contractId = contractsAddress[availableIds[i]].id;
             }
         }
 

@@ -1,46 +1,46 @@
-var AppCoinAddresses = artifacts.require("./AppCoinsAddresses.sol");
+var AddressProxy = artifacts.require("./AddressProxy.sol");
 var expect = require("chai").expect;
 
-contract('AppCoinsAddresses', function(accounts) {
+contract('AddressProxy', function(accounts) {
 	var instance;
 	var testAddress = "0x73215a5f1b95ecfb79d37c94fea5c310b039f527";
 	var appCoinsTestAddress = "0x74901a5f1b95ecfb79d37c94fea5c310b039f527";
 	var appCoinsIABTestAddress = "0xb388fcbf75812a2b25630baf2be307bff4333204";
 	var advertisementTestAddress = "0xd2eafa9b3d6ee31c6c1b615e0efa0751d4a892b6";
 
-	beforeEach('Setting AppCoinsAddresses test...', async function(){
-		instance = await AppCoinAddresses.new();
+	beforeEach('Setting AddressProxy test...', async function(){
+		instance = await AddressProxy.new();
 	})
 
-	it("it should set AppCoins Address correctly", async function(){
+	it("should set AppCoins Address correctly", async function(){
 		await instance.setAppCoinsAddress.sendTransaction(appCoinsTestAddress);
 		var testAddr = await instance.getAppCoinsAddress.call();
 
 		expect(testAddr).to.be.equal(appCoinsTestAddress);
 	})
 
-	it("it should set AppCoinsIAB Address correctly", async function(){
+	it("should set AppCoinsIAB Address correctly", async function(){
 		await instance.setAppCoinsIABAddress.sendTransaction(appCoinsIABTestAddress);
 		var testAddr = await instance.getAppCoinsIABAddress.call();
 
 		expect(testAddr).to.be.equal(appCoinsIABTestAddress);
 	})
 
-	it("it should set Advertisement Address correctly", async function(){
+	it("should set Advertisement Address correctly", async function(){
 		await instance.setAdvertisementAddress.sendTransaction(advertisementTestAddress);
 		var testAddr = await instance.getAdvertisementAddress.call();
 
 		expect(testAddr).to.be.equal(advertisementTestAddress);
 	})
 
-	it("it should set a new Custom Made Address correctly", async function(){
+	it("should set a new Custom Address correctly", async function(){
 		await instance.addAddress.sendTransaction("testeContractAddress", testAddress);
 		var testAddr = await instance.getContractAddressByName.call("testeContractAddress");
 
 		expect(testAddr).to.be.equal(testAddress);
 	})
 
-	it("it should update an Address when added a duplicated name", async function(){
+	it("should update an Address when added a duplicated name", async function(){
 		await instance.addAddress.sendTransaction("testeContractAddress", testAddress);
 		var auxAddr = await instance.getContractAddressByName.call("testeContractAddress");
 		expect(auxAddr).to.be.equal(testAddress);
