@@ -36,9 +36,13 @@ contract AddressProxy {
         return availableIds;
     }
 
+    //  Adds or updates an address
+    //  @params {string} name - the name of the contract Address
+    //  @params {address} newAddress
     function addAddress(string name, address newAddress) public onlyOwner {
-        //  @dev find if there is a contract with the same name
         uint contractId;
+
+        //  @dev {bool} found - if there is a contract with the same name
         bool found;
         uint nowInMilliseconds = now * 1000;
 
@@ -73,7 +77,6 @@ contract AddressProxy {
     }
 
     function getContractAddressByName(string name) public view returns(address) {
-        //  find if there is a contract with the same name
         uint contractId;
         bool found;
 
@@ -135,6 +138,10 @@ contract AddressProxy {
         return compare(_a, _b) == 0;
     }
 
+    //  @dev Get the contractAddress object by walletName
+    //  @params {name} - name of the contract
+    //  @return {uint} - id of the contract
+    //  @return {bool} - true if the contract exists
     function getContractIdByName(string name) internal view returns(uint, bool) {
         bool found = false;
         uint contractId = 0;
