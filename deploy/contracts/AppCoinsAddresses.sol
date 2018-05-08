@@ -11,7 +11,7 @@ contract AppCoinsAddresses {
         uint updatedTime;
     }
 
-    address private owner;
+    address public owner;
     mapping(uint => ContractAddress) private appcoinsAddresses;
     uint[] public availableIds;
 
@@ -28,7 +28,7 @@ contract AppCoinsAddresses {
     event AddressUpdated(uint id, string name, address at);
 
 
-    function AppcoinsAddresses() public {
+    function AppCoinsAddresses() public {
         owner = msg.sender;
     }
 
@@ -83,7 +83,7 @@ contract AppCoinsAddresses {
         return getContractAddressById(contractId);
     }
 
-    function setAppCoinsAddress(address newAddress) public onlyOwner {
+    function setAppCoinsAddress(address newAddress) public {
         addAddress(APPCOINS_ADDRESS_INDEX, newAddress);
     }
 
@@ -91,7 +91,7 @@ contract AppCoinsAddresses {
         return getContractAddressByName(APPCOINS_ADDRESS_INDEX);
     }
 
-    function setAdvertisementAddress(address newAddress) public onlyOwner {
+    function setAdvertisementAddress(address newAddress) public {
         addAddress(ADVERTISEMENT_ADDRESS_INDEX, newAddress);
     }
 
@@ -99,7 +99,7 @@ contract AppCoinsAddresses {
         return getContractAddressByName(ADVERTISEMENT_ADDRESS_INDEX);
     }
 
-    function setAppCoinsIABAddress(address newAddress) public onlyOwner {
+    function setAppCoinsIABAddress(address newAddress) public {
         addAddress(APPCOINSIAB_ADDRESS_INDEX, newAddress);
     }
 
