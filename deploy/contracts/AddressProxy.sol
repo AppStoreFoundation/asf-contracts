@@ -4,7 +4,7 @@ pragma solidity ^0.4.19;
 contract AddressProxy {
 
     struct ContractAddress {
-        uint id;
+        bytes32 id;
         string name;
         address at;
         uint createdTime;
@@ -12,27 +12,23 @@ contract AddressProxy {
     }
 
     address public owner;
-    mapping(uint => ContractAddress) private contractsAddress;
-    uint[] public availableIds;
-
-    string public constant APPCOINS_CONTRACT_NAME = "appcoins";
-    string public constant ADVERTISEMENT_CONTRACT_NAME = "advertisement";
-    string public constant APPCOINSIAB_CONTRACT_NAME = "appcoinsiab";
+    mapping(bytes32 => ContractAddress) private contractsAddress;
+    bytes32[] public availableIds;
 
     modifier onlyOwner() {
         require(msg.sender == owner);
         _;
     }
 
-    event AddressCreated(uint id, string name, address at);
-    event AddressUpdated(uint id, string name, address at);
+    event AddressCreated(bytes32 id, string name, address at, uint createdTime, uint updatedTime);
+    event AddressUpdated(bytes32 id, string name, address at, uint createdTime, uint updatedTime);
 
 
     function AddressProxy() public {
         owner = msg.sender;
     }
 
-    function getAvailableIds() public view returns (uint[]) {
+    function getAvailableIds() public view returns (bytes32[]) {
         return availableIds;
     }
 
@@ -40,118 +36,68 @@ contract AddressProxy {
     //  @params {string} name - the name of the contract Address
     //  @params {address} newAddress
     function addAddress(string name, address newAddress) public onlyOwner {
-        uint contractId;
+        bytes32 contAddId = stringToBytes32(name);
 
-        //  @dev {bool} found - if there is a contract with the same name
-        bool found;
         uint nowInMilliseconds = now * 1000;
+        bool isNew = isNewAddress(contAddId);
 
-        (contractId, found) = getContractIdByName(name);
-
-        if (!found) {
+        if(isNew) {
             ContractAddress memory newContractAddress;
-            uint newId = availableIds.length;
-            newContractAddress.id = newId;
+            newContractAddress.id = contAddId;
             newContractAddress.name = name;
             newContractAddress.at = newAddress;
             newContractAddress.createdTime = nowInMilliseconds;
             newContractAddress.updatedTime = nowInMilliseconds;
-            availableIds.push(newId);
-            contractsAddress[newId] = newContractAddress;
-            emit AddressCreated(newContractAddress.id, newContractAddress.name, newContractAddress.at);
+            availableIds.push(contAddId);
+            contractsAddress[contAddId] = newContractAddress;
+
+            emit AddressCreated(newContractAddress.id, newContractAddress.name, newContractAddress.at, newContractAddress.createdTime, newContractAddress.updatedTime);
         } else {
-            ContractAddress storage contAdd = contractsAddress[contractId];
+            ContractAddress storage contAdd = contractsAddress[contAddId];
             contAdd.at = newAddress;
             contAdd.updatedTime = nowInMilliseconds;
-            emit AddressUpdated(contAdd.id, contAdd.name, contAdd.at);
-        }
 
+            emit AddressUpdated(contAdd.id, contAdd.name, contAdd.at, contAdd.createdTime, contAdd.updatedTime);
+        }
     }
 
-    function getContractNameById(uint id) public view returns(string) {
+    function getContractNameById(bytes32 id) public view returns(string) {
         return contractsAddress[id].name;
     }
 
-    function getContractAddressById(uint id) public view returns(address) {
+    function getContractAddressById(bytes32 id) public view returns(address) {
         return contractsAddress[id].at;
     }
 
-    function getContractAddressByName(string name) public view returns(address) {
-        uint contractId;
-        bool found;
+    function getContractCreatedTimeById(bytes32 id) public view returns(uint) {
+        return contractsAddress[id].createdTime;
+    }
 
-        (contractId, found) = getContractIdByName(name);
-        if (!found) {
-            revert();
+    function getContractUpdatedTimeById(bytes32 id) public view returns(uint) {
+        return contractsAddress[id].updatedTime;
+    }
+
+    //  @params {string} source
+    //  @return {bytes32}
+    function stringToBytes32(string source) internal pure returns (bytes32 result) {
+        bytes memory tempEmptyStringTest = bytes(source);
+        if (tempEmptyStringTest.length == 0) {
+            return 0x0;
         }
 
-        return getContractAddressById(contractId);
-    }
-
-    function setAppCoinsAddress(address newAddress) public {
-        addAddress(APPCOINS_CONTRACT_NAME, newAddress);
-    }
-
-    function getAppCoinsAddress() public view returns(address) {
-        return getContractAddressByName(APPCOINS_CONTRACT_NAME);
-    }
-
-    function setAdvertisementAddress(address newAddress) public {
-        addAddress(ADVERTISEMENT_CONTRACT_NAME, newAddress);
-    }
-
-    function getAdvertisementAddress() public view returns(address) {
-        return getContractAddressByName(ADVERTISEMENT_CONTRACT_NAME);
-    }
-
-    function setAppCoinsIABAddress(address newAddress) public {
-        addAddress(APPCOINSIAB_CONTRACT_NAME, newAddress);
-    }
-
-    function getAppCoinsIABAddress() public view returns(address) {
-        return getContractAddressByName(APPCOINSIAB_CONTRACT_NAME);
-    }
-
-    //  @dev Does a byte-by-byte lexicographical comparison of two strings.
-    //  @return a negative number if `_a` is smaller, zero if they are equal
-    //  and a positive numbe if `_b` is smaller.
-    function compare(string _a, string _b) internal pure returns (int) {
-        bytes memory a = bytes(_a);
-        bytes memory b = bytes(_b);
-        uint minLength = a.length;
-        if (b.length < minLength) minLength = b.length;
-        for (uint i = 0; i < minLength; i++)
-            if (a[i] < b[i])
-                return -1;
-            else if (a[i] > b[i])
-                return 1;
-        if (a.length < b.length)
-            return -1;
-        else if (a.length > b.length)
-            return 1;
-        else
-            return 0;
-    }
-
-    // @dev Compares two strings and returns true if they are equal.
-    function equal(string _a, string _b) internal pure returns (bool) {
-        return compare(_a, _b) == 0;
-    }
-
-    //  @dev get the contractAddress by name
-    //  @params {name} - name of the contract
-    //  @return {uint} - id of the contract
-    //  @return {bool} - true if the contract exists
-    function getContractIdByName(string name) internal view returns(uint, bool) {
-        bool found = false;
-        uint contractId = 0;
-        for (uint i = 0; i < availableIds.length; i++) {
-            if (equal(contractsAddress[availableIds[i]].name, name)) {
-                found = true;
-                contractId = contractsAddress[availableIds[i]].id;
-            }
+        assembly {
+            result := mload(add(source, 32))
         }
+    }
 
-        return (contractId, found);
+    function isNewAddress(bytes32 id) internal view returns (bool) {
+      bool isNew = true;
+      for (uint i = 0; i < availableIds.length; i++) {
+        if(id == availableIds[i]) {
+          isNew = false;
+        }
+      }
+
+      return isNew;
     }
 }
