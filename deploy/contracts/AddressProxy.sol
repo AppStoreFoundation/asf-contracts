@@ -23,7 +23,6 @@ contract AddressProxy {
     event AddressCreated(bytes32 id, string name, address at, uint createdTime, uint updatedTime);
     event AddressUpdated(bytes32 id, string name, address at, uint createdTime, uint updatedTime);
 
-
     function AddressProxy() public {
         owner = msg.sender;
     }
