@@ -40,7 +40,7 @@ contract AddressProxy {
         uint nowInMilliseconds = now * 1000;
         bool isNew = isNewAddress(contAddId);
 
-        if(isNew) {
+        if (isNew) {
             ContractAddress memory newContractAddress;
             newContractAddress.id = contAddId;
             newContractAddress.name = name;
@@ -90,13 +90,13 @@ contract AddressProxy {
     }
 
     function isNewAddress(bytes32 id) internal view returns (bool) {
-      bool isNew = true;
-      for (uint i = 0; i < availableIds.length; i++) {
-        if(id == availableIds[i]) {
-          isNew = false;
+        bool isNew = true;
+        for (uint i = 0; i < availableIds.length; i++) {
+            if (id == availableIds[i]) {
+                isNew = false;
+            }
         }
-      }
 
-      return isNew;
+        return isNew;
     }
 }

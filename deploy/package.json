@@ -15,7 +15,9 @@
   },
   "devDependencies": {},
   "scripts": {
-    "test": "truffle test"
+    "test": "truffle test",
+    "address:ropsten": "truffle exec scripts/address-proxy.js --network ropsten",
+    "address:mainnet": "truffle exec scripts/address-proxy.js --network mainnet"
   },
   "keywords": [
     "asf",

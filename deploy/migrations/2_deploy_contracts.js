@@ -4,8 +4,9 @@ var AppCoinsIAB = artifacts.require("./AppCoinsIAB.sol");
 var AddressProxy = artifacts.require("./AddressProxy.sol");
 var Advertisement = artifacts.require("./Advertisement.sol");
 
-module.exports = function(deployer, network) {
+require('dotenv').config();
 
+module.exports = function(deployer, network) {
     switch (network) {
         case 'development':
             deployer.deploy(AppCoins).then(function() {
@@ -17,7 +18,7 @@ module.exports = function(deployer, network) {
             break;
 
         case 'ropsten':
-            AppCoinsAddress = '0xab949343E6C369C6B17C7ae302c1dEbD4B7B61c3';
+            AppCoinsAddress = process.env.APPCOINS_ROPSTEN_ADDRESS;
 
             if (!AppCoinsAddress) {
                 throw 'AppCoins Address not found!'
@@ -38,7 +39,7 @@ module.exports = function(deployer, network) {
             break;
 
         case 'main':
-            var AppCoinsAddress = '';
+            var AppCoinsAddress = process.env.APPCOINS_MAINNET_ADDRESS;
 
             if (!AppCoinsAddress) {
                 throw 'AppCoins Address not found!'
