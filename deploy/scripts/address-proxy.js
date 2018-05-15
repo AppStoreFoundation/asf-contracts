@@ -1,14 +1,14 @@
+const AddressProxy = artifacts.require("./AddressProxy.sol");
+const network = process.argv[5] || 'development';
 const web3 = require('web3');
 
 require('dotenv').config();
-
-const AddressProxy = artifacts.require("./AddressProxy.sol");
-const network = process.argv[5] || 'development';
 
 module.exports = function(callback) {
     let instance;
 
     switch (network) {
+
         case 'development':
             instance = AddressProxy.at(process.env.ADDRESSPROXY_DEVELOPMENT_ADDRESS);
             appCoinsAddress = process.env.APPCOINS_DEVELOPMENT_ADDRESS;
@@ -16,6 +16,7 @@ module.exports = function(callback) {
             advertisementAddress = process.env.ADVERTISEMENT_DEVELOPMENT_ADDRESS;
             appCoinsBClassAddress = process.env.APPCOINSBCLASS_DEVELOPMENT_ADDRESS;
             break;
+
         case 'ropsten':
             instance = AddressProxy.at(process.env.ADDRESSPROXY_ROPSTEN_ADDRESS);
             appCoinsAddress = process.env.APPCOINS_ROPSTEN_ADDRESS;
@@ -24,7 +25,7 @@ module.exports = function(callback) {
             appCoinsBClassAddress = process.env.APPCOINSBCLASS_ROPSTEN_ADDRESS;
             break;
 
-        case 'ropsten':
+        case 'main':
             instance = AddressProxy.at(process.env.ADDRESSPROXY_MAINNET_ADDRESS);
             appCoinsAddress = process.env.APPCOINS_MAINNET_ADDRESS;
             appCoinsIABAddress = process.env.IAB_MAINNET_ADDRESS;
