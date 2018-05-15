@@ -17,7 +17,8 @@ contract AppCoinsIAB is AppCoinsIABInterface {
     uint public oem_share = 5;
 
     event Buy(uint _amount, string _sku, address _from, address _dev, address _appstore, address _oem);
-
+    event Error(string func, string message);
+    
     function division(uint numerator, uint denominator) public constant returns (uint) {
         uint _quotient = numerator / denominator;
         return _quotient;
@@ -31,7 +32,10 @@ contract AppCoinsIAB is AppCoinsIABInterface {
 
         AppCoins appc = AppCoins(_addr_appc);
         uint256 aux = appc.allowance(msg.sender, address(this));
-        require(aux >= _amount);
+        if(aux < _amount){
+            emit Error('buy','Not enough allowance');
+            return false;
+        }
 
         uint[] memory amounts = new uint[](3);
         amounts[0] = division(_amount * dev_share, 100);
