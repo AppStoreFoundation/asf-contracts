@@ -4,20 +4,29 @@ var AppCoinsIAB = artifacts.require("./AppCoinsIAB.sol");
 var AddressProxy = artifacts.require("./AddressProxy.sol");
 var Advertisement = artifacts.require("./Advertisement.sol");
 
-module.exports = function(deployer, network) {
+require('dotenv').config();
 
+module.exports = function(deployer, network) {
     switch (network) {
         case 'development':
-            deployer.deploy(AppCoins).then(function() {
-                deployer.deploy(AppCoinsIAB);
-                deployer.deploy(Advertisement, AppCoins.address);
-                deployer.deploy(AppCoinsBClass, AppCoins.address);
+            deployer.deploy(AppCoins)
+            .then(function() {
+                return deployer.deploy(AppCoinsIAB);
             })
-            deployer.deploy(AddressProxy);
+            .then(function() {
+                return deployer.deploy(Advertisement, AppCoins.address);
+            })
+            .then(function() {
+                return deployer.deploy(AppCoinsBClass, AppCoins.address);
+            })
+            .then(function() {
+                return  deployer.deploy(AddressProxy);
+            });
+
             break;
 
         case 'ropsten':
-            AppCoinsAddress = '0xab949343E6C369C6B17C7ae302c1dEbD4B7B61c3';
+            AppCoinsAddress = process.env.APPCOINS_ROPSTEN_ADDRESS;
 
             if (!AppCoinsAddress) {
                 throw 'AppCoins Address not found!'
@@ -30,15 +39,23 @@ module.exports = function(deployer, network) {
             break;
 
         case 'kovan':
-            deployer.deploy(AppCoins).then(function() {
-                deployer.deploy(AppCoinsIAB);
-                deployer.deploy(Advertisement, AppCoins.address);
-                deployer.deploy(AppCoinsBClass, AppCoins.address);
+            deployer.deploy(AppCoins)
+            .then(function() {
+                return deployer.deploy(AppCoinsIAB);
             })
+            .then(function() {
+                return deployer.deploy(Advertisement, AppCoins.address);
+            })
+            .then(function() {
+                return deployer.deploy(AppCoinsBClass, AppCoins.address);
+            })
+            .then(function() {
+                return  deployer.deploy(AddressProxy);
+            });
             break;
 
         case 'main':
-            var AppCoinsAddress = '';
+            var AppCoinsAddress = process.env.APPCOINS_MAINNET_ADDRESS;
 
             if (!AppCoinsAddress) {
                 throw 'AppCoins Address not found!'
