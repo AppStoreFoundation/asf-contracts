@@ -30,9 +30,9 @@ module.exports = function(callback) {
             appCoinsAddress = process.env.APPCOINS_MAINNET_ADDRESS;
             appCoinsIABAddress = process.env.IAB_MAINNET_ADDRESS;
             advertisementAddress = process.env.ADVERTISEMENT_MAINNET_ADDRESS;
-            appCoinsBClassAddress = process.env.APPCOINSBCLASS_ROPSTEN_ADDRESS;
+            appCoinsBClassAddress = process.env.APPCOINSBCLASS_MAINNET_ADDRESS;
             break;
-            
+
         default:
             throw `Unknown network "${network}". See your Truffle configuration file for available networks.`;
 
@@ -51,6 +51,6 @@ module.exports = function(callback) {
     addAddress(process.env.APPCOINS_CONTRACT_NAME, appCoinsAddress);
     addAddress(process.env.APPCOINSIAB_CONTRACT_NAME, appCoinsIABAddress);
     addAddress(process.env.ADVERTISEMENT_CONTRACT_NAME, advertisementAddress);
-    addAddress(process.env.APPCOINSBCLASS_CONTRACT_NAME, appCoinsBClassAddress);
+    // addAddress(process.env.APPCOINSBCLASS_CONTRACT_NAME, appCoinsBClassAddress);
 
 };

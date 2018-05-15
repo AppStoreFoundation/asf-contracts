@@ -18,7 +18,7 @@
     "test": "truffle test",
     "address": "truffle exec scripts/address-proxy.js",
     "address:ropsten": "truffle exec scripts/address-proxy.js --network ropsten",
-    "address:mainnet": "truffle exec scripts/address-proxy.js --network mainnet"
+    "address:main": "truffle exec scripts/address-proxy.js --network main"
   },
   "keywords": [
     "asf",
