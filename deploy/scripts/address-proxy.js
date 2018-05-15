@@ -32,6 +32,7 @@ module.exports = function(callback) {
             advertisementAddress = process.env.ADVERTISEMENT_MAINNET_ADDRESS;
             appCoinsBClassAddress = process.env.APPCOINSBCLASS_ROPSTEN_ADDRESS;
             break;
+            
         default:
             throw `Unknown network "${network}". See your Truffle configuration file for available networks.`;
 
