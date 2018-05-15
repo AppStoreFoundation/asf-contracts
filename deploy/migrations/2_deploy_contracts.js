@@ -20,20 +20,8 @@ module.exports = function(deployer, network) {
                 return deployer.deploy(AppCoinsBClass, AppCoins.address);
             })
             .then(function() {
-                //  Deploy the AddressProxy
                 return  deployer.deploy(AddressProxy);
-            })
-            .then(function() {
-                //  Is AddressProxy deployed
-                return AddressProxy.deployed();
-            })
-            .then(function(instance) {
-                instance.addAddress(process.env.APPCOINS_CONTRACT_NAME, AppCoins.address);
-                instance.addAddress(process.env.APPCOINSIAB_CONTRACT_NAME, AppCoinsIAB.address);
-                instance.addAddress(process.env.ADVERTISEMENT_CONTRACT_NAME, Advertisement.address);
-                instance.addAddress(process.env.APPCOINSBCLASS_CONTRACT_NAME, AppCoinsBClass.address);
-                console.log(instance);
-            })
+            });
 
             break;
 
@@ -51,11 +39,19 @@ module.exports = function(deployer, network) {
             break;
 
         case 'kovan':
-            deployer.deploy(AppCoins).then(function() {
-                deployer.deploy(AppCoinsIAB);
-                deployer.deploy(Advertisement, AppCoins.address);
-                deployer.deploy(AppCoinsBClass, AppCoins.address);
+            deployer.deploy(AppCoins)
+            .then(function() {
+                return deployer.deploy(AppCoinsIAB);
             })
+            .then(function() {
+                return deployer.deploy(Advertisement, AppCoins.address);
+            })
+            .then(function() {
+                return deployer.deploy(AppCoinsBClass, AppCoins.address);
+            })
+            .then(function() {
+                return  deployer.deploy(AddressProxy);
+            });
             break;
 
         case 'main':

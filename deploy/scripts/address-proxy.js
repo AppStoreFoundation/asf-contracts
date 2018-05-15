@@ -9,11 +9,19 @@ module.exports = function(callback) {
     let instance;
 
     switch (network) {
+        case 'development':
+            instance = AddressProxy.at(process.env.ADDRESSPROXY_DEVELOPMENT_ADDRESS);
+            appCoinsAddress = process.env.APPCOINS_DEVELOPMENT_ADDRESS;
+            appCoinsIABAddress = process.env.IAB_DEVELOPMENT_ADDRESS;
+            advertisementAddress = process.env.ADVERTISEMENT_DEVELOPMENT_ADDRESS;
+            appCoinsBClassAddress = process.env.APPCOINSBCLASS_DEVELOPMENT_ADDRESS;
+            break;
         case 'ropsten':
             instance = AddressProxy.at(process.env.ADDRESSPROXY_ROPSTEN_ADDRESS);
             appCoinsAddress = process.env.APPCOINS_ROPSTEN_ADDRESS;
             appCoinsIABAddress = process.env.IAB_ROPSTEN_ADDRESS;
             advertisementAddress = process.env.ADVERTISEMENT_ROPSTEN_ADDRESS;
+            appCoinsBClassAddress = process.env.APPCOINSBCLASS_ROPSTEN_ADDRESS;
             break;
 
         case 'ropsten':
@@ -21,6 +29,7 @@ module.exports = function(callback) {
             appCoinsAddress = process.env.APPCOINS_MAINNET_ADDRESS;
             appCoinsIABAddress = process.env.IAB_MAINNET_ADDRESS;
             advertisementAddress = process.env.ADVERTISEMENT_MAINNET_ADDRESS;
+            appCoinsBClassAddress = process.env.APPCOINSBCLASS_ROPSTEN_ADDRESS;
             break;
         default:
             throw `Unknown network "${network}". See your Truffle configuration file for available networks.`;
@@ -40,4 +49,6 @@ module.exports = function(callback) {
     addAddress(process.env.APPCOINS_CONTRACT_NAME, appCoinsAddress);
     addAddress(process.env.APPCOINSIAB_CONTRACT_NAME, appCoinsIABAddress);
     addAddress(process.env.ADVERTISEMENT_CONTRACT_NAME, advertisementAddress);
+    addAddress(process.env.APPCOINSBCLASS_CONTRACT_NAME, appCoinsBClassAddress);
+
 };
