@@ -186,7 +186,12 @@ contract Advertisement {
         address appstore, address oem,
         string walletName) external {
 
-        require(isCampaignValid(bidId));
+        if(!isCampaignValid(bidId)){
+        	emit Error(
+        		'registerPoA',
+        		'Registering a Proof of attention to a invalid campaign');
+        	return;
+        }
         if(timestampList.length != nonces.length){
         	emit Error(
         		'registerPoA',

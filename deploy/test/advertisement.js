@@ -262,9 +262,8 @@ contract('Advertisement', function(accounts) {
 	});
 
 	it('should revert registerPoA and emit an error event when the campaing is invalid', async () => {
-		var bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000001");
 
-		await addInstance.cancelCampaign(bid, { from : accounts[1]});
+		await addInstance.cancelCampaign(examplePoA.bid);
 		await expectErrorMessageTest("Registering a Proof of attention to a invalid campaign", async () => {
 			await addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce,accounts[1],accounts[2],walletName);
 		})		
