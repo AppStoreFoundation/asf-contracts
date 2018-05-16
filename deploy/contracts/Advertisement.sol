@@ -62,6 +62,8 @@ contract Advertisement {
 	event PoARegistered(bytes32 bidId, string packageName,
 						uint64[] timestampList,uint64[] nonceList,
 						string walletName);
+    event Error(string func, string message);
+
     /**
     * Constructor function
     *
@@ -103,7 +105,10 @@ contract Advertisement {
             newCampaign.endDate = endDate;
 
             //Transfers the budget to contract address
-            require(appc.allowance(msg.sender, address(this)) >= budget);
+            if(appc.allowance(msg.sender, address(this)) < budget){
+            	emit Error('createCampaign','Not enough allowance');
+            	return;
+            }
 
             appc.transferFrom(msg.sender, address(this), budget);
 
