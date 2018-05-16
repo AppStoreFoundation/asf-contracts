@@ -199,7 +199,12 @@ contract Advertisement {
             require((timestampDiff / 1000) == 10);
         }
 
-        verifyNonces(bytes(packageName), timestampList, nonces);
+        if(!areNoncesValid(bytes(packageName), timestampList, nonces)){
+        	emit Error(
+        		'registerPoA',
+        		'Incorrect nounces for submited proof of attention');
+        	return;
+        }
 
         if(userAttributions[msg.sender][bidId]){
         	emit Error(
@@ -347,7 +352,7 @@ contract Advertisement {
             }
         }
 
-	function verifyNonces (bytes packageName,uint64[] timestampList, uint64[] nonces) internal {
+	function areNoncesValid (bytes packageName,uint64[] timestampList, uint64[] nonces) internal returns(bool) {
 
 		for(uint i = 0; i < nonces.length; i++){
 			bytes8 timestamp = bytes8(timestampList[i]);
@@ -383,9 +388,12 @@ contract Advertisement {
 				mstore(leadingBytes,result)
 			}
 
-			require(comp == leadingBytes[0]);
+			if(comp != leadingBytes[0]){
+				return false;
+			}
 
 		}
+		return true;
 	}
 
 
