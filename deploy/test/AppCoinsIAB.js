@@ -22,6 +22,21 @@ async function getBalance(account) {
 	return JSON.parse(await appcInstance.balanceOf(account));
 }
 
+async function expectErrorMessageTest(errorMessage,callback){
+	var price = 10000000;
+	var revert = false;
+	var events = appIABInstance.allEvents();
+
+	await callback(price);
+	var eventLog = await new Promise(
+			function(resolve, reject){
+	        events.watch(function(error, log){ events.stopWatching(); resolve(log); });
+	    });
+
+    assert.equal(eventLog.event, "Error", "Event must be an Error");
+    assert.equal(eventLog.args.message,errorMessage,"Event message should be: "+errorMessage);	
+}
+
 contract('AppCoinsIAB', function(accounts) {
 	beforeEach( async () => {
 		appcInstance = await AppCoins.new();
@@ -55,25 +70,9 @@ contract('AppCoinsIAB', function(accounts) {
 		expect(oemFinalBalance).to.be.equal(oemInitBalance+(price*oemShare));
 	})
 	it('should revert when there is no allowance', async function () {
-		var price = 10000000;
-		var errorMessage = "Not enough allowance";
-		var expectRevert = RegExp(errorMessage);
-		var revert = false;
-		var events = appIABInstance.allEvents();
-
-		await appIABInstance.buy.sendTransaction(price,"example",appcInstance.address,devAcc,appStoreAcc,oemAcc)
-		var eventLog = await new Promise(
-  			function(resolve, reject){
-		        events.watch(function(error, log){ events.stopWatching(); resolve(log); });
-		    });
-
-	    assert.equal(eventLog.event, "Error", "Event must be an Error");
-	    assert.equal(eventLog.args.message,errorMessage,"Event message should be: "+errorMessage);	
+		await expectErrorMessageTest("Not enough allowance",(price) => {
+			return appIABInstance.buy.sendTransaction(price,"example",appcInstance.address,devAcc,appStoreAcc,oemAcc);
+		});
 	})
-
-	it('should revert when appcAddress is 0')
-	it('should revert when developer address is 0')
-	it('should revert when appStore address is 0')
-	it('should revert when oem address is 0')
 
 })
