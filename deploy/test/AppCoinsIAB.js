@@ -69,7 +69,7 @@ contract('AppCoinsIAB', function(accounts) {
 		expect(appSFinalBalance).to.be.equal(appSInitBalance+(price*appSShare));
 		expect(oemFinalBalance).to.be.equal(oemInitBalance+(price*oemShare));
 	})
-	it('should revert when there is no allowance', async function () {
+	it('should revert and emit an Error event when there is no allowance', async function () {
 		await expectErrorMessageTest("Not enough allowance",(price) => {
 			return appIABInstance.buy.sendTransaction(price,"example",appcInstance.address,devAcc,appStoreAcc,oemAcc);
 		});

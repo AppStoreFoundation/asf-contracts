@@ -21,6 +21,18 @@ async function getBalance(account) {
 	return JSON.parse(await appcInstance.balanceOf(account));
 }
 
+async function expectErrorMessageTest(errorMessage,callback){
+	var events = addInstance.allEvents();
+	
+	await callback();
+	var eventLog = await new Promise(
+			function(resolve, reject){
+	        events.watch(function(error, log){ events.stopWatching(); resolve(log); });
+	    });
+
+    assert.equal(eventLog.event, "Error", "Event must be an Error");
+    assert.equal(eventLog.args.message,errorMessage,"Event message should be: "+errorMessage);	
+}
 
 contract('Advertisement', function(accounts) {
   beforeEach(async () => {
@@ -190,6 +202,12 @@ contract('Advertisement', function(accounts) {
 				reverted = expectRevert.test(err.message);
 			});
 		expect(reverted).to.be.equal(true,"Revert expected");
+	});
+
+	it('should revert and emit an error event when a campaign is created without allowance', async function(){
+		await expectErrorMessageTest('Not enough allowance',async () => {
+			await addInstance.createCampaign.sendTransaction("org.telegram.messenger","UK,FR",[1,2],campaignPrice,campaignBudget,20,1922838059980);
+		})
 	});
 
 	it('should emit an event when PoA is received', function () {
