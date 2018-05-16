@@ -187,7 +187,10 @@ contract Advertisement {
         string walletName) external {
 
         require(isCampaignValid(bidId));
-        require(timestampList.length == nonces.length);
+        if(timestampList.length != nonces.length){
+        	emit Error('registerPoA','Nounce list and timestamp list must have same length');
+        	return;
+        }
         //Expect ordered array arranged in ascending order
         for (uint i = 0; i < timestampList.length - 1; i++) {
             uint timestampDiff = (timestampList[i+1]-timestampList[i]);
