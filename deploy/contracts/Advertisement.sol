@@ -196,7 +196,12 @@ contract Advertisement {
         //Expect ordered array arranged in ascending order
         for (uint i = 0; i < timestampList.length - 1; i++) {
             uint timestampDiff = (timestampList[i+1]-timestampList[i]);
-            require((timestampDiff / 1000) == 10);
+            if((timestampDiff / 1000) != 10){
+            	emit Error(
+            		'registerPoA',
+            		'Timestamps should be spaced exactly 10 secounds');
+            	return;
+            }
         }
 
         if(!areNoncesValid(bytes(packageName), timestampList, nonces)){
