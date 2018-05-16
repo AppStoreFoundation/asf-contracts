@@ -188,7 +188,9 @@ contract Advertisement {
 
         require(isCampaignValid(bidId));
         if(timestampList.length != nonces.length){
-        	emit Error('registerPoA','Nounce list and timestamp list must have same length');
+        	emit Error(
+        		'registerPoA',
+        		'Nounce list and timestamp list must have same length');
         	return;
         }
         //Expect ordered array arranged in ascending order
@@ -199,7 +201,12 @@ contract Advertisement {
 
         verifyNonces(bytes(packageName), timestampList, nonces);
 
-        require(!userAttributions[msg.sender][bidId]);
+        if(userAttributions[msg.sender][bidId]){
+        	emit Error(
+        		'registerPoA',
+        		'User already registered a proof of attention for this campaign');
+        	return;
+        }
         //atribute
         userAttributions[msg.sender][bidId] = true;
 

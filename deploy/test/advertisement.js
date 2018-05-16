@@ -286,7 +286,7 @@ contract('Advertisement', function(accounts) {
 		
 		var userInitBalance = await getBalance(accounts[0]);
 		
-		await expectErrorMessageTest("User already registerd a proof of attention for this campaign", async () =>{
+		await expectErrorMessageTest("User already registered a proof of attention for this campaign", async () =>{
 			await addInstance.registerPoA(example2PoA.packageName,example2PoA.bid,example2PoA.timestamp,example2PoA.nonce,accounts[1],accounts[2],walletName);		
 		})
 		var newUserBalance = await getBalance(accounts[0]);
