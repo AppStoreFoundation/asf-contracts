@@ -21,6 +21,18 @@ async function getBalance(account) {
 	return JSON.parse(await appcInstance.balanceOf(account));
 }
 
+async function expectErrorMessageTest(errorMessage,callback){
+	var events = addInstance.allEvents();
+	
+	await callback();
+	var eventLog = await new Promise(
+			function(resolve, reject){
+	        events.watch(function(error, log){ events.stopWatching(); resolve(log); });
+	    });
+
+    assert.equal(eventLog.event, "Error", "Event must be an Error");
+    assert.equal(eventLog.args.message,errorMessage,"Event message should be: "+errorMessage);	
+}
 
 contract('Advertisement', function(accounts) {
   beforeEach('Setting Advertisement test...',async () => {
@@ -192,6 +204,19 @@ contract('Advertisement', function(accounts) {
 		expect(reverted).to.be.equal(true,"Revert expected");
 	});
 
+	it('should revert and emit an error event when a campaign is created without allowance', async function(){
+		var userInitBalance = await getBalance(accounts[0]);
+
+		await expectErrorMessageTest('Not enough allowance',async () => {
+			await addInstance.createCampaign.sendTransaction("org.telegram.messenger","UK,FR",[1,2],campaignPrice,campaignBudget,20,1922838059980);
+		})
+
+		var newUserBalance = await getBalance(accounts[0]);
+
+		expect(userInitBalance).to.be.equal(newUserBalance);
+
+	});
+
 	it('should emit an event when PoA is received', function () {
 		return addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce,accounts[1],accounts[2],walletName).then( instance => {
 			expect(instance.logs.length).to.be.equal(1);
@@ -207,15 +232,6 @@ contract('Advertisement', function(accounts) {
 		});
 
 		expect(addInstance.valid).to.be.false;
-	});
-
-	it('should revert registerPoA when nonce list and timestamp list have diferent lengths', async function () {
-		var reverted = false;
-		await addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce.splice(2,3),accounts[1],accounts[2],walletName).catch(
-			(err) => {
-				reverted = expectRevert.test(err.message);
-			});
-		expect(reverted).to.be.equal(true,"Revert expected");
 	});
 
 	it('should registerPoA and transfer the equivalent to one installation to the user registering a PoA', async function () {
@@ -245,32 +261,58 @@ contract('Advertisement', function(accounts) {
 		expect(oemInitBalance+(campaignPrice*oemShare)).to.be.equal((newOemBalance),"OEM balance not updated.");
 	});
 
-	it('should revert registerPoA when same user sends duplicate registerPoA', async function () {
-		var reverted = false;
-		await addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce,accounts[1],accounts[2],walletName);
-		await addInstance.registerPoA(example2PoA.packageName,example2PoA.bid,example2PoA.timestamp,example2PoA.nonce,accounts[1],accounts[2],walletName).catch(
-			(err) => {
-				reverted = expectRevert.test(err.message);
-			});
-		expect(reverted).to.be.equal(true,"Revert expected");
+	it('should revert registerPoA and emit an error event when the campaing is invalid', async () => {
+
+		await addInstance.cancelCampaign(examplePoA.bid);
+		await expectErrorMessageTest("Registering a Proof of attention to a invalid campaign", async () => {
+			await addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce,accounts[1],accounts[2],walletName);
+		})		
 	});
 
-	it('should revert registerPoA if timestamps are not spaced exactly 10 secounds from each other', async function () {
-		var reverted = false;
-		await addInstance.registerPoA(wrongTimestampPoA.packageName,wrongTimestampPoA.bid,wrongTimestampPoA.timestamp,wrongTimestampPoA.nonce,accounts[1],accounts[2],walletName).catch(
-			(err) => {
-				reverted = expectRevert.test(err.message);
-			});
-		expect(reverted).to.be.equal(true,"Revert expected");
+	it('should revert registerPoA and emit an error event when nonce list and timestamp list have diferent lengths', async function () {
+		var userInitBalance = await getBalance(accounts[0]);
+		
+		await expectErrorMessageTest("Nounce list and timestamp list must have same length", async () => {
+			await addInstance.registerPoA.sendTransaction(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce.splice(2,3),accounts[1],accounts[2],walletName);
+		})
+		var newUserBalance = await getBalance(accounts[0]);
+		expect(userInitBalance).to.be.equal(newUserBalance);
+
+	});
+
+	it('should revert registerPoA and emit an error event when same user sends duplicate registerPoA', async function () {
+		await addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce,accounts[1],accounts[2],walletName);
+		
+		var userInitBalance = await getBalance(accounts[0]);
+		
+		await expectErrorMessageTest("User already registered a proof of attention for this campaign", async () =>{
+			await addInstance.registerPoA(example2PoA.packageName,example2PoA.bid,example2PoA.timestamp,example2PoA.nonce,accounts[1],accounts[2],walletName);		
+		})
+		var newUserBalance = await getBalance(accounts[0]);
+		expect(userInitBalance).to.be.equal(newUserBalance);
+
+	});
+
+	it('should revert registerPoA and emit an error event if timestamps are not spaced exactly 10 secounds from each other', async function () {
+		var userInitBalance = await getBalance(accounts[0]);
+
+		await expectErrorMessageTest("Timestamps should be spaced exactly 10 secounds", async () => {
+			await addInstance.registerPoA(wrongTimestampPoA.packageName,wrongTimestampPoA.bid,wrongTimestampPoA.timestamp,wrongTimestampPoA.nonce,accounts[1],accounts[2],walletName);		
+		});
+		var newUserBalance = await getBalance(accounts[0]);
+		expect(userInitBalance).to.be.equal(newUserBalance);
+
 	})
 
-	it('should revert registerPoA if nounces do not generate correct leading zeros', async function () {
-		var reverted = false;
-		await addInstance.registerPoA(wrongNoncePoA.packageName,wrongNoncePoA.bid,wrongNoncePoA.timestamp,wrongNoncePoA.nonce,accounts[1],accounts[2],walletName).catch(
-			(err) => {
-				reverted = expectRevert.test(err.message);
-			});
-		expect(reverted).to.be.equal(true,"Revert expected");
+	it('should revert registerPoA and emit an error event if nounces do not generate correct leading zeros', async function () {
+		var userInitBalance = await getBalance(accounts[0]);
+		
+		await expectErrorMessageTest("Incorrect nounces for submited proof of attention", async () => {
+			await addInstance.registerPoA(wrongNoncePoA.packageName,wrongNoncePoA.bid,wrongNoncePoA.timestamp,wrongNoncePoA.nonce,accounts[1],accounts[2],walletName);
+		});
+		var newUserBalance = await getBalance(accounts[0]);
+		expect(userInitBalance).to.be.equal(newUserBalance);
+		
 	})
 
 });

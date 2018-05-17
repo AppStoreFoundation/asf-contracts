@@ -62,6 +62,8 @@ contract Advertisement {
 	event PoARegistered(bytes32 bidId, string packageName,
 						uint64[] timestampList,uint64[] nonceList,
 						string walletName);
+    event Error(string func, string message);
+
     /**
     * Constructor function
     *
@@ -103,7 +105,10 @@ contract Advertisement {
             newCampaign.endDate = endDate;
 
             //Transfers the budget to contract address
-            require(appc.allowance(msg.sender, address(this)) >= budget);
+            if(appc.allowance(msg.sender, address(this)) < budget){
+            	emit Error('createCampaign','Not enough allowance');
+            	return;
+            }
 
             appc.transferFrom(msg.sender, address(this), budget);
 
@@ -181,17 +186,42 @@ contract Advertisement {
         address appstore, address oem,
         string walletName) external {
 
-        require(isCampaignValid(bidId));
-        require(timestampList.length == nonces.length);
+        if(!isCampaignValid(bidId)){
+        	emit Error(
+        		'registerPoA',
+        		'Registering a Proof of attention to a invalid campaign');
+        	return;
+        }
+        if(timestampList.length != nonces.length){
+        	emit Error(
+        		'registerPoA',
+        		'Nounce list and timestamp list must have same length');
+        	return;
+        }
         //Expect ordered array arranged in ascending order
         for (uint i = 0; i < timestampList.length - 1; i++) {
             uint timestampDiff = (timestampList[i+1]-timestampList[i]);
-            require((timestampDiff / 1000) == 10);
+            if((timestampDiff / 1000) != 10){
+            	emit Error(
+            		'registerPoA',
+            		'Timestamps should be spaced exactly 10 secounds');
+            	return;
+            }
         }
 
-        verifyNonces(bytes(packageName), timestampList, nonces);
+        if(!areNoncesValid(bytes(packageName), timestampList, nonces)){
+        	emit Error(
+        		'registerPoA',
+        		'Incorrect nounces for submited proof of attention');
+        	return;
+        }
 
-        require(!userAttributions[msg.sender][bidId]);
+        if(userAttributions[msg.sender][bidId]){
+        	emit Error(
+        		'registerPoA',
+        		'User already registered a proof of attention for this campaign');
+        	return;
+        }
         //atribute
         userAttributions[msg.sender][bidId] = true;
 
@@ -332,7 +362,7 @@ contract Advertisement {
             }
         }
 
-	function verifyNonces (bytes packageName,uint64[] timestampList, uint64[] nonces) internal {
+	function areNoncesValid (bytes packageName,uint64[] timestampList, uint64[] nonces) internal returns(bool) {
 
 		for(uint i = 0; i < nonces.length; i++){
 			bytes8 timestamp = bytes8(timestampList[i]);
@@ -368,9 +398,12 @@ contract Advertisement {
 				mstore(leadingBytes,result)
 			}
 
-			require(comp == leadingBytes[0]);
+			if(comp != leadingBytes[0]){
+				return false;
+			}
 
 		}
+		return true;
 	}
 
 
