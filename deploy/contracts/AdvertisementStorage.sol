@@ -1,25 +1,12 @@
 pragma solidity ^0.4.19;
 
 
-/**
- * The Advertisement contract collects campaigns registered by developers
- * and executes payments to users using campaign registered applications
- * after proof of Attention.
- */
-contract AdvertisementStorage {
+library CampaignLibrary {
 
 	struct Filters {
 		string countries;
 		string packageName;
 		uint[] vercodes;
-	}
-
-	struct ValidationRules {
-		bool vercode;
-		bool ipValidation;
-		bool country;
-		uint constipDailyConversions;
-		uint walletDailyConversions;
 	}
 
 	struct Campaign {
@@ -34,129 +21,76 @@ contract AdvertisementStorage {
 		Filters filters;
 	}
 
-
-	ValidationRules public rules;
-	bytes32[] bidIdList;
-	mapping (bytes32 => Campaign) campaigns;
-	mapping (bytes => bytes32[]) campaignsByCountry;
-	AppCoins appc;
-	bytes2[] countryList;
-    address public owner;
-	mapping (address => mapping (bytes32 => bool)) userAttributions;
+}
 
 
-	// This notifies clients about a newly created campaign
-	event CampaignCreated(bytes32 bidId, string packageName,
-							string countries, uint[] vercodes,
-							uint price, uint budget,
-							uint startDate, uint endDate);
+/**
+ * The Advertisement contract collects campaigns registered by developers
+ * and executes payments to users using campaign registered applications
+ * after proof of Attention.
+ */
+contract AdvertisementStorage {
 
-	event PoARegistered(bytes32 bidId, string packageName,
-						uint64[] timestampList,uint64[] nonceList,
-						string walletName);
-    event Error(string func, string message);
+		struct ValidationRules {
+			bool vercode;
+			bool ipValidation;
+			bool country;
+			uint constipDailyConversions;
+			uint walletDailyConversions;
+		}
+
+		ValidationRules public rules;
+		bytes32[] bidIdList;
+		mapping (bytes32 => CampaignLibrary.Campaign) campaigns;
+		mapping (bytes => bytes32[]) campaignsByCountry;
+		bytes2[] countryList;
+	  address public owner;
+		mapping (address => mapping (bytes32 => bool)) userAttributions;
 
     /**
     * Constructor function
     *
     * Initializes contract with default validation rules
     */
-    function Advertisement (address addrAppc) public {
-        rules = ValidationRules(false, true, true, 2, 1);
+    function AdvertisementStorage () public {
         owner = msg.sender;
-        appc = AppCoins(addrAppc);
     }
 
+		function addCampaign(CampaignLibrary.Campaign campaign) internal {
 
+				//Add to bidIdList
+				bidIdList.push(campaign.bidId);
 
-    /**
-    * Creates a campaign for a certain package name with
-    * a defined price and budget and emits a CampaignCreated event
-    */
-    function createCampaign (
-        string packageName,
-        string countries,
-        uint[] vercodes,
-        uint price,
-        uint budget,
-        uint startDate,
-        uint endDate)
-        external {
+				//Add to campaign map
+				campaigns[campaign.bidId] = campaign;
 
-            require(budget >= price);
-            require(endDate >= startDate);
+				//Assuming each country is represented in ISO country codes
+				bytes memory country =  new bytes(2);
+				bytes memory countriesInBytes = bytes(campaign.filters.countries);
+				uint countryLength = 0;
 
+				for (uint i=0; i<countriesInBytes.length; i++){
 
-            Campaign memory newCampaign;
+					//if ',' is found, new country ahead
+					if(countriesInBytes[i]=="," || i == countriesInBytes.length-1){
 
-            newCampaign.filters.packageName = packageName;
-            newCampaign.filters.countries = countries;
-            newCampaign.filters.vercodes = vercodes;
-            newCampaign.price = price;
-            newCampaign.startDate = startDate;
-            newCampaign.endDate = endDate;
+						if(i == countriesInBytes.length-1){
+							country[countryLength]=countriesInBytes[i];
+						}
 
-            //Transfers the budget to contract address
-            if(appc.allowance(msg.sender, address(this)) < budget){
-            	emit Error('createCampaign','Not enough allowance');
-            	return;
-            }
+						addCampaignToCountryMap(campaign,country);
 
-            appc.transferFrom(msg.sender, address(this), budget);
-
-            newCampaign.budget = budget;
-            newCampaign.owner = msg.sender;
-            newCampaign.valid = true;
-            newCampaign.bidId = uintToBytes(bidIdList.length);
-            addCampaign(newCampaign);
-
-            CampaignCreated(
-                newCampaign.bidId,
-                packageName,
-                countries,
-                vercodes,
-                price,
-                budget,
-                startDate,
-                endDate
-            );
-
-        }
-
-	function addCampaign(Campaign campaign) internal {
-		//Add to bidIdList
-		bidIdList.push(campaign.bidId);
-		//Add to campaign map
-		campaigns[campaign.bidId] = campaign;
-
-		//Assuming each country is represented in ISO country codes
-		bytes memory country =  new bytes(2);
-		bytes memory countriesInBytes = bytes(campaign.filters.countries);
-		uint countryLength = 0;
-
-		for (uint i=0; i<countriesInBytes.length; i++){
-
-			//if ',' is found, new country ahead
-			if(countriesInBytes[i]=="," || i == countriesInBytes.length-1){
-
-				if(i == countriesInBytes.length-1){
-					country[countryLength]=countriesInBytes[i];
+						country =  new bytes(2);
+						countryLength = 0;
+					} else {
+						country[countryLength]=countriesInBytes[i];
+						countryLength++;
+					}
 				}
-
-				addCampaignToCountryMap(campaign,country);
-
-				country =  new bytes(2);
-				countryLength = 0;
-			} else {
-				country[countryLength]=countriesInBytes[i];
-				countryLength++;
-			}
 		}
 
-	}
 
-
-	function addCampaignToCountryMap (Campaign newCampaign,bytes country) internal {
+	function addCampaignToCountryMap (CampaignLibrary.Campaign newCampaign,bytes country) internal {
 		// Adds a country to countryList if the country is not in this list
 		if (campaignsByCountry[country].length == 0){
 			bytes2 countryCode;
