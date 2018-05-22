@@ -1,20 +1,12 @@
 pragma solidity ^0.4.19;
 
 
-contract AppCoins {
-    mapping (address => mapping (address => uint256)) public allowance;
-    function balanceOf (address _owner) public constant returns (uint256);
-    function transfer(address _to, uint256 _value) public returns (bool success);
-    function transferFrom(address _from, address _to, uint256 _value) public returns (uint);
-}
-
-
 /**
  * The Advertisement contract collects campaigns registered by developers
  * and executes payments to users using campaign registered applications
  * after proof of Attention.
  */
-contract Advertisement {
+contract AdvertisementStorage {
 
 	struct Filters {
 		string countries;
@@ -180,56 +172,6 @@ contract Advertisement {
 
 	}
 
-    function registerPoA (
-        string packageName, bytes32 bidId,
-        uint64[] timestampList, uint64[] nonces,
-        address appstore, address oem,
-        string walletName) external {
-
-        if(!isCampaignValid(bidId)){
-        	emit Error(
-        		'registerPoA',
-        		'Registering a Proof of attention to a invalid campaign');
-        	return;
-        }
-        if(timestampList.length != nonces.length){
-        	emit Error(
-        		'registerPoA',
-        		'Nounce list and timestamp list must have same length');
-        	return;
-        }
-        //Expect ordered array arranged in ascending order
-        for (uint i = 0; i < timestampList.length - 1; i++) {
-            uint timestampDiff = (timestampList[i+1]-timestampList[i]);
-            if((timestampDiff / 1000) != 10){
-            	emit Error(
-            		'registerPoA',
-            		'Timestamps should be spaced exactly 10 secounds');
-            	return;
-            }
-        }
-
-        if(!areNoncesValid(bytes(packageName), timestampList, nonces)){
-        	emit Error(
-        		'registerPoA',
-        		'Incorrect nounces for submited proof of attention');
-        	return;
-        }
-
-        if(userAttributions[msg.sender][bidId]){
-        	emit Error(
-        		'registerPoA',
-        		'User already registered a proof of attention for this campaign');
-        	return;
-        }
-        //atribute
-        userAttributions[msg.sender][bidId] = true;
-
-        payFromCampaign(bidId, appstore, oem);
-
-        PoARegistered(bidId, packageName, timestampList, nonces, walletName);
-    }
-
 	function cancelCampaign (bytes32 bidId) external {
 		address campaignOwner = getOwnerOfCampaign(bidId);
 
@@ -241,8 +183,6 @@ contract Advertisement {
 
 		setBudgetOfCampaign(bidId,0);
 		setCampaignValidity(bidId,false);
-
-
 
 	}
 
@@ -326,91 +266,14 @@ contract Advertisement {
 		return campaigns[bidId].owner;
 	}
 
-	function getBidIdList ()
-			public view returns(bytes32[]) {
+	function getBidIdList () public view returns(bytes32[]) {
 		return bidIdList;
 	}
 
-    function isCampaignValid(bytes32 bidId) public view returns(bool) {
-        Campaign storage campaign = campaigns[bidId];
-        uint nowInMilliseconds = now * 1000;
-        return campaign.valid && campaign.startDate < nowInMilliseconds && campaign.endDate > nowInMilliseconds;
-	}
-
-    function payFromCampaign (bytes32 bidId, address appstore, address oem)
-        internal {
-            uint devShare =  85;
-            uint appstoreShare = 10;
-            uint oemShare = 5;
-
-            //Search bid price
-            Campaign storage campaign = campaigns[bidId];
-
-            require(campaign.budget > 0);
-            require(campaign.budget >= campaign.price);
-
-            //transfer to user, appstore and oem
-            appc.transfer(msg.sender, division(campaign.price * devShare, 100));
-            appc.transfer(appstore, division(campaign.price * appstoreShare, 100));
-            appc.transfer(oem, division(campaign.price * oemShare, 100));
-
-            //subtract from campaign
-            campaign.budget -= campaign.price;
-
-            if (campaign.budget < campaign.price) {
-                setCampaignValidity(bidId, false);
-            }
-        }
-
-	function areNoncesValid (bytes packageName,uint64[] timestampList, uint64[] nonces) internal returns(bool) {
-
-		for(uint i = 0; i < nonces.length; i++){
-			bytes8 timestamp = bytes8(timestampList[i]);
-			bytes8 nonce = bytes8(nonces[i]);
-			bytes memory byteList = new bytes(packageName.length + timestamp.length);
-
-			for(uint j = 0; j < packageName.length;j++){
-				byteList[j] = packageName[j];
-			}
-
-			for(j = 0; j < timestamp.length; j++ ){
-				byteList[j + packageName.length] = timestamp[j];
-			}
-
-			bytes32 result = sha256(byteList);
-
-			bytes memory noncePlusHash = new bytes(result.length + nonce.length);
-
-			for(j = 0; j < nonce.length; j++){
-				noncePlusHash[j] = nonce[j];
-			}
-
-			for(j = 0; j < result.length; j++){
-				noncePlusHash[j + nonce.length] = result[j];
-			}
-
-			result = sha256(noncePlusHash);
-
-			bytes2[1] memory leadingBytes = [bytes2(0)];
-			bytes2 comp = 0x0000;
-
-			assembly{
-				mstore(leadingBytes,result)
-			}
-
-			if(comp != leadingBytes[0]){
-				return false;
-			}
-
-		}
-		return true;
-	}
-
-
 	function division(uint numerator, uint denominator) public constant returns (uint) {
-                uint _quotient = numerator / denominator;
-        return _quotient;
-    }
+		uint _quotient = numerator / denominator;
+		return _quotient;
+  }
 
 	function uintToBytes (uint256 i) constant returns(bytes32 b)  {
 		b = bytes32(i);
