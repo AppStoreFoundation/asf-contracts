@@ -1,6 +1,6 @@
 pragma solidity ^0.4.19;
 
-import  { CampaignLibrary } from "./lib/CampaignLibrary";
+import  { CampaignLibrary } from "./CampaignLibrary.sol";
 
 /**
  * The Advertisement contract collects campaigns registered by developers
@@ -11,12 +11,52 @@ contract AdvertisementStorage {
 
     mapping (bytes32 => CampaignLibrary.Campaign) campaigns;
 
-    function getCampaign (byte32 campaignId) public view returns (CampaignLibrary.Campaign) {
+    event CampaignCreated
+        (
+            bytes32 bidId,
+            uint price,
+            uint budget,
+            uint startDate,
+            uint endDate,
+            bool valid,
+            address  owner,
+            string ipValidator,
+            string packageName,
+            string countries,
+            uint[] vercodes
+    );
+
+    event CampaignUpdated
+        (
+            bytes32 bidId,
+            uint price,
+            uint budget,
+            uint startDate,
+            uint endDate,
+            bool valid,
+            address  owner,
+            string ipValidator,
+            string packageName,
+            string countries,
+            uint[] vercodes
+    );
+    function getCampaign (bytes32 campaignId)
+        internal
+        view
+        returns (CampaignLibrary.Campaign) {
+
         return campaigns[campaignId];
     }
 
 
-    function setCampaign (byte32 campaignId, CampaignLibrary.Campaign campaign) public view returns (CampaignLibrary.Campaign) {
-        return campaigns[campaignId] = campaign;
+    function setCampaign (CampaignLibrary.Campaign campaign) internal {
+
+        if (campaigns[campaign.bidId].bidId == 0x0) {
+            emit CampaignCreated(campaign.bidId, campaign.price, campaign.budget, campaign.startDate, campaign.endDate, campaign.valid, campaign.owner, campaign.ipValidator, campaign.filters.packageName, campaign.filters.countries, campaign.filters.vercodes);
+        } else {
+            emit CampaignUpdated(campaign.bidId, campaign.price, campaign.budget, campaign.startDate, campaign.endDate, campaign.valid, campaign.owner, campaign.ipValidator, campaign.filters.packageName, campaign.filters.countries, campaign.filters.vercodes);
+        }
+
+        campaigns[campaign.bidId] = campaign;
     }
 }

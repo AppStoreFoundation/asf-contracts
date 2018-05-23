@@ -15,10 +15,10 @@ library CampaignLibrary {
         uint budget;
         uint startDate;
         uint endDate;
-        string ipValidator;
         bool valid;
         address  owner;
         Filters filters;
+        string ipValidator;
     }
 
 }
