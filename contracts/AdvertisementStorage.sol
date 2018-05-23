@@ -2,11 +2,7 @@ pragma solidity ^0.4.19;
 
 import  { CampaignLibrary } from "./CampaignLibrary.sol";
 
-/**
- * The Advertisement contract collects campaigns registered by developers
- * and executes payments to users using campaign registered applications
- * after proof of Attention.
- */
+
 contract AdvertisementStorage {
 
     mapping (bytes32 => CampaignLibrary.Campaign) campaigns;

@@ -283,7 +283,7 @@ contract Advertisement {
     function getBudgetOfCampaign (bytes32 bidId) public view returns(uint) {
         CampaignLibrary.Campaign memory campaign = advertisementStorage.getCampaign(bidId);
 
-        returncampaign.budget;
+        return campaign.budget;
     }
 
     function getOwnerOfCampaign (bytes32 bidId)
