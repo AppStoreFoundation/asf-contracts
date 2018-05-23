@@ -40,7 +40,7 @@ contract AdvertisementStorage {
             string countries,
             uint[] vercodes
     );
-    function getCampaign (bytes32 campaignId)
+    function getCampaign(bytes32 campaignId)
         internal
         view
         returns (CampaignLibrary.Campaign) {
@@ -49,12 +49,36 @@ contract AdvertisementStorage {
     }
 
 
-    function setCampaign (CampaignLibrary.Campaign campaign) internal {
+    function setCampaign(CampaignLibrary.Campaign campaign) internal {
 
         if (campaigns[campaign.bidId].bidId == 0x0) {
-            emit CampaignCreated(campaign.bidId, campaign.price, campaign.budget, campaign.startDate, campaign.endDate, campaign.valid, campaign.owner, campaign.ipValidator, campaign.filters.packageName, campaign.filters.countries, campaign.filters.vercodes);
+            emit CampaignCreated(
+                campaign.bidId,
+                campaign.price,
+                campaign.budget,
+                campaign.startDate,
+                campaign.endDate,
+                campaign.valid,
+                campaign.owner,
+                campaign.ipValidator,
+                campaign.filters.packageName,
+                campaign.filters.countries,
+                campaign.filters.vercodes
+            );
         } else {
-            emit CampaignUpdated(campaign.bidId, campaign.price, campaign.budget, campaign.startDate, campaign.endDate, campaign.valid, campaign.owner, campaign.ipValidator, campaign.filters.packageName, campaign.filters.countries, campaign.filters.vercodes);
+            emit CampaignUpdated(
+                campaign.bidId,
+                campaign.price,
+                campaign.budget,
+                campaign.startDate,
+                campaign.endDate,
+                campaign.valid,
+                campaign.owner,
+                campaign.ipValidator,
+                campaign.filters.packageName,
+                campaign.filters.countries,
+                campaign.filters.vercodes
+            );
         }
 
         campaigns[campaign.bidId] = campaign;
