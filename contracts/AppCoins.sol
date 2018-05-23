@@ -6,7 +6,7 @@ pragma solidity ^0.4.21;
 contract ERC20Interface {
     function name() public view returns(bytes32);
     function symbol() public view returns(bytes32);
-    function balanceOf (address _owner) public constant returns(uint256 balance);
+    function balanceOf (address _owner) public view returns(uint256 balance);
     function transfer(address _to, uint256 _value) public returns (bool success);
     function transferFrom(address _from, address _to, uint256 _value) public returns (uint);
     event Transfer(address indexed _from, address indexed _to, uint256 _value);
@@ -53,7 +53,7 @@ contract AppCoins is ERC20Interface{
         return token_symbol;
     }
 
-    function balanceOf (address _owner) public constant returns(uint256 balance) {
+    function balanceOf (address _owner) public view returns(uint256 balance) {
         return balances[_owner];
     }
 
@@ -64,7 +64,7 @@ contract AppCoins is ERC20Interface{
         // Prevent transfer to 0x0 address. Use burn() instead
         require(_to != 0x0);
         // Check if the sender has enough
-         require(balances[_from] >= _value);
+        require(balances[_from] >= _value);
         // Check for overflows
         require(balances[_to] + _value > balances[_to]);
         // Save this for an assertion in the future
@@ -73,7 +73,7 @@ contract AppCoins is ERC20Interface{
         balances[_from] -= _value;
         // Add the same to the recipient
         balances[_to] += _value;
-        Transfer(_from, _to, _value);
+        emit Transfer(_from, _to, _value);
         // Asserts are used to use static analysis to find bugs in your code. They should never fail
         assert(balances[_from] + balances[_to] == previousBalances);
     }
@@ -90,12 +90,11 @@ contract AppCoins is ERC20Interface{
     //     _transfer(msg.sender, _to, _value);
     // }
     function transfer (address _to, uint256 _amount) public returns (bool success) {
-        if (balances[msg.sender] >= _amount
-                && _amount > 0
-                && balances[_to] + _amount > balances[_to]) {
+        if( balances[msg.sender] >= _amount && _amount > 0 && balances[_to] + _amount > balances[_to]) {
+            
             balances[msg.sender] -= _amount;
             balances[_to] += _amount;
-            Transfer(msg.sender, _to, _amount);
+            emit Transfer(msg.sender, _to, _amount);
             return true;
         } else {
             return false;
@@ -114,7 +113,7 @@ contract AppCoins is ERC20Interface{
     function transferFrom(address _from, address _to, uint256 _value) public returns (uint) {
         require(_value <= allowance[_from][msg.sender]);     // Check allowance
         allowance[_from][msg.sender] -= _value;
-         _transfer(_from, _to, _value);
+        _transfer(_from, _to, _value);
         return allowance[_from][msg.sender];
     }
 
@@ -143,7 +142,7 @@ contract AppCoins is ERC20Interface{
         require(balances[msg.sender] >= _value);   // Check if the sender has enough
         balances[msg.sender] -= _value;            // Subtract from the sender
         totalSupply -= _value;                      // Updates totalSupply
-        Burn(msg.sender, _value);
+        emit Burn(msg.sender, _value);
         return true;
     }
 
@@ -161,7 +160,7 @@ contract AppCoins is ERC20Interface{
         balances[_from] -= _value;                         // Subtract from the targeted balance
         allowance[_from][msg.sender] -= _value;             // Subtract from the sender's allowance
         totalSupply -= _value;                              // Update totalSupply
-        Burn(_from, _value);
+        emit Burn(_from, _value);
         return true;
     }
 }
