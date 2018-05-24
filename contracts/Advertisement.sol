@@ -105,7 +105,8 @@ contract Advertisement {
         bidIdList.push(campaign.bidId);
 
 		//Add to campaign map
-        advertisementStorage.setCampaign(campaign);
+        advertisementStorage.setCampaign(campaign.bidId, campaign.price, campaign.budget, campaign.startDate, campaign.endDate, campaign.valid, campaign.owner, campaign.ipValidator);
+        advertisementStorage.setCampaignFilters(campaign.bidId, campaign.filters.packageName, campaign.filters.countries, campaign.filters.vercodes);
 
 		//Assuming each country is represented in ISO country codes
         bytes memory country = new bytes(2);
@@ -209,23 +210,22 @@ contract Advertisement {
         setCampaignValidity(bidId, false);
     }
 
-    function setBudgetOfCampaign (bytes32 bidId, uint budget) internal {
-        CampaignLibrary.Campaign memory campaign = advertisementStorage.getCampaign(bidId);
-        campaign.budget = budget;
-        advertisementStorage.setCampaign(campaign);
+    function setBudgetOfCampaign (bytes32 campaignBidId, uint newBudget) internal {
+        var (bidId, price, budget, startDate, endDate, valid, owner, ipValidator,,,) = advertisementStorage.getCampaign(campaignBidId);
+        budget = newBudget;
+        advertisementStorage.setCampaign(bidId, price, budget, startDate, endDate, valid, owner, ipValidator);
     }
 
-    function setCampaignValidity (bytes32 bidId, bool isValid) internal {
-        CampaignLibrary.Campaign memory campaign = advertisementStorage.getCampaign(bidId);
-        campaign.valid = isValid;
-        advertisementStorage.setCampaign(campaign);
+    function setCampaignValidity (bytes32 campaignBidId, bool isValid) internal {
+        var (bidId, price, budget, startDate, endDate, valid, owner, ipValidator,,,) = advertisementStorage.getCampaign(campaignBidId);
+        valid = isValid;
+        advertisementStorage.setCampaign(bidId, price, budget, startDate, endDate, valid, owner, ipValidator);
     }
 
     function getCampaignValidity(bytes32 bidId) public view returns(bool){
-        CampaignLibrary.Campaign memory campaign = advertisementStorage.getCampaign(bidId);
-        return campaign.valid;
+        var (,,,,,valid,,,,,) = advertisementStorage.getCampaign(bidId);
+        return valid;
     }
-
 
     function getCountryList() public view returns(bytes2[]) {
         return countryList;
@@ -245,52 +245,48 @@ contract Advertisement {
     }
 
     function getPackageNameOfCampaign (bytes32 bidId) public view returns(string) {
-        CampaignLibrary.Campaign memory campaign = advertisementStorage.getCampaign(bidId);
-
-        return campaign.filters.packageName;
+        var (,,,,,,,,packageName,,) = advertisementStorage.getCampaign(bidId);
+        return packageName;
     }
 
     function getCountriesOfCampaign (bytes32 bidId) public view returns(string){
-        CampaignLibrary.Campaign memory campaign = advertisementStorage.getCampaign(bidId);
-
-        return campaign.filters.countries;
+        var (,,,,,,,,,countries,) = advertisementStorage.getCampaign(bidId);
+        return countries;
     }
 
     function getVercodesOfCampaign (bytes32 bidId) public view returns(uint[]) {
-        CampaignLibrary.Campaign memory campaign = advertisementStorage.getCampaign(bidId);
-
-        return campaign.filters.vercodes;
+        var (,,,,,,,,,,vercodes) = advertisementStorage.getCampaign(bidId);
+        return vercodes;
     }
 
     function getPriceOfCampaign (bytes32 bidId) public view returns(uint) {
-        CampaignLibrary.Campaign memory campaign = advertisementStorage.getCampaign(bidId);
+        var (,price,,,,,,,,,) = advertisementStorage.getCampaign(bidId);
 
-        return campaign.price;
+        return price;
     }
 
     function getStartDateOfCampaign (bytes32 bidId) public view returns(uint) {
-        CampaignLibrary.Campaign memory campaign = advertisementStorage.getCampaign(bidId);
+        var (,,,startDate,,,,,,,) = advertisementStorage.getCampaign(bidId);
 
-        return campaign.startDate;
+        return startDate;
     }
 
     function getEndDateOfCampaign (bytes32 bidId) public view returns(uint) {
-        CampaignLibrary.Campaign memory campaign = advertisementStorage.getCampaign(bidId);
+        var (,,,,endDate,,,,,,) = advertisementStorage.getCampaign(bidId);
 
-        return campaign.endDate;
+        return endDate;
     }
 
     function getBudgetOfCampaign (bytes32 bidId) public view returns(uint) {
-        CampaignLibrary.Campaign memory campaign = advertisementStorage.getCampaign(bidId);
+        var (,,budget,,,,,,,,) = advertisementStorage.getCampaign(bidId);
 
-        return campaign.budget;
+        return budget;
     }
 
-    function getOwnerOfCampaign (bytes32 bidId)
-		public view returns(address) {
-        CampaignLibrary.Campaign memory campaign = advertisementStorage.getCampaign(bidId);
+    function getOwnerOfCampaign (bytes32 bidId) public view returns(address) {
+        var (,,,,,,owner,,,,) = advertisementStorage.getCampaign(bidId);
 
-        return campaign.owner;
+        return owner;
     }
 
     function getBidIdList() public view returns(bytes32[]) {
@@ -298,31 +294,31 @@ contract Advertisement {
     }
 
     function isCampaignValid(bytes32 bidId) public view returns(bool) {
-        CampaignLibrary.Campaign storage campaign = advertisementStorage.getCampaign(bidId);
+        var (,,,startDate, endDate, valid,,,,,) = advertisementStorage.getCampaign(bidId);
         uint nowInMilliseconds = now * 1000;
-        return campaign.valid && campaign.startDate < nowInMilliseconds && campaign.endDate > nowInMilliseconds;
+        return valid && startDate < nowInMilliseconds && endDate > nowInMilliseconds;
     }
 
-    function payFromCampaign (bytes32 bidId, address appstore, address oem) internal {
+    function payFromCampaign (bytes32 campaignBidId, address appstore, address oem) internal {
         uint devShare = 85;
         uint appstoreShare = 10;
         uint oemShare = 5;
 
         //Search bid price
-        CampaignLibrary.Campaign storage campaign = advertisementStorage.getCampaign(bidId);
+        var (bidId, price, budget,,,,,,,,) = advertisementStorage.getCampaign(campaignBidId);
 
-        require(campaign.budget > 0);
-        require(campaign.budget >= campaign.price);
+        require(budget > 0);
+        require(budget >= price);
 
         //transfer to user, appstore and oem
-        appc.transfer(msg.sender, division(campaign.price * devShare, 100));
-        appc.transfer(appstore, division(campaign.price * appstoreShare, 100));
-        appc.transfer(oem, division(campaign.price * oemShare, 100));
+        appc.transfer(msg.sender, division(price * devShare, 100));
+        appc.transfer(appstore, division(price * appstoreShare, 100));
+        appc.transfer(oem, division(price * oemShare, 100));
 
         //subtract from campaign
-        campaign.budget -= campaign.price;
+        budget -= price;
 
-        if (campaign.budget < campaign.price) {
+        if (budget < price) {
             setCampaignValidity(bidId, false);
         }
     }

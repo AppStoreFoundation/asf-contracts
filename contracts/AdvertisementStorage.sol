@@ -1,6 +1,6 @@
 pragma solidity ^0.4.19;
 
-import  { CampaignLibrary } from "./CampaignLibrary.sol";
+import  { CampaignLibrary } from "./lib/CampaignLibrary.sol";
 
 
 contract AdvertisementStorage {
@@ -36,16 +36,91 @@ contract AdvertisementStorage {
             string countries,
             uint[] vercodes
     );
-    function getCampaign(bytes32 campaignId)
-        internal
-        view
-        returns (CampaignLibrary.Campaign) {
 
-        return campaigns[campaignId];
+    function getCampaign(bytes32 campaignId)
+        public
+        view
+        returns (
+                bytes32,
+                uint,
+                uint,
+                uint,
+                uint,
+                bool,
+                address,
+                string,
+                string,
+                string,
+                uint[]
+            ) {
+
+        CampaignLibrary.Campaign storage campaign = campaigns[campaignId];
+
+        return (
+            campaign.bidId,
+            campaign.price,
+            campaign.budget,
+            campaign.startDate,
+            campaign.endDate,
+            campaign.valid,
+            campaign.owner,
+            campaign.ipValidator,
+            campaign.filters.packageName,
+            campaign.filters.countries,
+            campaign.filters.vercodes
+        );
     }
 
 
-    function setCampaign(CampaignLibrary.Campaign campaign) internal {
+    function setCampaign (
+        bytes32 bidId,
+        uint price,
+        uint budget,
+        uint startDate,
+        uint endDate,
+        bool valid,
+        address owner,
+        string ipValidator
+    ) public {
+
+        CampaignLibrary.Campaign memory campaign = campaigns[campaign.bidId];
+
+        campaign = CampaignLibrary.Campaign({
+            bidId: bidId,
+            price: price,
+            budget: budget,
+            startDate: startDate,
+            endDate: endDate,
+            valid: valid,
+            owner: owner,
+            ipValidator: ipValidator,
+            filters: campaign.filters
+        });
+
+        emitEvent(campaigns[campaign.bidId]);
+
+        campaigns[campaign.bidId] = campaign;
+    }
+
+    function setCampaignFilters (
+        bytes32 bidId,
+        string packageName,
+        string countries,
+        uint[] vercodes
+    ) public {
+
+        CampaignLibrary.Campaign memory campaign = campaigns[bidId];
+
+        campaign.filters.packageName = packageName;
+        campaign.filters.countries = countries;
+        campaign.filters.vercodes = vercodes;
+
+        emitEvent(campaigns[campaign.bidId]);
+
+        campaigns[campaign.bidId] = campaign;
+    }
+
+    function emitEvent(CampaignLibrary.Campaign campaign) private {
 
         if (campaigns[campaign.bidId].bidId == 0x0) {
             emit CampaignCreated(
@@ -76,7 +151,5 @@ contract AdvertisementStorage {
                 campaign.filters.vercodes
             );
         }
-
-        campaigns[campaign.bidId] = campaign;
     }
 }
