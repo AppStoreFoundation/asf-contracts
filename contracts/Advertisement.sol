@@ -105,8 +105,22 @@ contract Advertisement {
         bidIdList.push(campaign.bidId);
 
 		//Add to campaign map
-        advertisementStorage.setCampaign(campaign.bidId, campaign.price, campaign.budget, campaign.startDate, campaign.endDate, campaign.valid, campaign.owner, campaign.ipValidator);
-        advertisementStorage.setCampaignFilters(campaign.bidId, campaign.filters.packageName, campaign.filters.countries, campaign.filters.vercodes);
+        advertisementStorage.setCampaign(
+            campaign.bidId,
+            campaign.price,
+            campaign.budget,
+            campaign.startDate,
+            campaign.endDate,
+            campaign.valid,
+            campaign.owner,
+            campaign.ipValidator
+        );
+        advertisementStorage.setCampaignFilters(
+            campaign.bidId,
+            campaign.filters.packageName,
+            campaign.filters.countries,
+            campaign.filters.vercodes
+        );
 
 		//Assuming each country is represented in ISO country codes
         bytes memory country = new bytes(2);
