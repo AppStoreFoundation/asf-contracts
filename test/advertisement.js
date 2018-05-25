@@ -254,7 +254,6 @@ contract('Advertisement', function(accounts) {
 
 		expect(campaignBudget-campaignPrice).to.be.equal(newCampaignBudget,"Campaign budget not updated.");
 		expect(contractBalance-campaignPrice).to.be.equal(newContractBalance,"Contract balance not updated.");
-
 		var error = new Number("1.99208860077274e-9");
 		var expectedUserBalance = userInitBalance+(campaignPrice*devShare)
 		expect(newUserBalance).to.be.within(expectedUserBalance - (expectedUserBalance*error), expectedUserBalance + (expectedUserBalance*error),"User balance not updated.");

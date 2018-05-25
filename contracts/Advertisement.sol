@@ -220,25 +220,12 @@ contract Advertisement {
 
         appc.transfer(campaignOwner, budget);
 
-        setBudgetOfCampaign(bidId, 0);
-        setCampaignValidity(bidId, false);
-    }
-
-    function setBudgetOfCampaign (bytes32 campaignBidId, uint newBudget) internal {
-        var (bidId, price, budget, startDate, endDate, valid, owner, ipValidator,,,) = advertisementStorage.getCampaign(campaignBidId);
-        budget = newBudget;
-        advertisementStorage.setCampaign(bidId, price, budget, startDate, endDate, valid, owner, ipValidator);
-    }
-
-    function setCampaignValidity (bytes32 campaignBidId, bool isValid) internal {
-        var (bidId, price, budget, startDate, endDate, valid, owner, ipValidator,,,) = advertisementStorage.getCampaign(campaignBidId);
-        valid = isValid;
-        advertisementStorage.setCampaign(bidId, price, budget, startDate, endDate, valid, owner, ipValidator);
+        advertisementStorage.setCampaignBudgetById(bidId, 0);
+        advertisementStorage.setCampaignValidById(bidId, false);
     }
 
     function getCampaignValidity(bytes32 bidId) public view returns(bool){
-        var (,,,,,valid,,,,,) = advertisementStorage.getCampaign(bidId);
-        return valid;
+        return advertisementStorage.getCampaignValidById(bidId);
     }
 
     function getCountryList() public view returns(bytes2[]) {
@@ -259,48 +246,35 @@ contract Advertisement {
     }
 
     function getPackageNameOfCampaign (bytes32 bidId) public view returns(string) {
-        var (,,,,,,,,packageName,,) = advertisementStorage.getCampaign(bidId);
-        return packageName;
+        return advertisementStorage.getCampaignPackageNameById(bidId);
     }
 
     function getCountriesOfCampaign (bytes32 bidId) public view returns(string){
-        var (,,,,,,,,,countries,) = advertisementStorage.getCampaign(bidId);
-        return countries;
+        return advertisementStorage.getCampaignCountriesById(bidId);
     }
 
     function getVercodesOfCampaign (bytes32 bidId) public view returns(uint[]) {
-        var (,,,,,,,,,,vercodes) = advertisementStorage.getCampaign(bidId);
-        return vercodes;
+        return advertisementStorage.getCampaignVercodesById(bidId);
     }
 
     function getPriceOfCampaign (bytes32 bidId) public view returns(uint) {
-        var (,price,,,,,,,,,) = advertisementStorage.getCampaign(bidId);
-
-        return price;
+        return advertisementStorage.getCampaignPriceById(bidId);
     }
 
     function getStartDateOfCampaign (bytes32 bidId) public view returns(uint) {
-        var (,,,startDate,,,,,,,) = advertisementStorage.getCampaign(bidId);
-
-        return startDate;
+        return advertisementStorage.getCampaignStartDateById(bidId);
     }
 
     function getEndDateOfCampaign (bytes32 bidId) public view returns(uint) {
-        var (,,,,endDate,,,,,,) = advertisementStorage.getCampaign(bidId);
-
-        return endDate;
+        return advertisementStorage.getCampaignEndDateById(bidId);
     }
 
     function getBudgetOfCampaign (bytes32 bidId) public view returns(uint) {
-        var (,,budget,,,,,,,,) = advertisementStorage.getCampaign(bidId);
-
-        return budget;
+        return advertisementStorage.getCampaignBudgetById(bidId);
     }
 
     function getOwnerOfCampaign (bytes32 bidId) public view returns(address) {
-        var (,,,,,,owner,,,,) = advertisementStorage.getCampaign(bidId);
-
-        return owner;
+        return advertisementStorage.getCampaignOwnerById(bidId);
     }
 
     function getBidIdList() public view returns(bytes32[]) {
@@ -330,10 +304,13 @@ contract Advertisement {
         appc.transfer(oem, division(price * oemShare, 100));
 
         //subtract from campaign
-        budget -= price;
+        uint newBudget = budget - price;
 
-        if (budget < price) {
-            setCampaignValidity(bidId, false);
+        advertisementStorage.setCampaignBudgetById(bidId, newBudget);
+
+
+        if (newBudget < price) {
+            advertisementStorage.setCampaignValidById(bidId, false);
         }
     }
 
