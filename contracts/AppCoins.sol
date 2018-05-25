@@ -12,6 +12,7 @@ contract ERC20Interface {
     event Transfer(address indexed _from, address indexed _to, uint256 _value);
 }
 
+
 contract AppCoins is ERC20Interface{
     // Public variables of the token
     address public owner;
@@ -91,7 +92,7 @@ contract AppCoins is ERC20Interface{
     // }
     function transfer (address _to, uint256 _amount) public returns (bool success) {
         if( balances[msg.sender] >= _amount && _amount > 0 && balances[_to] + _amount > balances[_to]) {
-            
+
             balances[msg.sender] -= _amount;
             balances[_to] += _amount;
             emit Transfer(msg.sender, _to, _amount);

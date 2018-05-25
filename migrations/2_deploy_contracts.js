@@ -2,6 +2,7 @@ var AppCoins = artifacts.require("./AppCoins.sol");
 var AppCoinsBClass = artifacts.require("./AppCoinsBClass.sol");
 var AppCoinsIAB = artifacts.require("./AppCoinsIAB.sol");
 var AddressProxy = artifacts.require("./AddressProxy.sol");
+var AdvertisementStorage = artifacts.require("./AdvertisementStorage.sol");
 var Advertisement = artifacts.require("./Advertisement.sol");
 
 require('dotenv').config();
@@ -14,7 +15,10 @@ module.exports = function(deployer, network) {
                 return deployer.deploy(AppCoinsIAB);
             })
             .then(function() {
-                return deployer.deploy(Advertisement, AppCoins.address);
+                return  deployer.deploy(AdvertisementStorage);
+            })
+            .then(function() {
+                return deployer.deploy(Advertisement, AppCoins.address, AdvertisementStorage.address);
             })
             .then(function() {
                 return deployer.deploy(AppCoinsBClass, AppCoins.address);
