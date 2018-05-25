@@ -1,7 +1,6 @@
 var AppCoins = artifacts.require("./AppCoins.sol");
 var AppCoinsBClass = artifacts.require("./AppCoinsBClass.sol");
 var AppCoinsIAB = artifacts.require("./AppCoinsIAB.sol");
-var CampaignLibrary = artifacts.require("./lib/CampaignLibrary.sol");
 var AddressProxy = artifacts.require("./AddressProxy.sol");
 var AdvertisementStorage = artifacts.require("./AdvertisementStorage.sol");
 var Advertisement = artifacts.require("./Advertisement.sol");
@@ -16,14 +15,9 @@ module.exports = function(deployer, network) {
                 return deployer.deploy(AppCoinsIAB);
             })
             .then(function() {
-                return  deployer.deploy(CampaignLibrary);
-            })
-            .then(function() {
-                deployer.link(CampaignLibrary, AdvertisementStorage);
                 return  deployer.deploy(AdvertisementStorage);
             })
             .then(function() {
-                deployer.link(CampaignLibrary, Advertisement);
                 return deployer.deploy(Advertisement, AppCoins.address, AdvertisementStorage.address);
             })
             .then(function() {
