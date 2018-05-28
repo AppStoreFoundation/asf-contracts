@@ -51,9 +51,9 @@ module.exports = function(deployer, network) {
                     return deployer.deploy(Advertisement, AppCoinsAddress, AdvertisementStorage.address);
                 })
             } else {
-                deployer.deploy(Advertisement, AppCoinsAddress, AdvertisementStorage.address);
+                deployer.deploy(Advertisement, AppCoinsAddress, AdvertisementStorageAddress);
             }
-            
+
             break;
 
         case 'main':
