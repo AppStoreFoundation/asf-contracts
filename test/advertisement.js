@@ -92,8 +92,9 @@ contract('Advertisement', function(accounts) {
 
         appcInstance = await AppCoins.new();
         AdvertisementStorageInstance = await AdvertisementStorage.new();
-
 		addInstance = await	Advertisement.new(appcInstance.address, AdvertisementStorageInstance.address);
+
+        await AdvertisementStorageInstance.setAllowedAddresses(addInstance.address, true);
 
 		campaignPrice = 50000000000000000;
 		campaignBudget = 1000000000000000000;

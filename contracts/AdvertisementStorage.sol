@@ -6,6 +6,18 @@ import  { CampaignLibrary } from "./lib/CampaignLibrary.sol";
 contract AdvertisementStorage {
 
     mapping (bytes32 => CampaignLibrary.Campaign) campaigns;
+    mapping (address => bool) allowedAddresses;
+    address public owner;
+
+    modifier onlyOwner() {
+        require(msg.sender == owner);
+        _;
+    }
+
+    modifier onlyAllowedAddress() {
+        require(allowedAddresses[msg.sender] == true);
+        _;
+    }
 
     event CampaignCreated
         (
@@ -37,22 +49,32 @@ contract AdvertisementStorage {
             uint[] vercodes
     );
 
+    function AdvertisementStorage() public {
+        owner = msg.sender;
+        allowedAddresses[msg.sender] = true;
+    }
+
+    function setAllowedAddresses(address newAddress, bool isAllowed) public onlyOwner {
+        allowedAddresses[newAddress] = isAllowed;
+    }
+
+
     function getCampaign(bytes32 campaignId)
         public
         view
         returns (
-                bytes32,
-                uint,
-                uint,
-                uint,
-                uint,
-                bool,
-                address,
-                string,
-                string,
-                string,
-                uint[]
-            ) {
+            bytes32,
+            uint,
+            uint,
+            uint,
+            uint,
+            bool,
+            address,
+            string,
+            string,
+            string,
+            uint[]
+        ) {
 
         CampaignLibrary.Campaign storage campaign = campaigns[campaignId];
 
@@ -81,7 +103,9 @@ contract AdvertisementStorage {
         bool valid,
         address owner,
         string ipValidator
-    ) public {
+    )
+    public
+    onlyAllowedAddress {
 
         CampaignLibrary.Campaign memory campaign = campaigns[campaign.bidId];
 
@@ -107,7 +131,9 @@ contract AdvertisementStorage {
         string packageName,
         string countries,
         uint[] vercodes
-    ) public {
+    )
+    public
+    onlyAllowedAddress {
 
         CampaignLibrary.Campaign memory campaign = campaigns[bidId];
 
@@ -129,8 +155,10 @@ contract AdvertisementStorage {
 
     function setCampaignPriceById(bytes32 bidId, uint price)
         public
+        onlyAllowedAddress
         {
         campaigns[bidId].price = price;
+        emitEvent(campaigns[bidId]);
     }
 
     function getCampaignBudgetById(bytes32 bidId)
@@ -142,8 +170,10 @@ contract AdvertisementStorage {
 
     function setCampaignBudgetById(bytes32 bidId, uint newBudget)
         public
+        onlyAllowedAddress
         {
         campaigns[bidId].budget = newBudget;
+        emitEvent(campaigns[bidId]);
     }
 
     function getCampaignStartDateById(bytes32 bidId)
@@ -155,8 +185,10 @@ contract AdvertisementStorage {
 
     function setCampaignStartDateById(bytes32 bidId, uint newStartDate)
         public
+        onlyAllowedAddress
         {
         campaigns[bidId].startDate = newStartDate;
+        emitEvent(campaigns[bidId]);
     }
 
     function getCampaignEndDateById(bytes32 bidId)
@@ -168,8 +200,10 @@ contract AdvertisementStorage {
 
     function setCampaignEndDateById(bytes32 bidId, uint newEndDate)
         public
+        onlyAllowedAddress
         {
         campaigns[bidId].endDate = newEndDate;
+        emitEvent(campaigns[bidId]);
     }
 
     function getCampaignValidById(bytes32 bidId)
@@ -181,8 +215,10 @@ contract AdvertisementStorage {
 
     function setCampaignValidById(bytes32 bidId, bool isValid)
         public
+        onlyAllowedAddress
         {
         campaigns[bidId].valid = isValid;
+        emitEvent(campaigns[bidId]);
     }
 
     function getCampaignOwnerById(bytes32 bidId)
@@ -194,8 +230,10 @@ contract AdvertisementStorage {
 
     function setCampaignOwnerById(bytes32 bidId, address newOwner)
         public
+        onlyAllowedAddress
         {
         campaigns[bidId].owner = newOwner;
+        emitEvent(campaigns[bidId]);
     }
 
     function getCampaignCountriesById(bytes32 bidId)
@@ -207,8 +245,10 @@ contract AdvertisementStorage {
 
     function setCampaignCountriesById(bytes32 bidId, string newCountries)
         public
+        onlyAllowedAddress
         {
         campaigns[bidId].filters.countries = newCountries;
+        emitEvent(campaigns[bidId]);
     }
 
     function getCampaignPackageNameById(bytes32 bidId)
@@ -220,8 +260,10 @@ contract AdvertisementStorage {
 
     function setCampaignPackageNameById(bytes32 bidId, string newPackageName)
         public
+        onlyAllowedAddress
         {
         campaigns[bidId].filters.packageName = newPackageName;
+        emitEvent(campaigns[bidId]);
     }
 
     function getCampaignVercodesById(bytes32 bidId)
@@ -233,8 +275,10 @@ contract AdvertisementStorage {
 
     function setCampaignVercodesById(bytes32 bidId, uint[] newVercodes)
         public
+        onlyAllowedAddress
         {
         campaigns[bidId].filters.vercodes = newVercodes;
+        emitEvent(campaigns[bidId]);
     }
 
     function getCampaignIpValidatorById(bytes32 bidId)
@@ -246,8 +290,10 @@ contract AdvertisementStorage {
 
     function setCampaignIpValidatorById(bytes32 bidId, string newIpValidator)
         public
+        onlyAllowedAddress
         {
         campaigns[bidId].ipValidator = newIpValidator;
+        emitEvent(campaigns[bidId]);
     }
 
     function emitEvent(CampaignLibrary.Campaign campaign) private {
