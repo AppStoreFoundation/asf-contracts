@@ -15,7 +15,7 @@ contract AdvertisementStorage {
     }
 
     modifier onlyAllowedAddress() {
-        require(allowedAddresses[msg.sender] == true);
+        require(allowedAddresses[msg.sender]);
         _;
     }
 
