@@ -3,6 +3,7 @@ var AdvertisementStorage = artifacts.require("./AdvertisementStorage.sol");
 var AppCoins = artifacts.require("./AppCoins.sol");
 var chai = require('chai');
 var web3 = require('web3');
+var TestUtils = require('./TestUtils.js');
 var expect = chai.expect;
 var chaiAsPromissed = require('chai-as-promised');
 chai.use(chaiAsPromissed);
@@ -17,23 +18,6 @@ var expectRevert = RegExp('revert');
 
 var campaignPrice;
 var campaignBudget;
-
-async function getBalance(account) {
-	return JSON.parse(await appcInstance.balanceOf(account));
-}
-
-async function expectErrorMessageTest(errorMessage,callback){
-	var events = addInstance.allEvents();
-
-	await callback();
-	var eventLog = await new Promise(
-			function(resolve, reject){
-	        events.watch(function(error, log){ events.stopWatching(); resolve(log); });
-	    });
-
-    assert.equal(eventLog.event, "Error", "Event must be an Error");
-    assert.equal(eventLog.args.message,errorMessage,"Event message should be: "+errorMessage);
-}
 
 contract('Advertisement', function(accounts) {
   beforeEach('Setting Advertisement test...',async () => {
@@ -96,6 +80,9 @@ contract('Advertisement', function(accounts) {
 
         await AdvertisementStorageInstance.setAllowedAddresses(addInstance.address, true);
 
+		TestUtils.setAppCoinsInstance(appcInstance);
+		TestUtils.setContractInstance(addInstance);
+
 		campaignPrice = 50000000000000000;
 		campaignBudget = 1000000000000000000;
 
@@ -157,14 +144,14 @@ contract('Advertisement', function(accounts) {
 	it('should cancel a campaign as contract owner', async function () {
 		var bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000001");
 
-		var userInitBalance = await getBalance(accounts[1]);
-		var contractBalance = await getBalance(addInstance.address);
+		var userInitBalance = await TestUtils.getBalance(accounts[1]);
+		var contractBalance = await TestUtils.getBalance(addInstance.address);
 		var campaignBalance = JSON.parse(await addInstance.getBudgetOfCampaign(bid));
 
 		await addInstance.cancelCampaign(bid);
 
-		var newUserBalance = await getBalance(accounts[1]);
-		var newContractBalance = await getBalance(addInstance.address);
+		var newUserBalance = await TestUtils.getBalance(accounts[1]);
+		var newContractBalance = await TestUtils.getBalance(addInstance.address);
 		var newCampaignBalance = JSON.parse(await addInstance.getBudgetOfCampaign(bid));
 		var validity =  await addInstance.getCampaignValidity(bid);
 
@@ -179,14 +166,14 @@ contract('Advertisement', function(accounts) {
 	it('should cancel a campaign as campaign owner', async function () {
 		var bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000001");
 
-		var userInitBalance = await getBalance(accounts[1]);
-		var contractBalance = await getBalance(addInstance.address);
+		var userInitBalance = await TestUtils.getBalance(accounts[1]);
+		var contractBalance = await TestUtils.getBalance(addInstance.address);
 		var campaignBalance = JSON.parse(await addInstance.getBudgetOfCampaign(bid));
 
 		await addInstance.cancelCampaign(bid, { from : accounts[1]});
 
-		var newUserBalance = await getBalance(accounts[1]);
-		var newContractBalance = await getBalance(addInstance.address);
+		var newUserBalance = await TestUtils.getBalance(accounts[1]);
+		var newContractBalance = await TestUtils.getBalance(addInstance.address);
 		var newCampaignBalance = JSON.parse(await addInstance.getBudgetOfCampaign(bid));
 		var validity =  await addInstance.getCampaignValidity(bid);
 
@@ -208,13 +195,13 @@ contract('Advertisement', function(accounts) {
 	});
 
 	it('should revert and emit an error event when a campaign is created without allowance', async function(){
-		var userInitBalance = await getBalance(accounts[0]);
+		var userInitBalance = await TestUtils.getBalance(accounts[0]);
 
-		await expectErrorMessageTest('Not enough allowance',async () => {
+		await TestUtils.expectErrorMessageTest('Not enough allowance',async () => {
 			await addInstance.createCampaign.sendTransaction("org.telegram.messenger","UK,FR",[1,2],campaignPrice,campaignBudget,20,1922838059980);
 		})
 
-		var newUserBalance = await getBalance(accounts[0]);
+		var newUserBalance = await TestUtils.getBalance(accounts[0]);
 
 		expect(userInitBalance).to.be.equal(newUserBalance);
 
@@ -239,19 +226,19 @@ contract('Advertisement', function(accounts) {
 
 	it('should registerPoA and transfer the equivalent to one installation to the user registering a PoA', async function () {
 
-		var userInitBalance = await getBalance(accounts[0]);
-		var appSInitBalance = await getBalance(accounts[1]);
-		var oemInitBalance = await getBalance(accounts[2]);
+		var userInitBalance = await TestUtils.getBalance(accounts[0]);
+		var appSInitBalance = await TestUtils.getBalance(accounts[1]);
+		var oemInitBalance = await TestUtils.getBalance(accounts[2]);
 		var campaignBudget = JSON.parse(await addInstance.getBudgetOfCampaign(examplePoA.bid));
-		var contractBalance = JSON.parse(await appcInstance.balanceOf(addInstance.address));
+		var contractBalance = await TestUtils.getBalance(addInstance.address);
 
 		await addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce,accounts[1],accounts[2],walletName);
 
-		var newUserBalance = await getBalance(accounts[0]);
-		var newAppStoreBalance = await getBalance(accounts[1]);
-		var newOemBalance = await getBalance(accounts[2]);
+		var newUserBalance = await TestUtils.getBalance(accounts[0]);
+		var newAppStoreBalance = await TestUtils.getBalance(accounts[1]);
+		var newOemBalance = await TestUtils.getBalance(accounts[2]);
 		var newCampaignBudget = JSON.parse(await addInstance.getBudgetOfCampaign(examplePoA.bid));
-		var newContractBalance = JSON.parse(await appcInstance.balanceOf(addInstance.address));
+		var newContractBalance = await TestUtils.getBalance(addInstance.address);
 
 		expect(campaignBudget-campaignPrice).to.be.equal(newCampaignBudget,"Campaign budget not updated.");
 		expect(contractBalance-campaignPrice).to.be.equal(newContractBalance,"Contract balance not updated.");
@@ -266,18 +253,18 @@ contract('Advertisement', function(accounts) {
 	it('should revert registerPoA and emit an error event when the campaing is invalid', async () => {
 
 		await addInstance.cancelCampaign(examplePoA.bid);
-		await expectErrorMessageTest("Registering a Proof of attention to a invalid campaign", async () => {
+		await TestUtils.expectErrorMessageTest("Registering a Proof of attention to a invalid campaign", async () => {
 			await addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce,accounts[1],accounts[2],walletName);
 		})
 	});
 
 	it('should revert registerPoA and emit an error event when nonce list and timestamp list have diferent lengths', async function () {
-		var userInitBalance = await getBalance(accounts[0]);
+		var userInitBalance = await TestUtils.getBalance(accounts[0]);
 
-		await expectErrorMessageTest("Nounce list and timestamp list must have same length", async () => {
+		await TestUtils.expectErrorMessageTest("Nounce list and timestamp list must have same length", async () => {
 			await addInstance.registerPoA.sendTransaction(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce.splice(2,3),accounts[1],accounts[2],walletName);
 		})
-		var newUserBalance = await getBalance(accounts[0]);
+		var newUserBalance = await TestUtils.getBalance(accounts[0]);
 		expect(userInitBalance).to.be.equal(newUserBalance);
 
 	});
@@ -285,34 +272,34 @@ contract('Advertisement', function(accounts) {
 	it('should revert registerPoA and emit an error event when same user sends duplicate registerPoA', async function () {
 		await addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce,accounts[1],accounts[2],walletName);
 
-		var userInitBalance = await getBalance(accounts[0]);
+		var userInitBalance = await TestUtils.getBalance(accounts[0]);
 
-		await expectErrorMessageTest("User already registered a proof of attention for this campaign", async () =>{
+		await TestUtils.expectErrorMessageTest("User already registered a proof of attention for this campaign", async () =>{
 			await addInstance.registerPoA(example2PoA.packageName,example2PoA.bid,example2PoA.timestamp,example2PoA.nonce,accounts[1],accounts[2],walletName);
 		})
-		var newUserBalance = await getBalance(accounts[0]);
+		var newUserBalance = await TestUtils.getBalance(accounts[0]);
 		expect(userInitBalance).to.be.equal(newUserBalance);
 
 	});
 
 	it('should revert registerPoA and emit an error event if timestamps are not spaced exactly 10 secounds from each other', async function () {
-		var userInitBalance = await getBalance(accounts[0]);
+		var userInitBalance = await TestUtils.getBalance(accounts[0]);
 
-		await expectErrorMessageTest("Timestamps should be spaced exactly 10 secounds", async () => {
+		await TestUtils.expectErrorMessageTest("Timestamps should be spaced exactly 10 secounds", async () => {
 			await addInstance.registerPoA(wrongTimestampPoA.packageName,wrongTimestampPoA.bid,wrongTimestampPoA.timestamp,wrongTimestampPoA.nonce,accounts[1],accounts[2],walletName);
 		});
-		var newUserBalance = await getBalance(accounts[0]);
+		var newUserBalance = await TestUtils.getBalance(accounts[0]);
 		expect(userInitBalance).to.be.equal(newUserBalance);
 
 	})
 
 	it('should revert registerPoA and emit an error event if nounces do not generate correct leading zeros', async function () {
-		var userInitBalance = await getBalance(accounts[0]);
+		var userInitBalance = await TestUtils.getBalance(accounts[0]);
 
-		await expectErrorMessageTest("Incorrect nounces for submited proof of attention", async () => {
+		await TestUtils.expectErrorMessageTest("Incorrect nounces for submited proof of attention", async () => {
 			await addInstance.registerPoA(wrongNoncePoA.packageName,wrongNoncePoA.bid,wrongNoncePoA.timestamp,wrongNoncePoA.nonce,accounts[1],accounts[2],walletName);
 		});
-		var newUserBalance = await getBalance(accounts[0]);
+		var newUserBalance = await TestUtils.getBalance(accounts[0]);
 		expect(userInitBalance).to.be.equal(newUserBalance);
 
 	})
