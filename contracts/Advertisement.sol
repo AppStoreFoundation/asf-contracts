@@ -282,18 +282,22 @@ contract Advertisement {
     }
 
     function isCampaignValid(bytes32 bidId) public view returns(bool) {
-        var (,,,startDate, endDate, valid,,,,,) = advertisementStorage.getCampaign(bidId);
+        uint startDate = advertisementStorage.getCampaignStartDateById(bidId);
+        uint endDate = advertisementStorage.getCampaignEndDateById(bidId);
+        bool valid = advertisementStorage.getCampaignValidById(bidId);
+
         uint nowInMilliseconds = now * 1000;
         return valid && startDate < nowInMilliseconds && endDate > nowInMilliseconds;
     }
 
-    function payFromCampaign (bytes32 campaignBidId, address appstore, address oem) internal {
+    function payFromCampaign (bytes32 bidId, address appstore, address oem) internal {
         uint devShare = 85;
         uint appstoreShare = 10;
         uint oemShare = 5;
 
         //Search bid price
-        var (bidId, price, budget,,,,,,,,) = advertisementStorage.getCampaign(campaignBidId);
+        uint price = advertisementStorage.getCampaignPriceById(bidId);
+        uint budget = advertisementStorage.getCampaignBudgetById(bidId);
 
         require(budget > 0);
         require(budget >= price);
