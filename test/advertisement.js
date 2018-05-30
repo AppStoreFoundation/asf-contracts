@@ -1,4 +1,5 @@
 var Advertisement = artifacts.require("./Advertisement.sol");
+var AdvertisementStorage = artifacts.require("./AdvertisementStorage.sol");
 var AppCoins = artifacts.require("./AppCoins.sol");
 var chai = require('chai');
 var web3 = require('web3');
@@ -73,9 +74,11 @@ contract('Advertisement', function(accounts) {
 						  1524042557465,
 						  1524042557509 ];
 
-		appcInstance = await AppCoins.new();
+        appcInstance = await AppCoins.new();
+        AdvertisementStorageInstance = await AdvertisementStorage.new();
+		addInstance = await	Advertisement.new(appcInstance.address, AdvertisementStorageInstance.address);
 
-		addInstance = await	Advertisement.new(appcInstance.address);
+        await AdvertisementStorageInstance.setAllowedAddresses(addInstance.address, true);
 
 		TestUtils.setAppCoinsInstance(appcInstance);
 		TestUtils.setContractInstance(addInstance);
@@ -239,7 +242,6 @@ contract('Advertisement', function(accounts) {
 
 		expect(campaignBudget-campaignPrice).to.be.equal(newCampaignBudget,"Campaign budget not updated.");
 		expect(contractBalance-campaignPrice).to.be.equal(newContractBalance,"Contract balance not updated.");
-
 		var error = new Number("1.99208860077274e-9");
 		var expectedUserBalance = userInitBalance+(campaignPrice*devShare)
 		expect(newUserBalance).to.be.within(expectedUserBalance - (expectedUserBalance*error), expectedUserBalance + (expectedUserBalance*error),"User balance not updated.");
@@ -253,12 +255,12 @@ contract('Advertisement', function(accounts) {
 		await addInstance.cancelCampaign(examplePoA.bid);
 		await TestUtils.expectErrorMessageTest("Registering a Proof of attention to a invalid campaign", async () => {
 			await addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce,accounts[1],accounts[2],walletName);
-		})		
+		})
 	});
 
 	it('should revert registerPoA and emit an error event when nonce list and timestamp list have diferent lengths', async function () {
 		var userInitBalance = await TestUtils.getBalance(accounts[0]);
-		
+
 		await TestUtils.expectErrorMessageTest("Nounce list and timestamp list must have same length", async () => {
 			await addInstance.registerPoA.sendTransaction(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce.splice(2,3),accounts[1],accounts[2],walletName);
 		})
@@ -269,11 +271,11 @@ contract('Advertisement', function(accounts) {
 
 	it('should revert registerPoA and emit an error event when same user sends duplicate registerPoA', async function () {
 		await addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce,accounts[1],accounts[2],walletName);
-		
+
 		var userInitBalance = await TestUtils.getBalance(accounts[0]);
-		
+
 		await TestUtils.expectErrorMessageTest("User already registered a proof of attention for this campaign", async () =>{
-			await addInstance.registerPoA(example2PoA.packageName,example2PoA.bid,example2PoA.timestamp,example2PoA.nonce,accounts[1],accounts[2],walletName);		
+			await addInstance.registerPoA(example2PoA.packageName,example2PoA.bid,example2PoA.timestamp,example2PoA.nonce,accounts[1],accounts[2],walletName);
 		})
 		var newUserBalance = await TestUtils.getBalance(accounts[0]);
 		expect(userInitBalance).to.be.equal(newUserBalance);
@@ -284,7 +286,7 @@ contract('Advertisement', function(accounts) {
 		var userInitBalance = await TestUtils.getBalance(accounts[0]);
 
 		await TestUtils.expectErrorMessageTest("Timestamps should be spaced exactly 10 secounds", async () => {
-			await addInstance.registerPoA(wrongTimestampPoA.packageName,wrongTimestampPoA.bid,wrongTimestampPoA.timestamp,wrongTimestampPoA.nonce,accounts[1],accounts[2],walletName);		
+			await addInstance.registerPoA(wrongTimestampPoA.packageName,wrongTimestampPoA.bid,wrongTimestampPoA.timestamp,wrongTimestampPoA.nonce,accounts[1],accounts[2],walletName);
 		});
 		var newUserBalance = await TestUtils.getBalance(accounts[0]);
 		expect(userInitBalance).to.be.equal(newUserBalance);
@@ -293,13 +295,13 @@ contract('Advertisement', function(accounts) {
 
 	it('should revert registerPoA and emit an error event if nounces do not generate correct leading zeros', async function () {
 		var userInitBalance = await TestUtils.getBalance(accounts[0]);
-		
+
 		await TestUtils.expectErrorMessageTest("Incorrect nounces for submited proof of attention", async () => {
 			await addInstance.registerPoA(wrongNoncePoA.packageName,wrongNoncePoA.bid,wrongNoncePoA.timestamp,wrongNoncePoA.nonce,accounts[1],accounts[2],walletName);
 		});
 		var newUserBalance = await TestUtils.getBalance(accounts[0]);
 		expect(userInitBalance).to.be.equal(newUserBalance);
-		
+
 	})
 
 });

@@ -1,5 +1,6 @@
 var appcInstance = null;
 var contractInstance = null;
+
 module.exports = {
 	setAppCoinsInstance: async function (instance){
 		appcInstance = instance;
@@ -13,7 +14,7 @@ module.exports = {
 		},
 	expectErrorMessageTest: async function (errorMessage,callback){
 			var events = contractInstance.allEvents();
-			
+
 			await callback();
 			var eventLog = await new Promise(
 					function(resolve, reject){
@@ -21,6 +22,6 @@ module.exports = {
 			    });
 
 		    assert.equal(eventLog.event, "Error", "Event must be an Error");
-		    assert.equal(eventLog.args.message,errorMessage,"Event message should be: "+errorMessage);	
+		    assert.equal(eventLog.args.message,errorMessage,"Event message should be: "+errorMessage);
 		}
 }

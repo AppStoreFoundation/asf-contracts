@@ -3,7 +3,6 @@ var AppCoins = artifacts.require("./AppCoins.sol");
 var chai = require('chai');
 var web3 = require('web3');
 var TestUtils = require('./TestUtils.js');
-console.log(web3.version);
 var expect = chai.expect;
 var chaiAsPromissed = require('chai-as-promised')
 chai.use(chaiAsPromissed);
@@ -48,7 +47,7 @@ contract('AppCoinsIAB', function(accounts) {
 		var devFinalBalance = await TestUtils.getBalance(devAcc);
 		var appSFinalBalance = await TestUtils.getBalance(appStoreAcc);
 		var oemFinalBalance = await TestUtils.getBalance(oemAcc);
-		
+
 		expect(userFinalBalance).to.be.equal(userInitBalance-price);
 		expect(devFinalBalance).to.be.equal(devInitBalance+(price*devShare));
 		expect(appSFinalBalance).to.be.equal(appSInitBalance+(price*appSShare));
