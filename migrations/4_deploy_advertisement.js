@@ -25,8 +25,7 @@ module.exports = function(deployer, network) {
                 throw 'AppCoins Address not found!'
             }
 
-
-            if (!AdvertisementStorageAddress) {
+            if (!AdvertisementStorageAddress.startsWith("0x")) {
                 deployer.deploy(AdvertisementStorage)
                 .then(function() {
                     return deployer.deploy(Advertisement, AppCoinsAddress, AdvertisementStorage.address);
@@ -44,8 +43,7 @@ module.exports = function(deployer, network) {
                 throw 'AppCoins Address not found!'
             }
 
-
-            if (!AdvertisementStorageAddress) {
+            if (!AdvertisementStorageAddress.startsWith("0x")) {
                 deployer.deploy(AdvertisementStorage)
                 .then(function() {
                     return deployer.deploy(Advertisement, AppCoinsAddress, AdvertisementStorage.address);
@@ -65,7 +63,7 @@ module.exports = function(deployer, network) {
             }
 
 
-            if (!AdvertisementStorageAddress) {
+            if (!AdvertisementStorageAddress.startsWith("0x")) {
                 deployer.deploy(AdvertisementStorage)
                 .then(function() {
                     return deployer.deploy(Advertisement, AppCoinsAddress, AdvertisementStorage.address);
