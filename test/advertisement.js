@@ -19,6 +19,15 @@ var expectRevert = RegExp('revert');
 var campaignPrice;
 var campaignBudget;
 
+function convertCountryCodeToIndex(countryCode) {
+	var begin = new Buffer("AA");
+	var one = new Buffer("A");
+	var buffer = new  Buffer(countryCode);
+	var first = new  Buffer(countryCode[0]);
+
+	return buffer.readUInt16BE() - begin.readUInt16BE() - 230*(first.readUInt8()-one.readUInt8());
+}
+
 contract('Advertisement', function(accounts) {
   beforeEach('Setting Advertisement test...',async () => {
 
@@ -86,12 +95,18 @@ contract('Advertisement', function(accounts) {
 		campaignPrice = 50000000000000000;
 		campaignBudget = 1000000000000000000;
 
+		countryList = []
+
+		countryList.push(convertCountryCodeToIndex("PT"))
+		countryList.push(convertCountryCodeToIndex("UK"))
+		countryList.push(convertCountryCodeToIndex("FR"))
+
 		await appcInstance.approve(addInstance.address,campaignBudget);
-		await addInstance.createCampaign("com.facebook.orca","PT,UK,FR",[1,2],campaignPrice,campaignBudget,20,1922838059980);
+		await addInstance.createCampaign("com.facebook.orca",countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980);
 
 		await appcInstance.transfer(accounts[1],1000000000000000000);
 		await appcInstance.approve(addInstance.address,campaignBudget,{ from : accounts[1]});
-		await addInstance.createCampaign("com.facebook.orca","PT,UK,FR",[1,2],campaignPrice,campaignBudget,20,1922838059980, { from : accounts[1]});
+		await addInstance.createCampaign("com.facebook.orca",countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980, { from : accounts[1]});
 
 		examplePoA = new Object();
 		examplePoA.packageName = "com.facebook.orca";
