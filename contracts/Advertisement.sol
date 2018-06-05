@@ -1,4 +1,4 @@
-pragma solidity ^0.4.19;
+pragma solidity ^0.4.21;
 
 
 import  { CampaignLibrary } from "./lib/CampaignLibrary.sol";
@@ -31,10 +31,8 @@ contract Advertisement {
     ValidationRules public rules;
     bytes32[] bidIdList;
     mapping (bytes32 => CampaignLibrary.Campaign) campaigns;
-    mapping (bytes => bytes32[]) campaignsByCountry;
     AppCoins appc;
     AdvertisementStorage advertisementStorage;
-    bytes2[] countryList;
     address public owner;
     mapping (address => mapping (bytes32 => bool)) userAttributions;
 
@@ -62,7 +60,7 @@ contract Advertisement {
     */
     function createCampaign (
         string packageName,
-        string countries,
+        uint[] countries,
         uint[] vercodes,
         uint price,
         uint budget,
@@ -72,16 +70,17 @@ contract Advertisement {
 
         require(budget >= price);
         require(endDate >= startDate);
-
-
+        
         CampaignLibrary.Campaign memory newCampaign;
 
         newCampaign.filters.packageName = packageName;
-        newCampaign.filters.countries = countries;
         newCampaign.filters.vercodes = vercodes;
         newCampaign.price = price;
         newCampaign.startDate = startDate;
         newCampaign.endDate = endDate;
+
+        newCampaign.filters.countries = 
+            CampaignLibrary.convertCountryIndexToBytes(countries);
 
         //Transfers the budget to contract address
         if(appc.allowance(msg.sender, address(this)) < budget){
@@ -121,48 +120,6 @@ contract Advertisement {
             campaign.filters.countries,
             campaign.filters.vercodes
         );
-
-		//Assuming each country is represented in ISO country codes
-        bytes memory country = new bytes(2);
-        bytes memory countriesInBytes = bytes(campaign.filters.countries);
-        uint countryLength = 0;
-
-        for (uint i = 0; i < countriesInBytes.length; i++){
-
-			//if ',' is found, new country ahead
-            if(countriesInBytes[i] == "," || i == countriesInBytes.length-1){
-
-                if(i == countriesInBytes.length - 1){
-                    country[countryLength] = countriesInBytes[i];
-				}
-
-                addCampaignToCountryMap(campaign,country);
-
-                country = new bytes(2);
-                countryLength = 0;
-			} else {
-                country[countryLength] = countriesInBytes[i];
-                countryLength++;
-			}
-        }
-
-    }
-
-
-    function addCampaignToCountryMap (CampaignLibrary.Campaign newCampaign, bytes country) internal {
-		// Adds a country to countryList if the country is not in this list
-        if (campaignsByCountry[country].length == 0){
-            bytes2 countryCode;
-            assembly {
-			       countryCode := mload(add(country, 32))
-            }
-
-            countryList.push(countryCode);
-		}
-
-		//Adds Campaign to campaignsByCountry map
-        campaignsByCountry[country].push(newCampaign.bidId);
-
     }
 
     function registerPoA (
@@ -228,28 +185,11 @@ contract Advertisement {
         return advertisementStorage.getCampaignValidById(bidId);
     }
 
-    function getCountryList() public view returns(bytes2[]) {
-        return countryList;
-    }
-
-    function getCampaignsByCountry(string country) public view returns (bytes32[]){
-        bytes memory countryInBytes = bytes(country);
-
-        return campaignsByCountry[countryInBytes];
-    }
-
-
-    function getTotalCampaignsByCountry (string country) public view returns (uint){
-        bytes memory countryInBytes = bytes(country);
-
-        return campaignsByCountry[countryInBytes].length;
-    }
-
     function getPackageNameOfCampaign (bytes32 bidId) public view returns(string) {
         return advertisementStorage.getCampaignPackageNameById(bidId);
     }
 
-    function getCountriesOfCampaign (bytes32 bidId) public view returns(string){
+    function getCountriesOfCampaign (bytes32 bidId) public view returns(uint[3]){
         return advertisementStorage.getCampaignCountriesById(bidId);
     }
 
