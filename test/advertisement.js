@@ -213,7 +213,10 @@ contract('Advertisement', function(accounts) {
 		var userInitBalance = await TestUtils.getBalance(accounts[0]);
 
 		await TestUtils.expectErrorMessageTest('Not enough allowance',async () => {
-			await addInstance.createCampaign.sendTransaction("org.telegram.messenger","UK,FR",[1,2],campaignPrice,campaignBudget,20,1922838059980);
+			var countryList = [];
+			countryList.push(convertCountryCodeToIndex("UK"));
+			countryList.push(convertCountryCodeToIndex("FR"));
+			await addInstance.createCampaign.sendTransaction("org.telegram.messenger",countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980);
 		})
 
 		var newUserBalance = await TestUtils.getBalance(accounts[0]);
