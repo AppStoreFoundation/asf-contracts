@@ -16,17 +16,23 @@ Repo containing the smart contracts of the AppCoins protocol
 $ cd asf-contracts
 ```
 
-4. Install the dependencies:  
+4. create the file .env from .env.example and configure it:  
+```sd
+$  cp .env.example .env
+```
+
+
+5. Install the dependencies:  
 ```sd
 $  npm install
 ```
 
-5. Start Ganache/TestRPC
+6. Start Ganache/TestRPC
 ```sd
 $ ganache-cli
 ```  
 
-6. Deploy the contracts into the test network:  
+7. Deploy the contracts into the test network:  
 ```sd
 $  truffle deploy --reset
 ```
