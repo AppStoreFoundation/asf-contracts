@@ -24,7 +24,10 @@
     "address": "truffle exec scripts/address-proxy.js",
     "address:ropsten": "truffle exec scripts/address-proxy.js --network ropsten",
     "address:main": "truffle exec scripts/address-proxy.js --network main",
-    "lint": "./scripts/lint.sh"
+    "lint": "./scripts/lint.sh",
+    "storage": "truffle exec scripts/advertisement-storage.js",
+    "storage:ropsten": "truffle exec scripts/advertisement-storage.js --network ropsten",
+    "storage:main": "truffle exec scripts/advertisement-storage.js --network main"
   },
   "keywords": [
     "asf",
