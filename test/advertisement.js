@@ -28,6 +28,26 @@ function convertCountryCodeToIndex(countryCode) {
 	return buffer.readUInt16BE() - begin.readUInt16BE() - 230*(first.readUInt8()-one.readUInt8());
 }
 
+function buildCountryListFromIndexes(countryList){
+	var countries = [0,0,0];
+
+	for(var i = 0; i< countryList.length; i++){
+		var index = countryList[i];
+		
+		if(index < 256){
+			countries[0] = countries[0] | 1 << index;
+		}else if( index < 512){
+			countries[1] = countries[1] | 1 << (index - 256);
+		}else{
+			countries[2] = countries[2] | 1 << (index - 512);
+		}
+		
+
+	}
+	return countries;
+
+}
+
 contract('Advertisement', function(accounts) {
   beforeEach('Setting Advertisement test...',async () => {
 
@@ -95,7 +115,7 @@ contract('Advertisement', function(accounts) {
 		campaignPrice = 50000000000000000;
 		campaignBudget = 1000000000000000000;
 
-		countryList = []
+		var countryList = []
 
 		countryList.push(convertCountryCodeToIndex("PT"))
 		countryList.push(convertCountryCodeToIndex("UK"))
@@ -155,6 +175,24 @@ contract('Advertisement', function(accounts) {
 			wrongNoncePoA.nonce.push(nonceWrongTs[i]);
 		}
 	});
+
+  	it('should create a campaign', async function() {
+		var bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000002");
+  		var countryList = []
+
+		countryList.push(convertCountryCodeToIndex("PT"))
+		countryList.push(convertCountryCodeToIndex("UK"))
+		countryList.push(convertCountryCodeToIndex("FR"))
+
+		await appcInstance.approve(addInstance.address,campaignBudget);
+		await addInstance.createCampaign("com.instagram.android",countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980);
+		var countries = await addInstance.getCountriesOfCampaign(bid);
+		var expectedCountries = buildCountryListFromIndexes(countryList);
+		
+		expect(JSON.parse(countries[0])).to.be.equal(expectedCountries[0],"First country list storage is incorrect");
+		expect(JSON.parse(countries[1])).to.be.equal(expectedCountries[1],"Secound country list storage is incorrect");
+		expect(JSON.parse(countries[2])).to.be.equal(expectedCountries[2],"Third country list storage is incorrect");
+  	});
 
 	it('should cancel a campaign as contract owner', async function () {
 		var bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000001");
