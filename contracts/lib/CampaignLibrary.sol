@@ -3,9 +3,6 @@ pragma solidity ^0.4.19;
 
 library CampaignLibrary {
 
-    event CountryIndexes(uint[3] countries);
-    
-
     struct Filters {
         uint[3] countries;
         string packageName;
