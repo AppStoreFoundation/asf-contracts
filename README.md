@@ -1,3 +1,8 @@
+<p align="center">
+  <img width="300" height="300" src="https://www.appstorefoundation.org/img/image-appcoinsLogo.svg">
+  <h1 align="center">AppCoins Project</h1>
+</p>
+
 # Contracts
 Repo containing the smart contracts of the AppCoins protocol
 
