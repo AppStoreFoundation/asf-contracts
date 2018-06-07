@@ -79,7 +79,7 @@ contract Advertisement {
         newCampaign.startDate = startDate;
         newCampaign.endDate = endDate;
 
-        newCampaign.filters.countries = 
+        (newCampaign.filters.countries[0],newCampaign.filters.countries[1],newCampaign.filters.countries[2]) = 
             CampaignLibrary.convertCountryIndexToBytes(countries);
 
         //Transfers the budget to contract address

@@ -7,6 +7,7 @@
     "test": "test"
   },
   "dependencies": {
+    "big-number": "^0.4.0",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
     "dotenv": "^5.0.1",

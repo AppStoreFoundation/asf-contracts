@@ -8,6 +8,7 @@ var expect = chai.expect;
 var chaiAsPromissed = require('chai-as-promised');
 chai.use(chaiAsPromissed);
 
+var BigNumber = require('big-number');
 var appcInstance;
 var addInstance;
 var devShare = 0.85;
@@ -26,26 +27,6 @@ function convertCountryCodeToIndex(countryCode) {
 	var first = new  Buffer(countryCode[0]);
 
 	return buffer.readUInt16BE() - begin.readUInt16BE() - 230*(first.readUInt8()-one.readUInt8());
-}
-
-function buildCountryListFromIndexes(countryList){
-	var countries = [0,0,0];
-
-	for(var i = 0; i< countryList.length; i++){
-		var index = countryList[i];
-		
-		if(index < 256){
-			countries[0] = countries[0] | 1 << index;
-		}else if( index < 512){
-			countries[1] = countries[1] | 1 << (index - 256);
-		}else{
-			countries[2] = countries[2] | 1 << (index - 512);
-		}
-		
-
-	}
-	return countries;
-
 }
 
 contract('Advertisement', function(accounts) {
@@ -183,15 +164,17 @@ contract('Advertisement', function(accounts) {
 		countryList.push(convertCountryCodeToIndex("PT"))
 		countryList.push(convertCountryCodeToIndex("UK"))
 		countryList.push(convertCountryCodeToIndex("FR"))
+		countryList.push(convertCountryCodeToIndex("PA"))
+
 
 		await appcInstance.approve(addInstance.address,campaignBudget);
 		await addInstance.createCampaign("com.instagram.android",countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980);
 		var countries = await addInstance.getCountriesOfCampaign(bid);
-		var expectedCountries = buildCountryListFromIndexes(countryList);
 		
-		expect(JSON.parse(countries[0])).to.be.equal(expectedCountries[0],"First country list storage is incorrect");
-		expect(JSON.parse(countries[1])).to.be.equal(expectedCountries[1],"Secound country list storage is incorrect");
-		expect(JSON.parse(countries[2])).to.be.equal(expectedCountries[2],"Third country list storage is incorrect");
+		expect(JSON.parse(countries[0])).to.be.equal(1.78405961588245e+44,"First country list storage is incorrect");
+		expect(JSON.parse(countries[1])).to.be.equal(1.1418003319719162e+46,"Secound country list storage is incorrect");
+													 
+		expect(JSON.parse(countries[2])).to.be.equal(262144,"Third country list storage is incorrect");
   	});
 
 	it('should cancel a campaign as contract owner', async function () {
