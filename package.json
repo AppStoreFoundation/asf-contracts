@@ -17,6 +17,8 @@
     "web3": "^1.0.0-beta.34"
   },
   "devDependencies": {
+    "cz-conventional-changelog": "^2.1.0",
+    "semantic-release": "^15.5.1",
     "solidity-coverage": "^0.5.4"
   },
   "scripts": {
@@ -33,5 +35,10 @@
     "asf",
     "appcoins"
   ],
-  "pre-commit": "lint"
+  "pre-commit": "lint",
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  }
 }
