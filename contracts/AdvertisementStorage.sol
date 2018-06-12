@@ -30,7 +30,7 @@ contract AdvertisementStorage {
             address  owner,
             string ipValidator,
             string packageName,
-            string countries,
+            uint[3] countries,
             uint[] vercodes
     );
 
@@ -45,7 +45,7 @@ contract AdvertisementStorage {
             address  owner,
             string ipValidator,
             string packageName,
-            string countries,
+            uint[3] countries,
             uint[] vercodes
     );
 
@@ -72,7 +72,7 @@ contract AdvertisementStorage {
             address,
             string,
             string,
-            string,
+            uint[3],
             uint[]
         ) {
 
@@ -129,7 +129,7 @@ contract AdvertisementStorage {
     function setCampaignFilters (
         bytes32 bidId,
         string packageName,
-        string countries,
+        uint[3] countries,
         uint[] vercodes
     )
     public
@@ -239,11 +239,11 @@ contract AdvertisementStorage {
     function getCampaignCountriesById(bytes32 bidId)
         public
         view
-        returns (string) {
+        returns (uint[3]) {
         return campaigns[bidId].filters.countries;
     }
 
-    function setCampaignCountriesById(bytes32 bidId, string newCountries)
+    function setCampaignCountriesById(bytes32 bidId, uint[3] newCountries)
         public
         onlyAllowedAddress
         {

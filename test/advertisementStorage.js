@@ -18,7 +18,7 @@ var testCampaign = {
     ipValidator: 1,
     filters: {
         packageName: "com.test.pn",
-        countries: "WL",
+        countries: [409], // PT
         vercodes: [1, 2]
     }
 };

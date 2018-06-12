@@ -8,6 +8,7 @@ var expect = chai.expect;
 var chaiAsPromissed = require('chai-as-promised');
 chai.use(chaiAsPromissed);
 
+var BigNumber = require('big-number');
 var appcInstance;
 var addInstance;
 var devShare = 0.85;
@@ -18,6 +19,15 @@ var expectRevert = RegExp('revert');
 
 var campaignPrice;
 var campaignBudget;
+
+function convertCountryCodeToIndex(countryCode) {
+	var begin = new Buffer("AA");
+	var one = new Buffer("A");
+	var buffer = new  Buffer(countryCode);
+	var first = new  Buffer(countryCode[0]);
+
+	return buffer.readUInt16BE() - begin.readUInt16BE() - 230*(first.readUInt8()-one.readUInt8());
+}
 
 contract('Advertisement', function(accounts) {
   beforeEach('Setting Advertisement test...',async () => {
@@ -86,12 +96,18 @@ contract('Advertisement', function(accounts) {
 		campaignPrice = 50000000000000000;
 		campaignBudget = 1000000000000000000;
 
+		var countryList = []
+
+		countryList.push(convertCountryCodeToIndex("PT"))
+		countryList.push(convertCountryCodeToIndex("UK"))
+		countryList.push(convertCountryCodeToIndex("FR"))
+
 		await appcInstance.approve(addInstance.address,campaignBudget);
-		await addInstance.createCampaign("com.facebook.orca","PT,UK,FR",[1,2],campaignPrice,campaignBudget,20,1922838059980);
+		await addInstance.createCampaign("com.facebook.orca",countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980);
 
 		await appcInstance.transfer(accounts[1],1000000000000000000);
 		await appcInstance.approve(addInstance.address,campaignBudget,{ from : accounts[1]});
-		await addInstance.createCampaign("com.facebook.orca","PT,UK,FR",[1,2],campaignPrice,campaignBudget,20,1922838059980, { from : accounts[1]});
+		await addInstance.createCampaign("com.facebook.orca",countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980, { from : accounts[1]});
 
 		examplePoA = new Object();
 		examplePoA.packageName = "com.facebook.orca";
@@ -140,6 +156,26 @@ contract('Advertisement', function(accounts) {
 			wrongNoncePoA.nonce.push(nonceWrongTs[i]);
 		}
 	});
+
+  	it('should create a campaign', async function() {
+		var bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000002");
+  		var countryList = []
+
+		countryList.push(convertCountryCodeToIndex("PT"))
+		countryList.push(convertCountryCodeToIndex("UK"))
+		countryList.push(convertCountryCodeToIndex("FR"))
+		countryList.push(convertCountryCodeToIndex("PA"))
+
+
+		await appcInstance.approve(addInstance.address,campaignBudget);
+		await addInstance.createCampaign("com.instagram.android",countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980);
+		var countries = await addInstance.getCountriesOfCampaign(bid);
+		
+		expect(JSON.parse(countries[0])).to.be.equal(1.78405961588245e+44,"First country list storage is incorrect");
+		expect(JSON.parse(countries[1])).to.be.equal(1.1418003319719162e+46,"Secound country list storage is incorrect");
+													 
+		expect(JSON.parse(countries[2])).to.be.equal(262144,"Third country list storage is incorrect");
+  	});
 
 	it('should cancel a campaign as contract owner', async function () {
 		var bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000001");
@@ -198,7 +234,10 @@ contract('Advertisement', function(accounts) {
 		var userInitBalance = await TestUtils.getBalance(accounts[0]);
 
 		await TestUtils.expectErrorMessageTest('Not enough allowance',async () => {
-			await addInstance.createCampaign.sendTransaction("org.telegram.messenger","UK,FR",[1,2],campaignPrice,campaignBudget,20,1922838059980);
+			var countryList = [];
+			countryList.push(convertCountryCodeToIndex("UK"));
+			countryList.push(convertCountryCodeToIndex("FR"));
+			await addInstance.createCampaign.sendTransaction("org.telegram.messenger",countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980);
 		})
 
 		var newUserBalance = await TestUtils.getBalance(accounts[0]);
