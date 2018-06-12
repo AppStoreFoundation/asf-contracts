@@ -304,4 +304,19 @@ contract('Advertisement', function(accounts) {
 
 	})
 
+	it('should revert registerPoA and emit an error event if PoA pairs are not exactly 12', async () => {
+		var userInitBalance = await TestUtils.getBalance(accounts[0]);
+		
+		examplePoA.timestamp.pop();
+		examplePoA.nonce.pop();
+
+		await TestUtils.expectErrorMessageTest("Proof-of-attention should have exactly 12 proofs", async () => {
+			await addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce,accounts[1],accounts[2],walletName);
+		});
+
+		var newUserBalance = await TestUtils.getBalance(accounts[0]);
+		expect(userInitBalance).to.be.equal(newUserBalance);
+
+	})
+
 });
