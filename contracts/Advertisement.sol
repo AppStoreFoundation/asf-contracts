@@ -28,6 +28,8 @@ contract Advertisement {
         uint walletDailyConversions;
     }
 
+    uint constant expectedPoALength = 12;
+
     ValidationRules public rules;
     bytes32[] bidIdList;
     mapping (bytes32 => CampaignLibrary.Campaign) campaigns;
@@ -174,6 +176,11 @@ contract Advertisement {
         if(!isCampaignValid(bidId)){
             emit Error(
                 "registerPoA","Registering a Proof of attention to a invalid campaign");
+            return;
+        }
+
+        if(timestampList.length != expectedPoALength){
+            emit Error("registerPoA","Proof-of-attention should have exactly 12 proofs");
             return;
         }
 
