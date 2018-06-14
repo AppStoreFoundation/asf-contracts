@@ -38,6 +38,11 @@ contract Advertisement {
     address public owner;
     mapping (address => mapping (bytes32 => bool)) userAttributions;
 
+    modifier onlyOwner() { 
+        require (msg.sender == owner); 
+        _; 
+    }
+    
 
     event PoARegistered(bytes32 bidId, string packageName,uint64[] timestampList,uint64[] nonceList,string walletName);
     event Error(string func, string message);
@@ -54,6 +59,22 @@ contract Advertisement {
         advertisementStorage = AdvertisementStorage(addrAdverStorage);
     }
 
+    /**
+    * Upgrade storage function
+    *
+    * Upgrades AdvertisementStorage contract addres with no need to redeploy 
+    * Advertisement contract however every campaign in the old contract will
+    * be canceled
+    */
+
+    function upgradeStorage (address addrAdverStorage) public onlyOwner {
+        for(uint i = 0; i < bidIdList.length; i++) {
+            cancelCampaign(bidIdList[i]);
+        }
+        delete bidIdList;
+        
+        advertisementStorage = AdvertisementStorage(addrAdverStorage);
+    }
 
 
     /**
@@ -175,7 +196,7 @@ contract Advertisement {
         emit PoARegistered(bidId, packageName, timestampList, nonces, walletName);
     }
 
-    function cancelCampaign (bytes32 bidId) external {
+    function cancelCampaign (bytes32 bidId) public {
         address campaignOwner = getOwnerOfCampaign(bidId);
 
 		// Only contract owner or campaign owner can cancel a campaign
