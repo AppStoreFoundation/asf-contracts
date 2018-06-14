@@ -105,7 +105,7 @@ contract('Advertisement', function(accounts) {
 		await appcInstance.approve(addInstance.address,campaignBudget);
 		await addInstance.createCampaign("com.facebook.orca",countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980);
 
-		await appcInstance.transfer(accounts[1],1000000000000000000);
+		await appcInstance.transfer(accounts[1],campaignBudget);
 		await appcInstance.approve(addInstance.address,campaignBudget,{ from : accounts[1]});
 		await addInstance.createCampaign("com.facebook.orca",countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980, { from : accounts[1]});
 
@@ -358,4 +358,21 @@ contract('Advertisement', function(accounts) {
 
 	})
 
+	it('should upgrade advertisement storage and cancel all campaigns', async function() {
+		var addsBalance = await TestUtils.getBalance(AdvertisementStorageInstance.address);
+		var user0Balance = await TestUtils.getBalance(accounts[0]);
+		var user1Balance = await TestUtils.getBalance(accounts[1]);
+        AdvertisementStorageInstance = await AdvertisementStorage.new();
+
+		await addInstance.upgradeStorage(AdvertisementStorageInstance.address);
+
+		var addsFinalBalance = await TestUtils.getBalance(AdvertisementStorageInstance.address);
+		var user0FinalBalance = await TestUtils.getBalance(accounts[0]);
+		var user1FinalBalance = await TestUtils.getBalance(accounts[1]);
+		var bidIdList = await addInstance.getBidIdList();
+		expect(addsFinalBalance).to.be.equal(0,'Advertisement contract balance should be 0');
+		expect(user0FinalBalance).to.be.equal(user0Balance+campaignBudget,'User 0 should receive campaignBudget value of his campaign');
+		expect(user1FinalBalance).to.be.equal(user1Balance+campaignBudget,'User 1 should receive campaignBudget value of his campaign');
+		expect(bidIdList.length).to.be.equal(0,'Campaign list should be 0');
+	})
 });
