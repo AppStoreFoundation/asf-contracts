@@ -105,7 +105,7 @@ contract('Advertisement', function(accounts) {
 		await appcInstance.approve(addInstance.address,campaignBudget);
 		await addInstance.createCampaign("com.facebook.orca",countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980);
 
-		await appcInstance.transfer(accounts[1],1000000000000000000);
+		await appcInstance.transfer(accounts[1],campaignBudget);
 		await appcInstance.approve(addInstance.address,campaignBudget,{ from : accounts[1]});
 		await addInstance.createCampaign("com.facebook.orca",countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980, { from : accounts[1]});
 
@@ -355,6 +355,57 @@ contract('Advertisement', function(accounts) {
 
 		var newUserBalance = await TestUtils.getBalance(accounts[0]);
 		expect(userInitBalance).to.be.equal(newUserBalance);
+
+	})
+
+	it('should upgrade advertisement storage and cancel all campaigns', async function() {
+		var addsBalance = await TestUtils.getBalance(AdvertisementStorageInstance.address);
+		var user0Balance = await TestUtils.getBalance(accounts[0]);
+		var user1Balance = await TestUtils.getBalance(accounts[1]);
+        AdvertisementStorageInstance = await AdvertisementStorage.new();
+
+		await addInstance.upgradeStorage(AdvertisementStorageInstance.address);
+        await AdvertisementStorageInstance.setAllowedAddresses(addInstance.address, true);
+		
+		var addsFinalBalance = await TestUtils.getBalance(AdvertisementStorageInstance.address);
+		var user0FinalBalance = await TestUtils.getBalance(accounts[0]);
+		var user1FinalBalance = await TestUtils.getBalance(accounts[1]);
+		var bidIdList = await addInstance.getBidIdList();
+		expect(addsFinalBalance).to.be.equal(0,'Advertisement contract balance should be 0');
+		expect(user0FinalBalance).to.be.equal(user0Balance+campaignBudget,'User 0 should receive campaignBudget value of his campaign');
+		expect(user1FinalBalance).to.be.equal(user1Balance+campaignBudget,'User 1 should receive campaignBudget value of his campaign');
+		expect(bidIdList.length).to.be.equal(0,'Campaign list should be 0');
+	})
+
+	it('should upgrade advertisement storage and cancel all campaigns', async function() {
+		AdvertisementStorageInstance = await AdvertisementStorage.new();
+		
+		await addInstance.upgradeStorage(AdvertisementStorageInstance.address);
+		await AdvertisementStorageInstance.setAllowedAddresses(addInstance.address, true);
+
+
+		var bidIdList = await addInstance.getBidIdList();
+
+		expect(bidIdList.length).to.be.equal(0,'Campaign list should be 0');
+
+		var bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000000");
+  		var countryList = []
+
+		countryList.push(convertCountryCodeToIndex("PT"))
+		countryList.push(convertCountryCodeToIndex("UK"))
+		countryList.push(convertCountryCodeToIndex("FR"))
+		countryList.push(convertCountryCodeToIndex("PA"))
+
+		await appcInstance.transfer(accounts[1],campaignBudget);
+		await appcInstance.approve(addInstance.address,campaignBudget,{ from : accounts[1]});
+		await addInstance.createCampaign("com.facebook.orca",countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980, { from : accounts[1]});
+
+		var countries = await addInstance.getCountriesOfCampaign(bid);
+		
+		expect(JSON.parse(countries[0])).to.be.equal(1.78405961588245e+44,"First country list storage is incorrect");
+		expect(JSON.parse(countries[1])).to.be.equal(1.1418003319719162e+46,"Secound country list storage is incorrect");
+													 
+		expect(JSON.parse(countries[2])).to.be.equal(262144,"Third country list storage is incorrect");
 
 	})
 
