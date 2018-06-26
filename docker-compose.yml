@@ -1,10 +1,9 @@
 version: "3"
 services:
   appcoins-build:
+    container_name: AppCoinsDev
     build:
       context: .
-      args:
-        USER_NAME: app
     volumes:
       - .:/app
     ports:
