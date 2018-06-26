@@ -6,6 +6,43 @@
 # Contracts
 Repo containing the smart contracts of the AppCoins protocol
 
+1. [Getting started with docker](#getting-started-with-docker)
+2. [Getting started](#getting-started)
+3. [How to test](#how-to-test)
+
+
+## Getting started with docker:
+
+1. Install [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/)
+
+2. Clone this repo:
+```sh
+$ git clone git@github.com:AppStoreFoundation/asf-contracts.git
+```
+
+3. Move to the appropriate directory:
+```sh
+$ cd asf-contracts
+```
+
+4. Run docker compose build (optional):
+```sh
+$ docker-compose build
+```
+
+5. Deploy the docker container:
+```sh
+$ docker-compose up
+```
+
+
+6. On a new terminal attach to the new docker container:
+```sh
+$ docker exec -it AppCoinsDev  bash
+```
+
+
+
 ## Getting started:
 
 1. This project has a few pre-installation dependencies.
@@ -21,7 +58,7 @@ Repo containing the smart contracts of the AppCoins protocol
 $ cd asf-contracts
 ```
 
-4. create the file .env from .env.example and configure it:  
+4. Create the file .env from .env.example and configure it:  
 ```sd
 $  cp .env.example .env
 ```
