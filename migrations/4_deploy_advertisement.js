@@ -1,5 +1,6 @@
 var AppCoins = artifacts.require("./AppCoins.sol");
 var AdvertisementStorage = artifacts.require("./AdvertisementStorage.sol");
+var AdvertisementFinance = artifacts.require("./AdvertisementFinance.sol");
 var Advertisement = artifacts.require("./Advertisement.sol");
 
 require('dotenv').config();
@@ -12,7 +13,10 @@ module.exports = function(deployer, network) {
                 return  deployer.deploy(AdvertisementStorage);
             })
             .then(function() {
-                return deployer.deploy(Advertisement, AppCoins.address, AdvertisementStorage.address);
+                return deployer.deploy(AdvertisementFinance,AppCoins.address);
+            })
+            .then(function() {
+                return deployer.deploy(Advertisement, AppCoins.address, AdvertisementStorage.address,AdvertisementFinance.address);
             });
 
             break;
