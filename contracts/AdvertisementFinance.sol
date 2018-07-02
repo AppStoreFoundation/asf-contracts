@@ -35,7 +35,7 @@ contract AdvertisementFinance {
         appc = AppCoins(_addrAppc);
     }
 
-    function setAdsContractAddress (address _addrAdvert) external {
+    function setAdsContractAddress (address _addrAdvert) external onlyOwner {
         
         advertisementContract = _addrAdvert;
     }
@@ -60,7 +60,7 @@ contract AdvertisementFinance {
         require(balanceDevelopers[_developer] >= _value);
         
         appc.transfer(_developer, _value);
-        balanceDevelopers[_developer] = 0;	
+        balanceDevelopers[_developer] -= _value;	
     }
 
     function reset() public onlyOwnerOrAds {
@@ -68,10 +68,6 @@ contract AdvertisementFinance {
             withdraw(developers[i],balanceDevelopers[developers[i]]);
         }
     }
-
-    function updateAdvertisementAddress (address _ads) external onlyOwner{
-        advertisementContract = _ads;	
-    }	
 
 }	
 
