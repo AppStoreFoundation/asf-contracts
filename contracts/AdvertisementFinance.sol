@@ -1,6 +1,7 @@
 pragma solidity ^0.4.21;
 
 import "./AppCoins.sol";
+import "./Advertisement.sol";
 
 /**
  * The AdvertisementFinance contract is responsible for keeping track of the 
@@ -12,6 +13,7 @@ contract AdvertisementFinance {
     address[] developers;
     address owner;
     address advertisementContract;
+    address advStorageContract;
     AppCoins appc;
 
     modifier onlyOwner() { 
@@ -33,11 +35,26 @@ contract AdvertisementFinance {
         public {
         owner = msg.sender;
         appc = AppCoins(_addrAppc);
+        advStorageContract = 0x0;
+    }
+
+    function setAdsStorageAddress (address _addrStorage) external onlyOwner {
+        reset();
+        advStorageContract = _addrStorage;
     }
 
     function setAdsContractAddress (address _addrAdvert) external onlyOwner {
+        // Verify if the new Ads contract is using the same storage as before 
+        if (advertisementContract != 0x0){
+            Advertisement adsContract = Advertisement(advertisementContract);
+            address adsStorage = adsContract.getAdvertisementStorageAddress();
+
+            require (adsStorage == advStorageContract);
+        }
         
+        //Update contract
         advertisementContract = _addrAdvert;
+
     }
     
 
