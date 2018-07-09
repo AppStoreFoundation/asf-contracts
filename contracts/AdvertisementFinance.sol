@@ -10,6 +10,8 @@ import "./Advertisement.sol";
 contract AdvertisementFinance {
 
     mapping (address => uint256) balanceDevelopers;
+    mapping (address => bool) developerExists;
+    
     address[] developers;
     address owner;
     address advertisementContract;
@@ -38,7 +40,7 @@ contract AdvertisementFinance {
         advStorageContract = 0x0;
     }
 
-    function setAdsStorageAddress (address _addrStorage) external onlyOwner {
+    function setAdsStorageAddress (address _addrStorage) external onlyOwnerOrAds {
         reset();
         advStorageContract = _addrStorage;
     }
@@ -48,21 +50,23 @@ contract AdvertisementFinance {
         if (advertisementContract != 0x0){
             Advertisement adsContract = Advertisement(advertisementContract);
             address adsStorage = adsContract.getAdvertisementStorageAddress();
-
             require (adsStorage == advStorageContract);
         }
         
         //Update contract
         advertisementContract = _addrAdvert;
-
     }
     
 
     function increaseBalance(address _developer, uint256 _value) 
         public onlyAds{
-        developers.push(_developer);
-        balanceDevelopers[_developer] += _value;
 
+        if(developerExists[_developer] == false){
+            developers.push(_developer);
+            developerExists[_developer] = true;
+        }
+
+        balanceDevelopers[_developer] += _value;
     }
 
     function pay(address _developer, address _destination, uint256 _value) 
@@ -77,7 +81,7 @@ contract AdvertisementFinance {
         require(balanceDevelopers[_developer] >= _value);
         
         appc.transfer(_developer, _value);
-        balanceDevelopers[_developer] -= _value;	
+        balanceDevelopers[_developer] -= _value;    
     }
 
     function reset() public onlyOwnerOrAds {
@@ -85,6 +89,7 @@ contract AdvertisementFinance {
             withdraw(developers[i],balanceDevelopers[developers[i]]);
         }
     }
+    
 
 }	
 
