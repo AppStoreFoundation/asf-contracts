@@ -68,6 +68,7 @@ contract Advertisement {
         }
         delete bidIdList;
         advertisementFinance.reset();
+        advertisementFinance.setAdsStorageAddress(addrAdverStorage);
         advertisementStorage = AdvertisementStorage(addrAdverStorage);
     }
 
