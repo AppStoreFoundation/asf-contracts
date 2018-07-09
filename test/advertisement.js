@@ -92,6 +92,7 @@ contract('Advertisement', function(accounts) {
 		addInstance = await	Advertisement.new(appcInstance.address, AdvertisementStorageInstance.address,adFinanceInstance.address);
 
         await adFinanceInstance.setAdsContractAddress(addInstance.address);
+        await adFinanceInstance.setAdsStorageAddress(AdvertisementStorageInstance.address);
         await AdvertisementStorageInstance.setAllowedAddresses(addInstance.address, true);
 
 		TestUtils.setAppCoinsInstance(appcInstance);
@@ -264,9 +265,6 @@ contract('Advertisement', function(accounts) {
 		return addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce,accounts[1],accounts[2],walletName).then( instance => {
 			expect(instance.logs.length).to.be.equal(1);
 		});
-		return addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce,accounts[1],accounts[2],walletName).then( instance => {
-			expect(instance.logs.length).to.be.equal(1);
-		});
 
 		expect(addInstance.valid).to.be.false;
 	});
@@ -372,6 +370,7 @@ contract('Advertisement', function(accounts) {
 		var addsBalance = await TestUtils.getBalance(AdvertisementStorageInstance.address);
 		var user0Balance = await TestUtils.getBalance(accounts[0]);
 		var user1Balance = await TestUtils.getBalance(accounts[1]);
+
         AdvertisementStorageInstance = await AdvertisementStorage.new();
 
 		await addInstance.upgradeStorage(AdvertisementStorageInstance.address);
@@ -381,6 +380,7 @@ contract('Advertisement', function(accounts) {
 		var user0FinalBalance = await TestUtils.getBalance(accounts[0]);
 		var user1FinalBalance = await TestUtils.getBalance(accounts[1]);
 		var bidIdList = await addInstance.getBidIdList();
+
 		expect(addsFinalBalance).to.be.equal(0,'Advertisement contract balance should be 0');
 		expect(await TestUtils.getBalance(adFinanceInstance.address)).to.be.equal(0,"AdvertisementFinance contract balance should be 0");											 
 		expect(user0FinalBalance).to.be.equal(user0Balance+campaignBudget,'User 0 should receive campaignBudget value of his campaign');
@@ -388,36 +388,29 @@ contract('Advertisement', function(accounts) {
 		expect(bidIdList.length).to.be.equal(0,'Campaign list should be 0');
 	})
 
-	it('should upgrade advertisement storage and cancel all campaigns', async function() {
-		AdvertisementStorageInstance = await AdvertisementStorage.new();
+
+	it('should upgrade advertisement contract without changing storage nor finance contracts', async function() {
+		addInstance = await	Advertisement.new(appcInstance.address, AdvertisementStorageInstance.address,adFinanceInstance.address);
 		
-		await addInstance.upgradeStorage(AdvertisementStorageInstance.address);
+		var oem = accounts[2]; 
+		var user = accounts[3];
+		var appstore = accounts[4]; 
+
+		var balanceAppS = await TestUtils.getBalance(appstore);
+		var balanceOEM = await TestUtils.getBalance(oem);
+		var balanceUser = await TestUtils.getBalance(user);
+		
+		await appcInstance.transfer(accounts[1],campaignBudget);
+		await adFinanceInstance.setAdsContractAddress(addInstance.address);
+
 		await AdvertisementStorageInstance.setAllowedAddresses(addInstance.address, true);
 
-
-		var bidIdList = await addInstance.getBidIdList();
-
-		expect(bidIdList.length).to.be.equal(0,'Campaign list should be 0');
-
-		var bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000000");
-  		var countryList = []
-
-		countryList.push(convertCountryCodeToIndex("PT"))
-		countryList.push(convertCountryCodeToIndex("UK"))
-		countryList.push(convertCountryCodeToIndex("FR"))
-		countryList.push(convertCountryCodeToIndex("PA"))
-
-		await appcInstance.transfer(accounts[1],campaignBudget);
-		await appcInstance.approve(addInstance.address,campaignBudget,{ from : accounts[1]});
-		await addInstance.createCampaign("com.facebook.orca",countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980, { from : accounts[1]});
-
-		var countries = await addInstance.getCountriesOfCampaign(bid);
-		
-		expect(JSON.parse(countries[0])).to.be.equal(1.78405961588245e+44,"First country list storage is incorrect");
-		expect(JSON.parse(countries[1])).to.be.equal(1.1418003319719162e+46,"Secound country list storage is incorrect");
-													 
-		expect(JSON.parse(countries[2])).to.be.equal(262144,"Third country list storage is incorrect");
-
+		return addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce,appstore,oem,walletName, { from : user }).then( async instance => {
+			expect(instance.logs.length).to.be.equal(1);
+			expect(await TestUtils.getBalance(appstore)).to.be.equal(balanceAppS + campaignPrice*appStoreShare, 'AppStore did not receive reward');
+			expect(await TestUtils.getBalance(oem)).to.be.equal(balanceOEM + campaignPrice*oemShare,'OEM did not receive reward');
+			expect(await TestUtils.getBalance(user)).to.be.equal(balanceUser + campaignPrice*devShare,'User did not receive reward');
+		});
 	})
 
 });
