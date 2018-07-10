@@ -53,6 +53,7 @@ contract('AppCoinsIAB', function(accounts) {
 		expect(appSFinalBalance).to.be.equal(appSInitBalance+(price*appSShare));
 		expect(oemFinalBalance).to.be.equal(oemInitBalance+(price*oemShare));
 	})
+
 	it('should revert and emit an Error event when there is no allowance', async function () {
 		var price = 10000000;
 
@@ -60,5 +61,15 @@ contract('AppCoinsIAB', function(accounts) {
 			return appIABInstance.buy.sendTransaction(price,"example",appcInstance.address,devAcc,appStoreAcc,oemAcc);
 		});
 	})
+
+	it('should allow the contract owner to add allowed addresses')
+	it('should revert if a non contract owner tries to add allowed addresses')
+	it('should allow the contract owner to remove allowed addresses')
+	it('should revert if a non contract owner tries to remove allowed addresses')
+	it('should require only allowed addresses to call offchain transaction event function')
+	it('should revert if a non allowed address calls offchain transaction event function')
+	it('should revert if offchain transaction event function is called with different wallet and roothash list lengths')
+
+
 
 })
