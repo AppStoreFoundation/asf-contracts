@@ -68,14 +68,29 @@ contract Advertisement {
         }
         delete bidIdList;
         advertisementFinance.reset();
+        advertisementFinance.setAdsStorageAddress(addrAdverStorage);
         advertisementStorage = AdvertisementStorage(addrAdverStorage);
     }
 
+    /**
+    * Get AdvertisementStorageAddress
+    *
+    * Is required to upgrade Advertisement contract address on 
+    * Advertisement Finance contract
+    */
+
+    function getAdvertisementStorageAddress() public view returns(address _contract) {
+        require (msg.sender == address(advertisementFinance));
+
+        return address(advertisementStorage);                      
+    }
+    
 
     /**
     * Creates a campaign for a certain package name with
     * a defined price and budget
     */
+    
     function createCampaign (
         string packageName,
         uint[] countries,

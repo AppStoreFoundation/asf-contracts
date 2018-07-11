@@ -1,6 +1,7 @@
 pragma solidity ^0.4.21;
 
 import "./AppCoins.sol";
+import "./Advertisement.sol";
 
 /**
  * The AdvertisementFinance contract is responsible for keeping track of the 
@@ -9,9 +10,12 @@ import "./AppCoins.sol";
 contract AdvertisementFinance {
 
     mapping (address => uint256) balanceDevelopers;
+    mapping (address => bool) developerExists;
+    
     address[] developers;
     address owner;
     address advertisementContract;
+    address advStorageContract;
     AppCoins appc;
 
     modifier onlyOwner() { 
@@ -33,19 +37,36 @@ contract AdvertisementFinance {
         public {
         owner = msg.sender;
         appc = AppCoins(_addrAppc);
+        advStorageContract = 0x0;
+    }
+
+    function setAdsStorageAddress (address _addrStorage) external onlyOwnerOrAds {
+        reset();
+        advStorageContract = _addrStorage;
     }
 
     function setAdsContractAddress (address _addrAdvert) external onlyOwner {
+        // Verify if the new Ads contract is using the same storage as before 
+        if (advertisementContract != 0x0){
+            Advertisement adsContract = Advertisement(advertisementContract);
+            address adsStorage = adsContract.getAdvertisementStorageAddress();
+            require (adsStorage == advStorageContract);
+        }
         
+        //Update contract
         advertisementContract = _addrAdvert;
     }
     
 
     function increaseBalance(address _developer, uint256 _value) 
         public onlyAds{
-        developers.push(_developer);
-        balanceDevelopers[_developer] += _value;
 
+        if(developerExists[_developer] == false){
+            developers.push(_developer);
+            developerExists[_developer] = true;
+        }
+
+        balanceDevelopers[_developer] += _value;
     }
 
     function pay(address _developer, address _destination, uint256 _value) 
@@ -60,7 +81,7 @@ contract AdvertisementFinance {
         require(balanceDevelopers[_developer] >= _value);
         
         appc.transfer(_developer, _value);
-        balanceDevelopers[_developer] -= _value;	
+        balanceDevelopers[_developer] -= _value;    
     }
 
     function reset() public onlyOwnerOrAds {
@@ -68,6 +89,7 @@ contract AdvertisementFinance {
             withdraw(developers[i],balanceDevelopers[developers[i]]);
         }
     }
+    
 
 }	
 
