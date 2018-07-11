@@ -94,7 +94,7 @@ contract('AppCoinsIAB', function(accounts) {
 	it('should enable allowed addresses to call offchain transaction event function', async function () {
 		var walletAddress1 = accounts[4];
 		var walletAddress2 = accounts[5];
-		await TestUtils.expectErrorMessageTest("Operation can only be performed by allowed Addresses", () => {
+		await TestUtils.expectEventTest("OffChainBuy", () => {
 			return appIABInstance.informOffChainBuy.sendTransaction([walletAddress1,walletAddress2],[walletAddress1,walletAddress2], { from : allowedAddress });
 		});
 	})
@@ -108,6 +108,8 @@ contract('AppCoinsIAB', function(accounts) {
 	})
 
 	it('should revert if offchain transaction event function is called with different wallet and roothash list lengths', async function() {
+		var walletAddress1 = accounts[4];
+		var walletAddress2 = accounts[5];
 		await TestUtils.expectErrorMessageTest("Wallet list and Roothash list must have the same lengths", () => {
 			return appIABInstance.informOffChainBuy.sendTransaction([walletAddress1,walletAddress2],[walletAddress1], {from: allowedAddress});
 		});
