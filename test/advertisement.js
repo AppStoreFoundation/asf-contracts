@@ -178,8 +178,8 @@ contract('Advertisement', function(accounts) {
 		await appcInstance.approve(addInstance.address,campaignBudget);
 		var eventsStorage = AdvertisementStorageInstance.allEvents();
 		var eventsInfo = addInstance.allEvents();
-
-		await addInstance.createCampaign("com.instagram.android",countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980);
+		var packageName1 = "com.instagram.android";
+		await addInstance.createCampaign(packageName1,countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980);
 		
 		var eventStorageLog = await new Promise(
 				function(resolve, reject){
@@ -195,12 +195,15 @@ contract('Advertisement', function(accounts) {
 	    assert.equal(eventStorageLog.args.price,campaignPrice,"Price on campaign create event is not correct");
 	    assert.equal(eventStorageLog.args.budget,campaignBudget,"Budget on campaign create event is not correct");
 	    assert.equal(eventStorageLog.args.startDate,startDate,"Start date on campaign create event is not correct");
-	    assert.equal(eventStorageLog.args.finishDate,finishDate,"Finish date on campaign create event is not correct");
+	    assert.equal(eventStorageLog.args.endDate,endDate,"Finish date on campaign create event is not correct");
 
 		assert.equal(eventInfoLog.event,"CampaignInformation", "Event must be a CampaignInformation event");
-	    assert.equal(eventStorageLog.args.bidId,bid,"BidId on campaign info event is not correct");
-	    assert.equal(eventStorageLog.args.owner,accounts[0],"owner on campaign info event is not correct");
-	    assert.equal(eventStorageLog.args.packageName,packageName,"Package name on campaign info event is not correct");
+	    assert.equal(eventInfoLog.args.bidId,bid,"BidId on campaign info event is not correct");
+	    assert.equal(eventInfoLog.args.owner,accounts[0],"owner on campaign info event is not correct");
+	    assert.equal(eventInfoLog.args.packageName,packageName1,"Package name on campaign info event is not correct");
+	    assert.equal(eventInfoLog.args.countries[0],countryList[0],"Countries 1 on campaign info event are not correct");
+	    assert.equal(eventInfoLog.args.countries[1],countryList[1],"Countries 2 on campaign info event are not correct");
+	    assert.equal(eventInfoLog.args.countries[2],countryList[2],"Countries 3 on campaign info event are not correct");
 
 		
 		var budget = await addInstance.getBudgetOfCampaign(bid);
