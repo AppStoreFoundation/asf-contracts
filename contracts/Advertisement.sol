@@ -32,7 +32,6 @@ contract Advertisement {
 
     ValidationRules public rules;
     bytes32[] bidIdList;
-    mapping (bytes32 => CampaignLibrary.Campaign) campaigns;
     AppCoins appc;
     AdvertisementStorage advertisementStorage;
     address public owner;
@@ -46,7 +45,15 @@ contract Advertisement {
 
     event PoARegistered(bytes32 bidId, string packageName,uint64[] timestampList,uint64[] nonceList,string walletName);
     event Error(string func, string message);
-
+    event CampaignInformation
+        (
+            bytes32 bidId,
+            address  owner,
+            string ipValidator,
+            string packageName,
+            uint[3] countries,
+            uint[] vercodes
+    ); 
     /**
     * Constructor function
     *
@@ -83,7 +90,7 @@ contract Advertisement {
     */
     function createCampaign (
         string packageName,
-        uint[] countries,
+        uint[3] countries,
         uint[] vercodes,
         uint price,
         uint budget,
@@ -96,14 +103,9 @@ contract Advertisement {
         
         CampaignLibrary.Campaign memory newCampaign;
 
-        newCampaign.filters.packageName = packageName;
-        newCampaign.filters.vercodes = vercodes;
         newCampaign.price = price;
         newCampaign.startDate = startDate;
         newCampaign.endDate = endDate;
-
-        (newCampaign.filters.countries[0],newCampaign.filters.countries[1],newCampaign.filters.countries[2]) = 
-            CampaignLibrary.convertCountryIndexToBytes(countries);
 
         //Transfers the budget to contract address
         if(appc.allowance(msg.sender, address(this)) < budget){
@@ -119,7 +121,14 @@ contract Advertisement {
         newCampaign.bidId = uintToBytes(bidIdList.length);
         addCampaign(newCampaign);
 
-    }
+        emit CampaignInformation(
+            newCampaign.bidId, 
+            newCampaign.owner,
+            "", // ipValidator field
+            packageName,
+            countries,
+            vercodes);
+    }   
 
     function addCampaign(CampaignLibrary.Campaign campaign) internal {
 
@@ -134,15 +143,9 @@ contract Advertisement {
             campaign.startDate,
             campaign.endDate,
             campaign.valid,
-            campaign.owner,
-            campaign.ipValidator
+            campaign.owner
         );
-        advertisementStorage.setCampaignFilters(
-            campaign.bidId,
-            campaign.filters.packageName,
-            campaign.filters.countries,
-            campaign.filters.vercodes
-        );
+
     }
 
     function registerPoA (
@@ -211,18 +214,6 @@ contract Advertisement {
 
     function getCampaignValidity(bytes32 bidId) public view returns(bool){
         return advertisementStorage.getCampaignValidById(bidId);
-    }
-
-    function getPackageNameOfCampaign (bytes32 bidId) public view returns(string) {
-        return advertisementStorage.getCampaignPackageNameById(bidId);
-    }
-
-    function getCountriesOfCampaign (bytes32 bidId) public view returns(uint[3]){
-        return advertisementStorage.getCampaignCountriesById(bidId);
-    }
-
-    function getVercodesOfCampaign (bytes32 bidId) public view returns(uint[]) {
-        return advertisementStorage.getCampaignVercodesById(bidId);
     }
 
     function getPriceOfCampaign (bytes32 bidId) public view returns(uint) {
