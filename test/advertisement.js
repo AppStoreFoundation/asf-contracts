@@ -174,7 +174,7 @@ contract('Advertisement', function(accounts) {
 
 		await appcInstance.approve(addInstance.address,campaignBudget);
 		await addInstance.createCampaign("com.instagram.android",countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980);
-		var countries = await addInstance.getCountriesOfCampaign(bid);
+		var countries = await addInstance.getCountriesOfCampaign.call(bid);
 		
 		expect(JSON.parse(countries[0])).to.be.equal(1.78405961588245e+44,"First country list storage is incorrect");
 		expect(JSON.parse(countries[1])).to.be.equal(1.1418003319719162e+46,"Secound country list storage is incorrect");
@@ -188,14 +188,14 @@ contract('Advertisement', function(accounts) {
 
 		var userInitBalance = await TestUtils.getBalance(accounts[1]);
 		var contractBalance = await TestUtils.getBalance(adFinanceInstance.address);
-		var campaignBalance = JSON.parse(await addInstance.getBudgetOfCampaign(bid));
+		var campaignBalance = JSON.parse(await addInstance.getBudgetOfCampaign.call(bid));
 		var contractBalance = await TestUtils.getBalance(adFinanceInstance.address);
 		await addInstance.cancelCampaign(bid);
 
 		var newUserBalance = await TestUtils.getBalance(accounts[1]);
 		var newContractBalance = await TestUtils.getBalance(adFinanceInstance.address);
-		var newCampaignBalance = JSON.parse(await addInstance.getBudgetOfCampaign(bid));
-		var validity =  await addInstance.getCampaignValidity(bid);
+		var newCampaignBalance = JSON.parse(await addInstance.getBudgetOfCampaign.call(bid));
+		var validity =  await addInstance.getCampaignValidity.call(bid);
 
 
 		expect(validity).to.be.equal(false);
@@ -211,14 +211,14 @@ contract('Advertisement', function(accounts) {
 
 		var userInitBalance = await TestUtils.getBalance(accounts[1]);
 		var contractBalance = await TestUtils.getBalance(adFinanceInstance.address);
-		var campaignBalance = JSON.parse(await addInstance.getBudgetOfCampaign(bid));
+		var campaignBalance = JSON.parse(await addInstance.getBudgetOfCampaign.call(bid));
 
 		await addInstance.cancelCampaign(bid, { from : accounts[1]});
 
 		var newUserBalance = await TestUtils.getBalance(accounts[1]);
 		var newContractBalance = await TestUtils.getBalance(adFinanceInstance.address);
-		var newCampaignBalance = JSON.parse(await addInstance.getBudgetOfCampaign(bid));
-		var validity =  await addInstance.getCampaignValidity(bid);
+		var newCampaignBalance = JSON.parse(await addInstance.getBudgetOfCampaign.call(bid));
+		var validity =  await addInstance.getCampaignValidity.call(bid);
 
 		expect(validity).to.be.equal(false);
 		expect(await TestUtils.getBalance(adFinanceInstance.address)).to.be.equal(contractBalance-campaignBudget,"AppCoins are not being stored on AdvertisementFinance.");
@@ -274,7 +274,7 @@ contract('Advertisement', function(accounts) {
 		var userInitBalance = await TestUtils.getBalance(accounts[0]);
 		var appSInitBalance = await TestUtils.getBalance(accounts[1]);
 		var oemInitBalance = await TestUtils.getBalance(accounts[2]);
-		var campaignBudget = JSON.parse(await addInstance.getBudgetOfCampaign(examplePoA.bid));
+		var campaignBudget = JSON.parse(await addInstance.getBudgetOfCampaign.call(examplePoA.bid));
 		var contractBalance = await TestUtils.getBalance(adFinanceInstance.address);
 
 		await addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce,accounts[1],accounts[2],walletName);
@@ -282,7 +282,7 @@ contract('Advertisement', function(accounts) {
 		var newUserBalance = await TestUtils.getBalance(accounts[0]);
 		var newAppStoreBalance = await TestUtils.getBalance(accounts[1]);
 		var newOemBalance = await TestUtils.getBalance(accounts[2]);
-		var newCampaignBudget = JSON.parse(await addInstance.getBudgetOfCampaign(examplePoA.bid));
+		var newCampaignBudget = JSON.parse(await addInstance.getBudgetOfCampaign.call(examplePoA.bid));
 		var newContractBalance = await TestUtils.getBalance(adFinanceInstance.address);
 
 		expect(campaignBudget-campaignPrice).to.be.equal(newCampaignBudget,"Campaign budget not updated.");
@@ -379,7 +379,7 @@ contract('Advertisement', function(accounts) {
 		var addsFinalBalance = await TestUtils.getBalance(AdvertisementStorageInstance.address);
 		var user0FinalBalance = await TestUtils.getBalance(accounts[0]);
 		var user1FinalBalance = await TestUtils.getBalance(accounts[1]);
-		var bidIdList = await addInstance.getBidIdList();
+		var bidIdList = await addInstance.getBidIdList.call();
 
 		expect(addsFinalBalance).to.be.equal(0,'Advertisement contract balance should be 0');
 		expect(await TestUtils.getBalance(adFinanceInstance.address)).to.be.equal(0,"AdvertisementFinance contract balance should be 0");											 
