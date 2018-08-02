@@ -212,7 +212,7 @@ contract('Advertisement', function(accounts) {
 	    assert.equal(eventInfoLog.args.countries[2],countryList[2],"Countries 3 on campaign info event are not correct");
 
 		
-		var budget = await addInstance.getBudgetOfCampaign(bid);
+		var budget = await addInstance.getBudgetOfCampaign.call(bid);
 		
 		await addInstance.createCampaign("com.instagram.android",countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980);
 		
@@ -441,7 +441,7 @@ contract('Advertisement', function(accounts) {
 		await appcInstance.transfer(accounts[1],campaignBudget);
 		await adFinanceInstance.setAdsContractAddress(addInstance.address);
 
-		var budget = await addInstance.getBudgetOfCampaign(examplePoA.bid);
+		var budget = await addInstance.getBudgetOfCampaign.call(examplePoA.bid);
 		
 		expect(JSON.parse(budget)).to.be.equal(campaignBudget,"Campaign budget is incorrect");
 
