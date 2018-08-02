@@ -1,5 +1,6 @@
 var Advertisement = artifacts.require("./Advertisement.sol");
 var AdvertisementStorage = artifacts.require("./AdvertisementStorage.sol");
+var AdvertisementFinance = artifacts.require("./AdvertisementFinance.sol");
 var AppCoins = artifacts.require("./AppCoins.sol");
 var chai = require('chai');
 var web3 = require('web3');
@@ -11,6 +12,7 @@ chai.use(chaiAsPromissed);
 var BigNumber = require('big-number');
 var appcInstance;
 var addInstance;
+var adFinanceInstance;
 var devShare = 0.85;
 var appStoreShare = 0.1;
 var oemShare = 0.05;
@@ -86,8 +88,11 @@ contract('Advertisement', function(accounts) {
 
         appcInstance = await AppCoins.new();
         AdvertisementStorageInstance = await AdvertisementStorage.new();
-		addInstance = await	Advertisement.new(appcInstance.address, AdvertisementStorageInstance.address);
+		adFinanceInstance = await AdvertisementFinance.new(appcInstance.address);
+		addInstance = await	Advertisement.new(appcInstance.address, AdvertisementStorageInstance.address,adFinanceInstance.address);
 
+        await adFinanceInstance.setAdsContractAddress(addInstance.address);
+        await adFinanceInstance.setAdsStorageAddress(AdvertisementStorageInstance.address);
         await AdvertisementStorageInstance.setAllowedAddresses(addInstance.address, true);
 
 		TestUtils.setAppCoinsInstance(appcInstance);
@@ -160,20 +165,21 @@ contract('Advertisement', function(accounts) {
   	it('should create a campaign', async function() {
 		var bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000002");
   		var countryList = []
+  		var contractBalance = await TestUtils.getBalance(adFinanceInstance.address);
 
 		countryList.push(convertCountryCodeToIndex("PT"))
 		countryList.push(convertCountryCodeToIndex("UK"))
 		countryList.push(convertCountryCodeToIndex("FR"))
 		countryList.push(convertCountryCodeToIndex("PA"))
 
-
 		await appcInstance.approve(addInstance.address,campaignBudget);
 		await addInstance.createCampaign("com.instagram.android",countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980);
-		var countries = await addInstance.getCountriesOfCampaign(bid);
+		var countries = await addInstance.getCountriesOfCampaign.call(bid);
 		
 		expect(JSON.parse(countries[0])).to.be.equal(1.78405961588245e+44,"First country list storage is incorrect");
 		expect(JSON.parse(countries[1])).to.be.equal(1.1418003319719162e+46,"Secound country list storage is incorrect");
-													 
+		expect(await TestUtils.getBalance(adFinanceInstance.address)).to.be.equal(contractBalance+campaignBudget,"AppCoins are not being stored on AdvertisementFinance.");											 
+		expect(await TestUtils.getBalance(addInstance.address)).to.be.equal(0,"AppCoins should not be stored on Advertisement contract.");											 
 		expect(JSON.parse(countries[2])).to.be.equal(262144,"Third country list storage is incorrect");
   	});
 
@@ -181,18 +187,19 @@ contract('Advertisement', function(accounts) {
 		var bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000001");
 
 		var userInitBalance = await TestUtils.getBalance(accounts[1]);
-		var contractBalance = await TestUtils.getBalance(addInstance.address);
-		var campaignBalance = JSON.parse(await addInstance.getBudgetOfCampaign(bid));
-
+		var contractBalance = await TestUtils.getBalance(adFinanceInstance.address);
+		var campaignBalance = JSON.parse(await addInstance.getBudgetOfCampaign.call(bid));
+		var contractBalance = await TestUtils.getBalance(adFinanceInstance.address);
 		await addInstance.cancelCampaign(bid);
 
 		var newUserBalance = await TestUtils.getBalance(accounts[1]);
-		var newContractBalance = await TestUtils.getBalance(addInstance.address);
-		var newCampaignBalance = JSON.parse(await addInstance.getBudgetOfCampaign(bid));
-		var validity =  await addInstance.getCampaignValidity(bid);
+		var newContractBalance = await TestUtils.getBalance(adFinanceInstance.address);
+		var newCampaignBalance = JSON.parse(await addInstance.getBudgetOfCampaign.call(bid));
+		var validity =  await addInstance.getCampaignValidity.call(bid);
 
 
 		expect(validity).to.be.equal(false);
+		expect(await TestUtils.getBalance(adFinanceInstance.address)).to.be.equal(contractBalance-campaignBudget,"AppCoins are not being stored on AdvertisementFinance.");
 		expect(campaignBalance).to.be.not.equal(0,"Campaign balance is 0");
 		expect(newCampaignBalance).to.be.equal(0,"Campaign balance after cancel should be 0");
 		expect(userInitBalance+campaignBalance).to.be.equal(newUserBalance,"User balance should be updated");
@@ -203,17 +210,19 @@ contract('Advertisement', function(accounts) {
 		var bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000001");
 
 		var userInitBalance = await TestUtils.getBalance(accounts[1]);
-		var contractBalance = await TestUtils.getBalance(addInstance.address);
-		var campaignBalance = JSON.parse(await addInstance.getBudgetOfCampaign(bid));
+		var contractBalance = await TestUtils.getBalance(adFinanceInstance.address);
+		var campaignBalance = JSON.parse(await addInstance.getBudgetOfCampaign.call(bid));
 
 		await addInstance.cancelCampaign(bid, { from : accounts[1]});
 
 		var newUserBalance = await TestUtils.getBalance(accounts[1]);
-		var newContractBalance = await TestUtils.getBalance(addInstance.address);
-		var newCampaignBalance = JSON.parse(await addInstance.getBudgetOfCampaign(bid));
-		var validity =  await addInstance.getCampaignValidity(bid);
+		var newContractBalance = await TestUtils.getBalance(adFinanceInstance.address);
+		var newCampaignBalance = JSON.parse(await addInstance.getBudgetOfCampaign.call(bid));
+		var validity =  await addInstance.getCampaignValidity.call(bid);
 
 		expect(validity).to.be.equal(false);
+		expect(await TestUtils.getBalance(adFinanceInstance.address)).to.be.equal(contractBalance-campaignBudget,"AppCoins are not being stored on AdvertisementFinance.");
+		expect(await TestUtils.getBalance(addInstance.address)).to.be.equal(0,"AppCoins should not be stored on Advertisement contract.");											 
 		expect(campaignBalance).to.be.not.equal(0,"Campaign balance is 0");
 		expect(newCampaignBalance).to.be.equal(0,"Campaign balance after cancel should be 0");
 		expect(userInitBalance+campaignBalance).to.be.equal(newUserBalance,"User balance should be updated");
@@ -256,9 +265,6 @@ contract('Advertisement', function(accounts) {
 		return addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce,accounts[1],accounts[2],walletName).then( instance => {
 			expect(instance.logs.length).to.be.equal(1);
 		});
-		return addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce,accounts[1],accounts[2],walletName).then( instance => {
-			expect(instance.logs.length).to.be.equal(1);
-		});
 
 		expect(addInstance.valid).to.be.false;
 	});
@@ -268,19 +274,21 @@ contract('Advertisement', function(accounts) {
 		var userInitBalance = await TestUtils.getBalance(accounts[0]);
 		var appSInitBalance = await TestUtils.getBalance(accounts[1]);
 		var oemInitBalance = await TestUtils.getBalance(accounts[2]);
-		var campaignBudget = JSON.parse(await addInstance.getBudgetOfCampaign(examplePoA.bid));
-		var contractBalance = await TestUtils.getBalance(addInstance.address);
+		var campaignBudget = JSON.parse(await addInstance.getBudgetOfCampaign.call(examplePoA.bid));
+		var contractBalance = await TestUtils.getBalance(adFinanceInstance.address);
 
 		await addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce,accounts[1],accounts[2],walletName);
 
 		var newUserBalance = await TestUtils.getBalance(accounts[0]);
 		var newAppStoreBalance = await TestUtils.getBalance(accounts[1]);
 		var newOemBalance = await TestUtils.getBalance(accounts[2]);
-		var newCampaignBudget = JSON.parse(await addInstance.getBudgetOfCampaign(examplePoA.bid));
-		var newContractBalance = await TestUtils.getBalance(addInstance.address);
+		var newCampaignBudget = JSON.parse(await addInstance.getBudgetOfCampaign.call(examplePoA.bid));
+		var newContractBalance = await TestUtils.getBalance(adFinanceInstance.address);
 
 		expect(campaignBudget-campaignPrice).to.be.equal(newCampaignBudget,"Campaign budget not updated.");
 		expect(contractBalance-campaignPrice).to.be.equal(newContractBalance,"Contract balance not updated.");
+		expect(await TestUtils.getBalance(addInstance.address)).to.be.equal(0,"AppCoins should not be stored on Advertisement contract.");											 
+		
 		var error = new Number("1.99208860077274e-9");
 		var expectedUserBalance = userInitBalance+(campaignPrice*devShare)
 		expect(newUserBalance).to.be.within(expectedUserBalance - (expectedUserBalance*error), expectedUserBalance + (expectedUserBalance*error),"User balance not updated.");
@@ -362,6 +370,7 @@ contract('Advertisement', function(accounts) {
 		var addsBalance = await TestUtils.getBalance(AdvertisementStorageInstance.address);
 		var user0Balance = await TestUtils.getBalance(accounts[0]);
 		var user1Balance = await TestUtils.getBalance(accounts[1]);
+
         AdvertisementStorageInstance = await AdvertisementStorage.new();
 
 		await addInstance.upgradeStorage(AdvertisementStorageInstance.address);
@@ -370,43 +379,38 @@ contract('Advertisement', function(accounts) {
 		var addsFinalBalance = await TestUtils.getBalance(AdvertisementStorageInstance.address);
 		var user0FinalBalance = await TestUtils.getBalance(accounts[0]);
 		var user1FinalBalance = await TestUtils.getBalance(accounts[1]);
-		var bidIdList = await addInstance.getBidIdList();
+		var bidIdList = await addInstance.getBidIdList.call();
+
 		expect(addsFinalBalance).to.be.equal(0,'Advertisement contract balance should be 0');
+		expect(await TestUtils.getBalance(adFinanceInstance.address)).to.be.equal(0,"AdvertisementFinance contract balance should be 0");											 
 		expect(user0FinalBalance).to.be.equal(user0Balance+campaignBudget,'User 0 should receive campaignBudget value of his campaign');
 		expect(user1FinalBalance).to.be.equal(user1Balance+campaignBudget,'User 1 should receive campaignBudget value of his campaign');
 		expect(bidIdList.length).to.be.equal(0,'Campaign list should be 0');
 	})
 
-	it('should upgrade advertisement storage and cancel all campaigns', async function() {
-		AdvertisementStorageInstance = await AdvertisementStorage.new();
+
+	it('should upgrade advertisement contract without changing storage nor finance contracts', async function() {
+		addInstance = await	Advertisement.new(appcInstance.address, AdvertisementStorageInstance.address,adFinanceInstance.address);
 		
-		await addInstance.upgradeStorage(AdvertisementStorageInstance.address);
+		var oem = accounts[2]; 
+		var user = accounts[3];
+		var appstore = accounts[4]; 
+
+		var balanceAppS = await TestUtils.getBalance(appstore);
+		var balanceOEM = await TestUtils.getBalance(oem);
+		var balanceUser = await TestUtils.getBalance(user);
+		
+		await appcInstance.transfer(accounts[1],campaignBudget);
+		await adFinanceInstance.setAdsContractAddress(addInstance.address);
+
 		await AdvertisementStorageInstance.setAllowedAddresses(addInstance.address, true);
 
-
-		var bidIdList = await addInstance.getBidIdList();
-
-		expect(bidIdList.length).to.be.equal(0,'Campaign list should be 0');
-
-		var bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000000");
-  		var countryList = []
-
-		countryList.push(convertCountryCodeToIndex("PT"))
-		countryList.push(convertCountryCodeToIndex("UK"))
-		countryList.push(convertCountryCodeToIndex("FR"))
-		countryList.push(convertCountryCodeToIndex("PA"))
-
-		await appcInstance.transfer(accounts[1],campaignBudget);
-		await appcInstance.approve(addInstance.address,campaignBudget,{ from : accounts[1]});
-		await addInstance.createCampaign("com.facebook.orca",countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980, { from : accounts[1]});
-
-		var countries = await addInstance.getCountriesOfCampaign(bid);
-		
-		expect(JSON.parse(countries[0])).to.be.equal(1.78405961588245e+44,"First country list storage is incorrect");
-		expect(JSON.parse(countries[1])).to.be.equal(1.1418003319719162e+46,"Secound country list storage is incorrect");
-													 
-		expect(JSON.parse(countries[2])).to.be.equal(262144,"Third country list storage is incorrect");
-
+		return addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce,appstore,oem,walletName, { from : user }).then( async instance => {
+			expect(instance.logs.length).to.be.equal(1);
+			expect(await TestUtils.getBalance(appstore)).to.be.equal(balanceAppS + campaignPrice*appStoreShare, 'AppStore did not receive reward');
+			expect(await TestUtils.getBalance(oem)).to.be.equal(balanceOEM + campaignPrice*oemShare,'OEM did not receive reward');
+			expect(await TestUtils.getBalance(user)).to.be.equal(balanceUser + campaignPrice*devShare,'User did not receive reward');
+		});
 	})
 
 });

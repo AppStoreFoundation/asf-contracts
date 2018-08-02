@@ -56,7 +56,7 @@ contract('AdvertisementStorage', function(accounts) {
             { from: allowedAddress }
         );
 
-        var advertPackageName = await AdvertisementStorageInstance.getCampaignPackageNameById(testCampaign.bidId);
+        var advertPackageName = await AdvertisementStorageInstance.getCampaignPackageNameById.call(testCampaign.bidId);
 
         expect(advertPackageName).to.be.equal(testCampaign.filters.packageName, "Successfully saved the campaign");
 

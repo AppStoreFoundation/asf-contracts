@@ -2,10 +2,10 @@ var appcInstance = null;
 var contractInstance = null;
 
 module.exports = {
-	setAppCoinsInstance: async function (instance){
+	setAppCoinsInstance: function (instance){
 		appcInstance = instance;
 	},
-	setContractInstance: async function (instance){
+	setContractInstance: function (instance){
 		contractInstance = instance;
 	},
 	getBalance: async function (account) {
