@@ -41,7 +41,7 @@ contract('AdvertisementStorage', function(accounts) {
             testCampaign.owner,
             { from: allowedAddress }
         );
-       
+               
         var advertStartDate = await AdvertisementStorageInstance.getCampaignStartDateById(testCampaign.bidId);
 
         expect(JSON.parse(advertStartDate)).to.be.equal(testCampaign.startDate, "Campaign was not saved");

@@ -17,6 +17,7 @@ var oemAcc;
 var devShare = 0.85;
 var appSShare = 0.1;
 var oemShare = 0.05;
+var allowedAddress;
 
 contract('AppCoinsIAB', function(accounts) {
 	beforeEach( async () => {
@@ -30,6 +31,11 @@ contract('AppCoinsIAB', function(accounts) {
 
 		TestUtils.setAppCoinsInstance(appcInstance);
 		TestUtils.setContractInstance(appIABInstance);
+
+		allowedAddress = accounts[7];
+
+		await appIABInstance.addAllowedAddress(allowedAddress);
+
 
 	})
 
@@ -53,6 +59,7 @@ contract('AppCoinsIAB', function(accounts) {
 		expect(appSFinalBalance).to.be.equal(appSInitBalance+(price*appSShare));
 		expect(oemFinalBalance).to.be.equal(oemInitBalance+(price*oemShare));
 	})
+
 	it('should revert and emit an Error event when there is no allowance', async function () {
 		var price = 10000000;
 
@@ -60,5 +67,64 @@ contract('AppCoinsIAB', function(accounts) {
 			return appIABInstance.buy.sendTransaction(price,"example",appcInstance.address,devAcc,appStoreAcc,oemAcc);
 		});
 	})
+
+	it('should allow the contract owner to add allowed addresses', async function () {
+		var allowedAddress = accounts[8];
+		await appIABInstance.addAllowedAddress(allowedAddress);
+	})
+
+	it('should revert if a non contract owner tries to add allowed addresses', async function () {
+		var newAllowedAddress = accounts[8];
+		await TestUtils.expectErrorMessageTest("Operation can only be performed by contract owner", () => {
+			return appIABInstance.addAllowedAddress.sendTransaction(newAllowedAddress, { from : allowedAddress });
+		});
+	})
+	
+	it('should allow the contract owner to remove allowed addresses', async function () {
+		await appIABInstance.removeAllowedAddress(allowedAddress);
+	})
+
+	it('should revert if a non contract owner tries to remove allowed addresses', async function () {
+		var issuer = accounts[9];
+		await TestUtils.expectErrorMessageTest("Operation can only be performed by contract owner", () => {
+			return appIABInstance.removeAllowedAddress.sendTransaction(allowedAddress, { from : issuer });
+		});
+	})
+
+	it('should enable allowed addresses to call offchain transaction event function', async function () {
+		var walletAddress1 = accounts[4];
+		var walletAddress2 = accounts[5];
+		await TestUtils.expectEventTest("OffChainBuy", () => {
+			return appIABInstance.informOffChainBuy.sendTransaction([walletAddress1,walletAddress2],[walletAddress1,walletAddress2], { from : allowedAddress });
+		});
+	})
+
+	it('should revert if a non allowed address calls offchain transaction event function', async function () {
+		var walletAddress1 = accounts[4];
+		var walletAddress2 = accounts[5];
+		await TestUtils.expectErrorMessageTest("Operation can only be performed by allowed Addresses", () => {
+			return appIABInstance.informOffChainBuy.sendTransaction([walletAddress1,walletAddress2],[walletAddress1,walletAddress2]);
+		});
+	})
+
+	it('should revert if offchain transaction event function is called with different wallet and roothash list lengths', async function() {
+		var walletAddress1 = accounts[4];
+		var walletAddress2 = accounts[5];
+		await TestUtils.expectErrorMessageTest("Wallet list and Roothash list must have the same lengths", () => {
+			return appIABInstance.informOffChainBuy.sendTransaction([walletAddress1,walletAddress2],[walletAddress1], {from: allowedAddress});
+		});
+	})
+
+	it('should revert if a previously allowed address has its access revoked to offchain transaction event function', async function () {
+		var walletAddress1 = accounts[4];
+		var walletAddress2 = accounts[5];
+		await appIABInstance.informOffChainBuy.sendTransaction([walletAddress1,walletAddress2],[walletAddress1,walletAddress2], {from: allowedAddress});
+
+		await appIABInstance.removeAllowedAddress(allowedAddress);
+		await TestUtils.expectErrorMessageTest("Operation can only be performed by allowed Addresses", () => {
+			return appIABInstance.informOffChainBuy.sendTransaction([walletAddress1,walletAddress2],[walletAddress1,walletAddress2], {from: allowedAddress});
+		})
+	})
+
 
 })

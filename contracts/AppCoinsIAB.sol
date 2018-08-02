@@ -12,17 +12,63 @@ contract AppCoinsIABInterface {
 }
 
 contract AppCoinsIAB is AppCoinsIABInterface {
+    
+
     uint public dev_share = 85;
     uint public appstore_share = 10;
     uint public oem_share = 5;
 
+    mapping (address => bool) allowedAddresses;
+    address owner;
+
+    modifier onlyAllowedAddress(string _funcName) {
+        if(!allowedAddresses[msg.sender]){
+            emit Error(_funcName, "Operation can only be performed by allowed Addresses");
+            return;
+        }
+        _;
+    }
+
+    modifier onlyOwner(string _funcName) { 
+        if(owner != msg.sender){
+            emit Error(_funcName, "Operation can only be performed by contract owner");
+            return;
+        }
+        _; 
+    }
+    
+
     event Buy(uint _amount, string _sku, address _from, address _dev, address _appstore, address _oem);
     event Error(string func, string message);
+    event OffChainBuy(address _wallet, bytes32 _rootHash);
     
-    function division(uint numerator, uint denominator) public view returns (uint) {
-        uint _quotient = numerator / denominator;
-        return _quotient;
+    function AppCoinsIAB() public {
+        owner = msg.sender;
     }
+
+    function addAllowedAddress(address _account) public onlyOwner("addAllowedAddress"){
+        allowedAddresses[_account] = true;
+    }
+
+    function removeAllowedAddress(address _account) public onlyOwner("removeAllowedAddress") {
+        allowedAddresses[_account] = false;
+    }
+    
+    function informOffChainBuy(address[] _walletList, bytes32[] _rootHashList) public onlyAllowedAddress("informOffChainTransaction") {
+        if(_walletList.length != _rootHashList.length){
+            emit Error("informOffChainTransaction", "Wallet list and Roothash list must have the same lengths");
+            return;
+        }
+        for(uint i = 0; i < _walletList.length; i++){
+            emit OffChainBuy(_walletList[i],_rootHashList[i]);
+        }
+    }
+
+    function division(uint _numerator, uint _denominator) public view returns (uint) {
+        uint quotient = _numerator / _denominator;
+        return quotient;
+    }
+
 
     function buy(uint256 _amount, string _sku, address _addr_appc, address _dev, address _appstore, address _oem) public view returns (bool) {
         require(_addr_appc != 0x0);

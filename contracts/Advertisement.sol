@@ -3,15 +3,8 @@ pragma solidity ^0.4.21;
 
 import  { CampaignLibrary } from "./lib/CampaignLibrary.sol";
 import "./AdvertisementStorage.sol";
-
-
-contract AppCoins {
-    mapping (address => mapping (address => uint256)) public allowance;
-    function balanceOf (address _owner) public view returns (uint256);
-    function transfer(address _to, uint256 _value) public returns (bool success);
-    function transferFrom(address _from, address _to, uint256 _value) public returns (uint);
-}
-
+import "./AdvertisementFinance.sol";
+import "./AppCoins.sol";
 
 /**
  * The Advertisement contract collects campaigns registered by developers
@@ -34,11 +27,12 @@ contract Advertisement {
     bytes32[] bidIdList;
     AppCoins appc;
     AdvertisementStorage advertisementStorage;
+    AdvertisementFinance advertisementFinance;
     address public owner;
     mapping (address => mapping (bytes32 => bool)) userAttributions;
 
     modifier onlyOwner() { 
-        require (msg.sender == owner); 
+        require(msg.sender == owner); 
         _; 
     }
     
@@ -59,11 +53,12 @@ contract Advertisement {
     *
     * Initializes contract with default validation rules
     */
-    function Advertisement (address addrAppc, address addrAdverStorage) public {
+    function Advertisement (address _addrAppc, address _addrAdverStorage, address _addrAdverFinance) public {
         rules = ValidationRules(false, true, true, 2, 1);
         owner = msg.sender;
-        appc = AppCoins(addrAppc);
-        advertisementStorage = AdvertisementStorage(addrAdverStorage);
+        appc = AppCoins(_addrAppc);
+        advertisementStorage = AdvertisementStorage(_addrAdverStorage);
+        advertisementFinance = AdvertisementFinance(_addrAdverFinance);
     }
 
     /**
@@ -79,15 +74,30 @@ contract Advertisement {
             cancelCampaign(bidIdList[i]);
         }
         delete bidIdList;
-        
+        advertisementFinance.reset();
+        advertisementFinance.setAdsStorageAddress(addrAdverStorage);
         advertisementStorage = AdvertisementStorage(addrAdverStorage);
     }
 
+    /**
+    * Get AdvertisementStorageAddress
+    *
+    * Is required to upgrade Advertisement contract address on 
+    * Advertisement Finance contract
+    */
+
+    function getAdvertisementStorageAddress() public view returns(address _contract) {
+        require (msg.sender == address(advertisementFinance));
+
+        return address(advertisementStorage);                      
+    }
+    
 
     /**
     * Creates a campaign for a certain package name with
     * a defined price and budget
     */
+    
     function createCampaign (
         string packageName,
         uint[3] countries,
@@ -113,7 +123,9 @@ contract Advertisement {
             return;
         }
 
-        appc.transferFrom(msg.sender, address(this), budget);
+        appc.transferFrom(msg.sender, address(advertisementFinance), budget);
+        
+        advertisementFinance.increaseBalance(msg.sender,budget);
 
         newCampaign.budget = budget;
         newCampaign.owner = msg.sender;
@@ -203,10 +215,10 @@ contract Advertisement {
         address campaignOwner = getOwnerOfCampaign(bidId);
 
 		// Only contract owner or campaign owner can cancel a campaign
-        require (owner == msg.sender || campaignOwner == msg.sender);
+        require(owner == msg.sender || campaignOwner == msg.sender);
         uint budget = getBudgetOfCampaign(bidId);
 
-        appc.transfer(campaignOwner, budget);
+        advertisementFinance.withdraw(campaignOwner, budget);
 
         advertisementStorage.setCampaignBudgetById(bidId, 0);
         advertisementStorage.setCampaignValidById(bidId, false);
@@ -257,14 +269,15 @@ contract Advertisement {
         //Search bid price
         uint price = advertisementStorage.getCampaignPriceById(bidId);
         uint budget = advertisementStorage.getCampaignBudgetById(bidId);
+        address campaignOwner = advertisementStorage.getCampaignOwnerById(bidId);
 
         require(budget > 0);
         require(budget >= price);
 
         //transfer to user, appstore and oem
-        appc.transfer(msg.sender, division(price * devShare, 100));
-        appc.transfer(appstore, division(price * appstoreShare, 100));
-        appc.transfer(oem, division(price * oemShare, 100));
+        advertisementFinance.pay(campaignOwner,msg.sender,division(price * devShare, 100));
+        advertisementFinance.pay(campaignOwner,appstore,division(price * appstoreShare, 100));
+        advertisementFinance.pay(campaignOwner,oem,division(price * oemShare, 100));
 
         //subtract from campaign
         uint newBudget = budget - price;
