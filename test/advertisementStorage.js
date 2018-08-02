@@ -14,13 +14,7 @@ var testCampaign = {
     startDate: 500000,
     endDate: 600000,
     valid: true,
-    owner: '0x1DD02B96E9D55E16c646d2F21CA93A705ac667Bf',
-    ipValidator: 1,
-    filters: {
-        packageName: "com.test.pn",
-        countries: [409], // PT
-        vercodes: [1, 2]
-    }
+    owner: '0x1DD02B96E9D55E16c646d2F21CA93A705ac667Bf'
 };
 
 var expectRevert = RegExp('revert');
@@ -45,20 +39,12 @@ contract('AdvertisementStorage', function(accounts) {
             testCampaign.endDate,
             testCampaign.valid,
             testCampaign.owner,
-            testCampaign.ipValidator,
-            { from: allowedAddress }
-        );
-        await AdvertisementStorageInstance.setCampaignFilters(
-            testCampaign.bidId,
-            testCampaign.filters.packageName,
-            testCampaign.filters.countries,
-            testCampaign.filters.vercodes,
             { from: allowedAddress }
         );
 
-        var advertPackageName = await AdvertisementStorageInstance.getCampaignPackageNameById.call(testCampaign.bidId);
+        var advertStartDate = await AdvertisementStorageInstance.getCampaignStartDateById.call(testCampaign.bidId);
 
-        expect(advertPackageName).to.be.equal(testCampaign.filters.packageName, "Successfully saved the campaign");
+        expect(JSON.parse(advertStartDate)).to.be.equal(testCampaign.startDate, "Campaign was not saved");
 
     })
 
@@ -75,7 +61,6 @@ contract('AdvertisementStorage', function(accounts) {
             testCampaign.endDate,
             testCampaign.valid,
             testCampaign.owner,
-            testCampaign.ipValidator,
             { from: invalidAddress }
         ).catch(
     		(err) => {

@@ -21,6 +21,9 @@ var expectRevert = RegExp('revert');
 
 var campaignPrice;
 var campaignBudget;
+var startDate;
+var endDate;
+var packageName;
 
 function convertCountryCodeToIndex(countryCode) {
 	var begin = new Buffer("AA");
@@ -106,13 +109,18 @@ contract('Advertisement', function(accounts) {
 		countryList.push(convertCountryCodeToIndex("PT"))
 		countryList.push(convertCountryCodeToIndex("UK"))
 		countryList.push(convertCountryCodeToIndex("FR"))
+	
+		startDate = 20;
+		endDate = 1922838059980;
+		packageName = "com.facebook.orca";
 
 		await appcInstance.approve(addInstance.address,campaignBudget);
-		await addInstance.createCampaign("com.facebook.orca",countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980);
-
+	
+		await addInstance.createCampaign(packageName,countryList,[1,2],campaignPrice,campaignBudget,startDate,endDate);
+	
 		await appcInstance.transfer(accounts[1],campaignBudget);
 		await appcInstance.approve(addInstance.address,campaignBudget,{ from : accounts[1]});
-		await addInstance.createCampaign("com.facebook.orca",countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980, { from : accounts[1]});
+		await addInstance.createCampaign(packageName,countryList,[1,2],campaignPrice,campaignBudget,startDate,endDate, { from : accounts[1]});
 
 		examplePoA = new Object();
 		examplePoA.packageName = "com.facebook.orca";
@@ -173,14 +181,44 @@ contract('Advertisement', function(accounts) {
 		countryList.push(convertCountryCodeToIndex("PA"))
 
 		await appcInstance.approve(addInstance.address,campaignBudget);
-		await addInstance.createCampaign("com.instagram.android",countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980);
-		var countries = await addInstance.getCountriesOfCampaign.call(bid);
+
+		var eventsStorage = AdvertisementStorageInstance.allEvents();
+		var eventsInfo = addInstance.allEvents();
+		var packageName1 = "com.instagram.android";
+		await addInstance.createCampaign(packageName1,countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980);
 		
-		expect(JSON.parse(countries[0])).to.be.equal(1.78405961588245e+44,"First country list storage is incorrect");
-		expect(JSON.parse(countries[1])).to.be.equal(1.1418003319719162e+46,"Secound country list storage is incorrect");
+		var eventStorageLog = await new Promise(
+				function(resolve, reject){
+		        eventsStorage.watch(function(error, log){ eventsStorage.stopWatching(); resolve(log); });
+		    });
+		var eventInfoLog = await new Promise(
+				function(resolve, reject){
+		        eventsInfo.watch(function(error, log){ eventsInfo.stopWatching(); resolve(log); });
+		    });
+
+	    assert.equal(eventStorageLog.event,"CampaignCreated", "Event must be a CampaignCreated event");
+	    assert.equal(eventStorageLog.args.bidId,bid,"BidId on campaign create event is not correct");
+	    assert.equal(eventStorageLog.args.price,campaignPrice,"Price on campaign create event is not correct");
+	    assert.equal(eventStorageLog.args.budget,campaignBudget,"Budget on campaign create event is not correct");
+	    assert.equal(eventStorageLog.args.startDate,startDate,"Start date on campaign create event is not correct");
+	    assert.equal(eventStorageLog.args.endDate,endDate,"Finish date on campaign create event is not correct");
+
+		assert.equal(eventInfoLog.event,"CampaignInformation", "Event must be a CampaignInformation event");
+	    assert.equal(eventInfoLog.args.bidId,bid,"BidId on campaign info event is not correct");
+	    assert.equal(eventInfoLog.args.owner,accounts[0],"owner on campaign info event is not correct");
+	    assert.equal(eventInfoLog.args.packageName,packageName1,"Package name on campaign info event is not correct");
+	    assert.equal(eventInfoLog.args.countries[0],countryList[0],"Countries 1 on campaign info event are not correct");
+	    assert.equal(eventInfoLog.args.countries[1],countryList[1],"Countries 2 on campaign info event are not correct");
+	    assert.equal(eventInfoLog.args.countries[2],countryList[2],"Countries 3 on campaign info event are not correct");
+
+		
+		var budget = await addInstance.getBudgetOfCampaign.call(bid);
+		
+		await addInstance.createCampaign("com.instagram.android",countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980);
+		
+		expect(JSON.parse(budget)).to.be.equal(campaignBudget,"Campaign budget is incorrect");
 		expect(await TestUtils.getBalance(adFinanceInstance.address)).to.be.equal(contractBalance+campaignBudget,"AppCoins are not being stored on AdvertisementFinance.");											 
 		expect(await TestUtils.getBalance(addInstance.address)).to.be.equal(0,"AppCoins should not be stored on Advertisement contract.");											 
-		expect(JSON.parse(countries[2])).to.be.equal(262144,"Third country list storage is incorrect");
   	});
 
 	it('should cancel a campaign as contract owner', async function () {
@@ -402,6 +440,10 @@ contract('Advertisement', function(accounts) {
 		
 		await appcInstance.transfer(accounts[1],campaignBudget);
 		await adFinanceInstance.setAdsContractAddress(addInstance.address);
+
+		var budget = await addInstance.getBudgetOfCampaign.call(examplePoA.bid);
+		
+		expect(JSON.parse(budget)).to.be.equal(campaignBudget,"Campaign budget is incorrect");
 
 		await AdvertisementStorageInstance.setAllowedAddresses(addInstance.address, true);
 
