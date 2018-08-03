@@ -107,7 +107,7 @@ contract('Advertisement', function(accounts) {
 		var countryList = []
 
 		countryList.push(convertCountryCodeToIndex("PT"))
-		countryList.push(convertCountryCodeToIndex("UK"))
+		countryList.push(convertCountryCodeToIndex("GB"))
 		countryList.push(convertCountryCodeToIndex("FR"))
 	
 		startDate = 20;
@@ -176,7 +176,7 @@ contract('Advertisement', function(accounts) {
   		var contractBalance = await TestUtils.getBalance(adFinanceInstance.address);
 
 		countryList.push(convertCountryCodeToIndex("PT"))
-		countryList.push(convertCountryCodeToIndex("UK"))
+		countryList.push(convertCountryCodeToIndex("GB"))
 		countryList.push(convertCountryCodeToIndex("FR"))
 		countryList.push(convertCountryCodeToIndex("PA"))
 
@@ -282,7 +282,7 @@ contract('Advertisement', function(accounts) {
 
 		await TestUtils.expectErrorMessageTest('Not enough allowance',async () => {
 			var countryList = [];
-			countryList.push(convertCountryCodeToIndex("UK"));
+			countryList.push(convertCountryCodeToIndex("GB"));
 			countryList.push(convertCountryCodeToIndex("FR"));
 			await addInstance.createCampaign.sendTransaction("org.telegram.messenger",countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980);
 		})
