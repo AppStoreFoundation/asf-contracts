@@ -9,12 +9,8 @@ module.exports = function(deployer, network) {
             break;
 
         case 'ropsten':
-            var AppCoinsIABAddress = process.env.IAB_ROPSTEN_ADDRESS;
-
-            if (!AppCoinsIABAddress) {
-                deployer.deploy(AppCoinsIAB);
-            }
-
+            deployer.deploy(AppCoinsIAB);
+            
             break;
 
         case 'kovan':
