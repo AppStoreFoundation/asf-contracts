@@ -31,11 +31,11 @@ contract Advertisement {
     address public owner;
     mapping (address => mapping (bytes32 => bool)) userAttributions;
 
-    modifier onlyOwner() { 
-        require(msg.sender == owner); 
-        _; 
+    modifier onlyOwner() {
+        require(msg.sender == owner);
+        _;
     }
-    
+
 
     event PoARegistered(bytes32 bidId, string packageName,uint64[] timestampList,uint64[] nonceList,string walletName);
     event Error(string func, string message);
@@ -47,7 +47,7 @@ contract Advertisement {
             string packageName,
             uint[3] countries,
             uint[] vercodes
-    ); 
+    );
     /**
     * Constructor function
     *
@@ -64,7 +64,7 @@ contract Advertisement {
     /**
     * Upgrade storage function
     *
-    * Upgrades AdvertisementStorage contract addres with no need to redeploy 
+    * Upgrades AdvertisementStorage contract addres with no need to redeploy
     * Advertisement contract however every campaign in the old contract will
     * be canceled
     */
@@ -82,22 +82,22 @@ contract Advertisement {
     /**
     * Get AdvertisementStorageAddress
     *
-    * Is required to upgrade Advertisement contract address on 
+    * Is required to upgrade Advertisement contract address on
     * Advertisement Finance contract
     */
 
     function getAdvertisementStorageAddress() public view returns(address _contract) {
         require (msg.sender == address(advertisementFinance));
 
-        return address(advertisementStorage);                      
+        return address(advertisementStorage);
     }
-    
+
 
     /**
     * Creates a campaign for a certain package name with
     * a defined price and budget
     */
-    
+
     function createCampaign (
         string packageName,
         uint[3] countries,
@@ -110,7 +110,7 @@ contract Advertisement {
 
         require(budget >= price);
         require(endDate >= startDate);
-        
+
         CampaignLibrary.Campaign memory newCampaign;
 
         newCampaign.price = price;
@@ -124,7 +124,7 @@ contract Advertisement {
         }
 
         appc.transferFrom(msg.sender, address(advertisementFinance), budget);
-        
+
         advertisementFinance.increaseBalance(msg.sender,budget);
 
         newCampaign.budget = budget;
@@ -134,13 +134,13 @@ contract Advertisement {
         addCampaign(newCampaign);
 
         emit CampaignInformation(
-            newCampaign.bidId, 
+            newCampaign.bidId,
             newCampaign.owner,
             "", // ipValidator field
             packageName,
             countries,
             vercodes);
-    }   
+    }
 
     function addCampaign(CampaignLibrary.Campaign campaign) internal {
 
@@ -192,11 +192,11 @@ contract Advertisement {
             }
         }
 
-        if(!areNoncesValid(bytes(packageName), timestampList, nonces)){
+        /* if(!areNoncesValid(bytes(packageName), timestampList, nonces)){
             emit Error(
                 "registerPoA","Incorrect nounces for submited proof of attention");
             return;
-        }
+        } */
 
         if(userAttributions[msg.sender][bidId]){
             emit Error(
