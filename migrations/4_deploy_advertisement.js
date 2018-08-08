@@ -35,7 +35,7 @@ module.exports = function(deployer, network) {
                 throw 'AppCoins Address not found!'
             }
 
-            if (!CampaignLibraryAddress) {
+            if (!CampaignLibraryAddress.startsWith("0x")) {
                 deployer.deploy(CampaignLibrary)
             }
 
