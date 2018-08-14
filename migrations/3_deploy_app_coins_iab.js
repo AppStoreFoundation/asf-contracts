@@ -29,7 +29,7 @@ module.exports = function(deployer, network) {
         case 'main':
             var AppCoinsIABAddress = process.env.IAB_MAINNET_ADDRESS;
 
-            if (!AppCoinsAddress) {
+            if (!AppCoinsIABAddress) {
                 deployer.deploy(AppCoinsIAB);
             }
 

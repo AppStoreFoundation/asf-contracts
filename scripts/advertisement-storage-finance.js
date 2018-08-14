@@ -53,7 +53,7 @@ module.exports = function(callback) {
 
 
     //  TODO this need to be async
-    addNewAdvertisementToStorage(advertisementAddress);
     addAdvertisementContractAddressToFinance(advertisementAddress);
+    addNewAdvertisementToStorage(advertisementAddress);
 
 };
