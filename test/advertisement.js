@@ -455,4 +455,48 @@ contract('Advertisement', function(accounts) {
 		});
 	})
 
+	it('should upgrade advertisement finance and transfer campaign money to the new contract', async function () {
+		var addsBalance = await TestUtils.getBalance(AdvertisementStorageInstance.address);
+		var oldFinanceInitBalance = await TestUtils.getBalance(adFinanceInstance.address);
+		
+		var advertisementFinanceInstance = await AdvertisementFinance.new(addInstance.address);
+		var newFinanceInitBalance = await TestUtils.getBalance(advertisementFinanceInstance.address);
+		var bidIdListBeforeUpgrade = await addInstance.getBidIdList.call();
+		
+		expect(newFinanceInitBalance).to.be.equal(0,'New advertisement finance contract should have an initial balance of 0');
+
+		await addInstance.upgradeFinance(advertisementFinanceInstance.address);
+		
+
+		var oldFinanceFinalBalance = await TestUtils.getBalance(adFinanceInstance.address);
+		var newFinanceFinalBalance = await TestUtils.getBalance(advertisementFinanceInstance.address);
+
+		var bidIdListAfterUpgrade = await addInstance.getBidIdList.call();
+		
+		expect(newFinanceFinalBalance).to.equal(oldFinanceInitBalance,'New finance contract after upgrade should have the same balance as the old finance contract before upgrade');
+		expect(oldFinanceFinalBalance).to.equal(0,'Old finance contract should have a balance of 0 after upgrade');
+		expect(bidIdListAfterUpgrade).to.eql(bidIdListBeforeUpgrade,'Bid Id List should suffer no change from this upgrade');
+
+		var devsBalance = {}
+		var devsList = []
+
+		bidIdListAfterUpgrade.forEach( async (id) => {
+			var dev = await addInstance.getOwnerOfCampaign.call(id);
+			var balance = await addInstance.getBalanceOfCampaign.call(id);
+
+			if(devsList.indexOf(dev) < 0){
+				devsBalance[dev] = balance;
+			} else {
+				devsBalance[dev] += balance;
+			}
+		});
+
+		devsList.forEach( async (dev) =>  {
+			await advertisementFinanceInstance.withdraw.call(dev,devsBalance[dev]);
+		});
+
+		var newFinanceResetBalance = await TestUtils.getBalance(advertisementFinanceInstance.address);
+		expect(newFinanceResetBalance).to.be.equal(0,'Each developer should have the same money each deposited after the upgrade on the new finance contract');
+
+	})
 });
