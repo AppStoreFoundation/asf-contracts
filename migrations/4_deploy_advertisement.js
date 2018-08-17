@@ -65,20 +65,24 @@ module.exports = function(deployer, network) {
 
         case 'main':
             AppCoinsAddress = process.env.APPCOINS_MAINNET_ADDRESS;
+            AdvertisementFinanceAddress =  process.env.ADVERTISEMENT_FINANCE_MAINNET_ADDRESS;
             AdvertisementStorageAddress = process.env.ADVERTISEMENT_STORAGE_MAINNET_ADDRESS;
 
             if(!AppCoinsAddress) {
                 throw 'AppCoins Address not found!'
             }
 
-
-            if (!AdvertisementStorageAddress.startsWith("0x")) {
-                deployer.deploy(AdvertisementStorage)
+            if (!AdvertisementFinanceAddress.startsWith("0x") || !AdvertisementStorageAddress.startsWith("0x")) {
+                deployer.deploy(AdvertisementFinance, AppCoinsAddress)
                 .then(function() {
-                    return deployer.deploy(Advertisement, AppCoinsAddress, AdvertisementStorage.address);
+                    return deployer.deploy(AdvertisementStorage)
+                    .then(function() {
+                        return deployer.deploy(Advertisement, AppCoinsAddress, AdvertisementStorage.address,AdvertisementFinance.address);
+
+                    })
                 })
             } else {
-                deployer.deploy(Advertisement, AppCoinsAddress, AdvertisementStorage.address);
+                return deployer.deploy(Advertisement, AppCoinsAddress, AdvertisementStorageAddress, AdvertisementFinanceAddress);
             }
 
             break;

@@ -50,6 +50,7 @@ module.exports = function(callback) {
         })
     }
 
+    //  TODO this need to be async
     addAdvertisementContractAddressToFinance(advertisementAddress);
     addNewAdvertisementToStorage(advertisementAddress);
 
