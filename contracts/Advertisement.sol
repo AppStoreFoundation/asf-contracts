@@ -48,6 +48,7 @@ contract Advertisement {
             uint[3] countries,
             uint[] vercodes
     );
+
     /**
     * Constructor function
     *
@@ -59,6 +60,37 @@ contract Advertisement {
         appc = AppCoins(_addrAppc);
         advertisementStorage = AdvertisementStorage(_addrAdverStorage);
         advertisementFinance = AdvertisementFinance(_addrAdverFinance);
+    }
+
+    struct Map {
+        mapping (address => uint256) balance;
+        address[] devs;
+    }
+
+    function upgradeFinance (address addrAdverFinance) public onlyOwner {
+        AdvertisementFinance newAdvFinance = AdvertisementFinance(addrAdverFinance);
+        Map storage devBalance;    
+
+        for(uint i = 0; i < bidIdList.length; i++) {
+            address dev = advertisementStorage.getCampaignOwnerById(bidIdList[i]);
+            
+            if(devBalance.balance[dev] == 0){
+                devBalance.devs.push(dev);
+            }
+            
+            devBalance.balance[dev] += advertisementStorage.getCampaignBudgetById(bidIdList[i]);
+        }        
+
+        for(i = 0; i < devBalance.devs.length; i++) {
+            advertisementFinance.pay(devBalance.devs[i],address(newAdvFinance),devBalance.balance[devBalance.devs[i]]);
+            newAdvFinance.increaseBalance(devBalance.devs[i],devBalance.balance[devBalance.devs[i]]);
+        }
+
+        uint256 oldBalance = appc.balances(address(advertisementFinance));
+
+        require(oldBalance == 0);
+
+        advertisementFinance = newAdvFinance;
     }
 
     /**
