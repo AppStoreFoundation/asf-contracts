@@ -109,15 +109,17 @@ contract('Advertisement', function(accounts) {
 		countryList.push(convertCountryCodeToIndex("PT"))
 		countryList.push(convertCountryCodeToIndex("GB"))
 		countryList.push(convertCountryCodeToIndex("FR"))
-	
+
+        countryCode = countryList[0]
+
 		startDate = 20;
 		endDate = 1922838059980;
 		packageName = "com.facebook.orca";
 
 		await appcInstance.approve(addInstance.address,campaignBudget);
-	
+
 		await addInstance.createCampaign(packageName,countryList,[1,2],campaignPrice,campaignBudget,startDate,endDate);
-	
+
 		await appcInstance.transfer(accounts[1],campaignBudget);
 		await appcInstance.approve(addInstance.address,campaignBudget,{ from : accounts[1]});
 		await addInstance.createCampaign(packageName,countryList,[1,2],campaignPrice,campaignBudget,startDate,endDate, { from : accounts[1]});
@@ -186,7 +188,7 @@ contract('Advertisement', function(accounts) {
 		var eventsInfo = addInstance.allEvents();
 		var packageName1 = "com.instagram.android";
 		await addInstance.createCampaign(packageName1,countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980);
-		
+
 		var eventStorageLog = await new Promise(
 				function(resolve, reject){
 		        eventsStorage.watch(function(error, log){ eventsStorage.stopWatching(); resolve(log); });
@@ -211,14 +213,14 @@ contract('Advertisement', function(accounts) {
 	    assert.equal(eventInfoLog.args.countries[1],countryList[1],"Countries 2 on campaign info event are not correct");
 	    assert.equal(eventInfoLog.args.countries[2],countryList[2],"Countries 3 on campaign info event are not correct");
 
-		
+
 		var budget = await addInstance.getBudgetOfCampaign.call(bid);
-		
+
 		await addInstance.createCampaign("com.instagram.android",countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980);
-		
+
 		expect(JSON.parse(budget)).to.be.equal(campaignBudget,"Campaign budget is incorrect");
-		expect(await TestUtils.getBalance(adFinanceInstance.address)).to.be.equal(contractBalance+campaignBudget,"AppCoins are not being stored on AdvertisementFinance.");											 
-		expect(await TestUtils.getBalance(addInstance.address)).to.be.equal(0,"AppCoins should not be stored on Advertisement contract.");											 
+		expect(await TestUtils.getBalance(adFinanceInstance.address)).to.be.equal(contractBalance+campaignBudget,"AppCoins are not being stored on AdvertisementFinance.");
+		expect(await TestUtils.getBalance(addInstance.address)).to.be.equal(0,"AppCoins should not be stored on Advertisement contract.");
   	});
 
 	it('should cancel a campaign as contract owner', async function () {
@@ -260,7 +262,7 @@ contract('Advertisement', function(accounts) {
 
 		expect(validity).to.be.equal(false);
 		expect(await TestUtils.getBalance(adFinanceInstance.address)).to.be.equal(contractBalance-campaignBudget,"AppCoins are not being stored on AdvertisementFinance.");
-		expect(await TestUtils.getBalance(addInstance.address)).to.be.equal(0,"AppCoins should not be stored on Advertisement contract.");											 
+		expect(await TestUtils.getBalance(addInstance.address)).to.be.equal(0,"AppCoins should not be stored on Advertisement contract.");
 		expect(campaignBalance).to.be.not.equal(0,"Campaign balance is 0");
 		expect(newCampaignBalance).to.be.equal(0,"Campaign balance after cancel should be 0");
 		expect(userInitBalance+campaignBalance).to.be.equal(newUserBalance,"User balance should be updated");
@@ -294,13 +296,13 @@ contract('Advertisement', function(accounts) {
 	});
 
 	it('should emit an event when PoA is received', function () {
-		return addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce,accounts[1],accounts[2],walletName).then( instance => {
+		return addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce,accounts[1],accounts[2],walletName, countryCode).then( instance => {
 			expect(instance.logs.length).to.be.equal(1);
 		});
 	});
 
 	it('should set the Campaign validity to false when the remaining budget is smaller than the price', function () {
-		return addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce,accounts[1],accounts[2],walletName).then( instance => {
+		return addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce,accounts[1],accounts[2],walletName, countryCode).then( instance => {
 			expect(instance.logs.length).to.be.equal(1);
 		});
 
@@ -308,14 +310,13 @@ contract('Advertisement', function(accounts) {
 	});
 
 	it('should registerPoA and transfer the equivalent to one installation to the user registering a PoA', async function () {
-
 		var userInitBalance = await TestUtils.getBalance(accounts[0]);
 		var appSInitBalance = await TestUtils.getBalance(accounts[1]);
 		var oemInitBalance = await TestUtils.getBalance(accounts[2]);
 		var campaignBudget = JSON.parse(await addInstance.getBudgetOfCampaign.call(examplePoA.bid));
 		var contractBalance = await TestUtils.getBalance(adFinanceInstance.address);
 
-		await addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce,accounts[1],accounts[2],walletName);
+		await addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce,accounts[1],accounts[2],walletName, countryCode);
 
 		var newUserBalance = await TestUtils.getBalance(accounts[0]);
 		var newAppStoreBalance = await TestUtils.getBalance(accounts[1]);
@@ -325,8 +326,8 @@ contract('Advertisement', function(accounts) {
 
 		expect(campaignBudget-campaignPrice).to.be.equal(newCampaignBudget,"Campaign budget not updated.");
 		expect(contractBalance-campaignPrice).to.be.equal(newContractBalance,"Contract balance not updated.");
-		expect(await TestUtils.getBalance(addInstance.address)).to.be.equal(0,"AppCoins should not be stored on Advertisement contract.");											 
-		
+		expect(await TestUtils.getBalance(addInstance.address)).to.be.equal(0,"AppCoins should not be stored on Advertisement contract.");
+
 		var error = new Number("1.99208860077274e-9");
 		var expectedUserBalance = userInitBalance+(campaignPrice*devShare)
 		expect(newUserBalance).to.be.within(expectedUserBalance - (expectedUserBalance*error), expectedUserBalance + (expectedUserBalance*error),"User balance not updated.");
@@ -337,17 +338,19 @@ contract('Advertisement', function(accounts) {
 
 	it('should revert registerPoA and emit an error event when the campaing is invalid', async () => {
 
+
 		await addInstance.cancelCampaign(examplePoA.bid);
 		await TestUtils.expectErrorMessageTest("Registering a Proof of attention to a invalid campaign", async () => {
-			await addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce,accounts[1],accounts[2],walletName);
+			await addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce,accounts[1],accounts[2],walletName, countryCode);
 		})
 	});
 
 	it('should revert registerPoA and emit an error event when nonce list and timestamp list have diferent lengths', async function () {
 		var userInitBalance = await TestUtils.getBalance(accounts[0]);
 
+
 		await TestUtils.expectErrorMessageTest("Nounce list and timestamp list must have same length", async () => {
-			await addInstance.registerPoA.sendTransaction(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce.splice(2,3),accounts[1],accounts[2],walletName);
+			await addInstance.registerPoA.sendTransaction(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce.splice(2,3),accounts[1],accounts[2],walletName, countryCode);
 		})
 		var newUserBalance = await TestUtils.getBalance(accounts[0]);
 		expect(userInitBalance).to.be.equal(newUserBalance);
@@ -355,12 +358,13 @@ contract('Advertisement', function(accounts) {
 	});
 
 	it('should revert registerPoA and emit an error event when same user sends duplicate registerPoA', async function () {
-		await addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce,accounts[1],accounts[2],walletName);
+
+		await addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce,accounts[1],accounts[2],walletName, countryCode);
 
 		var userInitBalance = await TestUtils.getBalance(accounts[0]);
 
 		await TestUtils.expectErrorMessageTest("User already registered a proof of attention for this campaign", async () =>{
-			await addInstance.registerPoA(example2PoA.packageName,example2PoA.bid,example2PoA.timestamp,example2PoA.nonce,accounts[1],accounts[2],walletName);
+			await addInstance.registerPoA(example2PoA.packageName,example2PoA.bid,example2PoA.timestamp,example2PoA.nonce,accounts[1],accounts[2],walletName, countryCode);
 		})
 		var newUserBalance = await TestUtils.getBalance(accounts[0]);
 		expect(userInitBalance).to.be.equal(newUserBalance);
@@ -368,35 +372,38 @@ contract('Advertisement', function(accounts) {
 	});
 
 	it('should revert registerPoA and emit an error event if timestamps are not spaced exactly 10 secounds from each other', async function () {
-		var userInitBalance = await TestUtils.getBalance(accounts[0]);
+
+        var userInitBalance = await TestUtils.getBalance(accounts[0]);
 
 		await TestUtils.expectErrorMessageTest("Timestamps should be spaced exactly 10 secounds", async () => {
-			await addInstance.registerPoA(wrongTimestampPoA.packageName,wrongTimestampPoA.bid,wrongTimestampPoA.timestamp,wrongTimestampPoA.nonce,accounts[1],accounts[2],walletName);
+			await addInstance.registerPoA(wrongTimestampPoA.packageName,wrongTimestampPoA.bid,wrongTimestampPoA.timestamp,wrongTimestampPoA.nonce,accounts[1],accounts[2],walletName, countryCode);
 		});
 		var newUserBalance = await TestUtils.getBalance(accounts[0]);
 		expect(userInitBalance).to.be.equal(newUserBalance);
 
 	})
 
-	it('should revert registerPoA and emit an error event if nounces do not generate correct leading zeros', async function () {
-		var userInitBalance = await TestUtils.getBalance(accounts[0]);
-
-		await TestUtils.expectErrorMessageTest("Incorrect nounces for submited proof of attention", async () => {
-			await addInstance.registerPoA(wrongNoncePoA.packageName,wrongNoncePoA.bid,wrongNoncePoA.timestamp,wrongNoncePoA.nonce,accounts[1],accounts[2],walletName);
-		});
-		var newUserBalance = await TestUtils.getBalance(accounts[0]);
-		expect(userInitBalance).to.be.equal(newUserBalance);
-
-	})
+    // TODO: enable this test after we start verifying nouces when registering PoAs.
+	// it('should revert registerPoA and emit an error event if nounces do not generate correct leading zeros', async function () {
+    //
+    //     var userInitBalance = await TestUtils.getBalance(accounts[0]);
+    //
+	// 	await TestUtils.expectErrorMessageTest("Incorrect nounces for submited proof of attention", async () => {
+	// 		await addInstance.registerPoA(wrongNoncePoA.packageName,wrongNoncePoA.bid,wrongNoncePoA.timestamp,wrongNoncePoA.nonce,accounts[1],accounts[2],walletName, countryCode);
+	// 	});
+	// 	var newUserBalance = await TestUtils.getBalance(accounts[0]);
+	// 	expect(userInitBalance).to.be.equal(newUserBalance);
+    //
+	// })
 
 	it('should revert registerPoA and emit an error event if PoA pairs are not exactly 12', async () => {
 		var userInitBalance = await TestUtils.getBalance(accounts[0]);
-		
+
 		examplePoA.timestamp.pop();
 		examplePoA.nonce.pop();
 
 		await TestUtils.expectErrorMessageTest("Proof-of-attention should have exactly 12 proofs", async () => {
-			await addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce,accounts[1],accounts[2],walletName);
+			await addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce,accounts[1],accounts[2],walletName, countryCode);
 		});
 
 		var newUserBalance = await TestUtils.getBalance(accounts[0]);
@@ -409,18 +416,19 @@ contract('Advertisement', function(accounts) {
 		var user0Balance = await TestUtils.getBalance(accounts[0]);
 		var user1Balance = await TestUtils.getBalance(accounts[1]);
 
+
         AdvertisementStorageInstance = await AdvertisementStorage.new();
 
 		await addInstance.upgradeStorage(AdvertisementStorageInstance.address);
         await AdvertisementStorageInstance.setAllowedAddresses(addInstance.address, true);
-		
+
 		var addsFinalBalance = await TestUtils.getBalance(AdvertisementStorageInstance.address);
 		var user0FinalBalance = await TestUtils.getBalance(accounts[0]);
 		var user1FinalBalance = await TestUtils.getBalance(accounts[1]);
 		var bidIdList = await addInstance.getBidIdList.call();
 
 		expect(addsFinalBalance).to.be.equal(0,'Advertisement contract balance should be 0');
-		expect(await TestUtils.getBalance(adFinanceInstance.address)).to.be.equal(0,"AdvertisementFinance contract balance should be 0");											 
+		expect(await TestUtils.getBalance(adFinanceInstance.address)).to.be.equal(0,"AdvertisementFinance contract balance should be 0");
 		expect(user0FinalBalance).to.be.equal(user0Balance+campaignBudget,'User 0 should receive campaignBudget value of his campaign');
 		expect(user1FinalBalance).to.be.equal(user1Balance+campaignBudget,'User 1 should receive campaignBudget value of his campaign');
 		expect(bidIdList.length).to.be.equal(0,'Campaign list should be 0');
@@ -429,25 +437,25 @@ contract('Advertisement', function(accounts) {
 
 	it('should upgrade advertisement contract without changing storage nor finance contracts', async function() {
 		addInstance = await	Advertisement.new(appcInstance.address, AdvertisementStorageInstance.address,adFinanceInstance.address);
-		
-		var oem = accounts[2]; 
+
+		var oem = accounts[2];
 		var user = accounts[3];
-		var appstore = accounts[4]; 
+		var appstore = accounts[4];
 
 		var balanceAppS = await TestUtils.getBalance(appstore);
 		var balanceOEM = await TestUtils.getBalance(oem);
 		var balanceUser = await TestUtils.getBalance(user);
-		
+
 		await appcInstance.transfer(accounts[1],campaignBudget);
 		await adFinanceInstance.setAdsContractAddress(addInstance.address);
 
 		var budget = await addInstance.getBudgetOfCampaign.call(examplePoA.bid);
-		
+
 		expect(JSON.parse(budget)).to.be.equal(campaignBudget,"Campaign budget is incorrect");
 
 		await AdvertisementStorageInstance.setAllowedAddresses(addInstance.address, true);
 
-		return addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce,appstore,oem,walletName, { from : user }).then( async instance => {
+		return addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce,appstore,oem,walletName, countryCode, { from : user }).then( async instance => {
 			expect(instance.logs.length).to.be.equal(1);
 			expect(await TestUtils.getBalance(appstore)).to.be.equal(balanceAppS + campaignPrice*appStoreShare, 'AppStore did not receive reward');
 			expect(await TestUtils.getBalance(oem)).to.be.equal(balanceOEM + campaignPrice*oemShare,'OEM did not receive reward');
