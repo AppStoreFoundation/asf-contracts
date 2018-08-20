@@ -18,6 +18,8 @@ contract AppCoins is ERC20Interface{
     address public owner;
     bytes32 private token_name;
     bytes32 private token_symbol;
+
+    
     uint8 public decimals = 18;
     // 18 decimals is the strongly suggested default, avoid changing it
     uint256 public totalSupply;
