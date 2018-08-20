@@ -459,14 +459,16 @@ contract('Advertisement', function(accounts) {
 		var addsBalance = await TestUtils.getBalance(AdvertisementStorageInstance.address);
 		var oldFinanceInitBalance = await TestUtils.getBalance(adFinanceInstance.address);
 		
-		var advertisementFinanceInstance = await AdvertisementFinance.new(addInstance.address);
+		var advertisementFinanceInstance = await AdvertisementFinance.new(appcInstance.address);
+		
+		await advertisementFinanceInstance.setAdsContractAddress.sendTransaction(addInstance.address)
+
 		var newFinanceInitBalance = await TestUtils.getBalance(advertisementFinanceInstance.address);
 		var bidIdListBeforeUpgrade = await addInstance.getBidIdList.call();
 		
 		expect(newFinanceInitBalance).to.be.equal(0,'New advertisement finance contract should have an initial balance of 0');
 
 		await addInstance.upgradeFinance(advertisementFinanceInstance.address);
-		
 
 		var oldFinanceFinalBalance = await TestUtils.getBalance(adFinanceInstance.address);
 		var newFinanceFinalBalance = await TestUtils.getBalance(advertisementFinanceInstance.address);
@@ -480,21 +482,25 @@ contract('Advertisement', function(accounts) {
 		var devsBalance = {}
 		var devsList = []
 
-		bidIdListAfterUpgrade.forEach( async (id) => {
+		for(var i = 0; i < bidIdListAfterUpgrade.length; i++){
+			var id = bidIdListAfterUpgrade[i];
 			var dev = await addInstance.getOwnerOfCampaign.call(id);
-			var balance = await addInstance.getBalanceOfCampaign.call(id);
+			var campaignBalance = JSON.parse(await addInstance.getBudgetOfCampaign.call(id));
 
 			if(devsList.indexOf(dev) < 0){
-				devsBalance[dev] = balance;
+				devsBalance[dev] = campaignBalance;
+				devsList.push(dev);
 			} else {
-				devsBalance[dev] += balance;
+				devsBalance[dev] += campaignBalance;
 			}
-		});
 
-		devsList.forEach( async (dev) =>  {
-			await advertisementFinanceInstance.withdraw.call(dev,devsBalance[dev]);
-		});
+		}
 
+		for(var j = 0; j < devsList.length; j++){
+			var dev = devsList[j];
+			await advertisementFinanceInstance.withdraw.sendTransaction(dev,devsBalance[dev]);
+		}
+		
 		var newFinanceResetBalance = await TestUtils.getBalance(advertisementFinanceInstance.address);
 		expect(newFinanceResetBalance).to.be.equal(0,'Each developer should have the same money each deposited after the upgrade on the new finance contract');
 
