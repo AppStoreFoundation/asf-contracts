@@ -37,7 +37,7 @@ contract Advertisement {
     }
 
 
-    event PoARegistered(bytes32 bidId, string packageName,uint64[] timestampList,uint64[] nonceList,string walletName);
+    event PoARegistered(bytes32 bidId, string packageName,uint64[] timestampList,uint64[] nonceList,string walletName, bytes2 countryCode);
     event Error(string func, string message);
     event CampaignInformation
         (
@@ -164,7 +164,7 @@ contract Advertisement {
         string packageName, bytes32 bidId,
         uint64[] timestampList, uint64[] nonces,
         address appstore, address oem,
-        string walletName) external {
+        string walletName, bytes2 countryCode) external {
 
         if(!isCampaignValid(bidId)){
             emit Error(
@@ -208,7 +208,7 @@ contract Advertisement {
 
         payFromCampaign(bidId, appstore, oem);
 
-        emit PoARegistered(bidId, packageName, timestampList, nonces, walletName);
+        emit PoARegistered(bidId, packageName, timestampList, nonces, walletName, countryCode);
     }
 
     function cancelCampaign (bytes32 bidId) public {
