@@ -8,11 +8,10 @@ contract AppCoins {
 
 contract AppCoinsIABInterface {
     function division(uint numerator, uint denominator) public view returns (uint);
-    function buy(uint _amount, string _sku, address _addr_appc, address _dev, address _appstore, address _oem) public view returns (bool);
+    function buy(string _packageName, string _sku, uint256 _amount, address _addr_appc, address _dev, address _appstore, address _oem, bytes2 _countryCode) public view returns (bool);
 }
 
 contract AppCoinsIAB is AppCoinsIABInterface {
-    
 
     uint public dev_share = 85;
     uint public appstore_share = 10;
@@ -29,19 +28,19 @@ contract AppCoinsIAB is AppCoinsIABInterface {
         _;
     }
 
-    modifier onlyOwner(string _funcName) { 
+    modifier onlyOwner(string _funcName) {
         if(owner != msg.sender){
             emit Error(_funcName, "Operation can only be performed by contract owner");
             return;
         }
-        _; 
+        _;
     }
-    
 
-    event Buy(uint _amount, string _sku, address _from, address _dev, address _appstore, address _oem);
+
+    event Buy(string packageName, string _sku, uint _amount, address _from, address _dev, address _appstore, address _oem, bytes2 countryCode);
     event Error(string func, string message);
     event OffChainBuy(address _wallet, bytes32 _rootHash);
-    
+
     function AppCoinsIAB() public {
         owner = msg.sender;
     }
@@ -53,7 +52,7 @@ contract AppCoinsIAB is AppCoinsIABInterface {
     function removeAllowedAddress(address _account) public onlyOwner("removeAllowedAddress") {
         allowedAddresses[_account] = false;
     }
-    
+
     function informOffChainBuy(address[] _walletList, bytes32[] _rootHashList) public onlyAllowedAddress("informOffChainTransaction") {
         if(_walletList.length != _rootHashList.length){
             emit Error("informOffChainTransaction", "Wallet list and Roothash list must have the same lengths");
@@ -70,7 +69,7 @@ contract AppCoinsIAB is AppCoinsIABInterface {
     }
 
 
-    function buy(uint256 _amount, string _sku, address _addr_appc, address _dev, address _appstore, address _oem) public view returns (bool) {
+    function buy(string _packageName, string _sku, uint256 _amount, address _addr_appc, address _dev, address _appstore, address _oem, bytes2 _countryCode) public view returns (bool) {
         require(_addr_appc != 0x0);
         require(_dev != 0x0);
         require(_appstore != 0x0);
@@ -92,7 +91,7 @@ contract AppCoinsIAB is AppCoinsIABInterface {
         appc.transferFrom(msg.sender, _appstore, amounts[1]);
         appc.transferFrom(msg.sender, _oem, amounts[2]);
 
-        emit Buy(_amount, _sku, msg.sender, _dev, _appstore, _oem);
+        emit Buy(_packageName, _sku, _amount, msg.sender, _dev, _appstore, _oem, _countryCode);
 
         return true;
     }

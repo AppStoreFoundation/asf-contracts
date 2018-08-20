@@ -29,6 +29,9 @@ contract('AppCoinsIAB', function(accounts) {
 		appStoreAcc = accounts[2];
 		oemAcc = accounts[3];
 
+        packageName = "com.facebook.orca";
+        countryCode = 0x1990
+
 		TestUtils.setAppCoinsInstance(appcInstance);
 		TestUtils.setContractInstance(appIABInstance);
 
@@ -47,7 +50,7 @@ contract('AppCoinsIAB', function(accounts) {
 
 		var price = 10000000;
 		await appcInstance.approve(appIABInstance.address,price);
-		await appIABInstance.buy.sendTransaction(price,"e",appcInstance.address,devAcc,appStoreAcc,oemAcc);
+		await appIABInstance.buy.sendTransaction(price,"e",appcInstance.address,devAcc,appStoreAcc,oemAcc, packageName, countryCode);
 
 		var userFinalBalance = await TestUtils.getBalance(userAcc);
 		var devFinalBalance = await TestUtils.getBalance(devAcc);
@@ -64,7 +67,7 @@ contract('AppCoinsIAB', function(accounts) {
 		var price = 10000000;
 
 		await TestUtils.expectErrorMessageTest("Not enough allowance",() => {
-			return appIABInstance.buy.sendTransaction(price,"example",appcInstance.address,devAcc,appStoreAcc,oemAcc);
+			return appIABInstance.buy.sendTransaction(price,"example",appcInstance.address,devAcc,appStoreAcc,oemAcc, packageName, countryCode);
 		});
 	})
 
@@ -79,7 +82,7 @@ contract('AppCoinsIAB', function(accounts) {
 			return appIABInstance.addAllowedAddress.sendTransaction(newAllowedAddress, { from : allowedAddress });
 		});
 	})
-	
+
 	it('should allow the contract owner to remove allowed addresses', async function () {
 		await appIABInstance.removeAllowedAddress(allowedAddress);
 	})
