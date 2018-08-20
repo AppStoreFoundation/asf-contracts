@@ -8,7 +8,7 @@ contract AppCoins {
 
 contract AppCoinsIABInterface {
     function division(uint numerator, uint denominator) public view returns (uint);
-    function buy(uint _amount, string _sku, address _addr_appc, address _dev, address _appstore, address _oem) public view returns (bool);
+    function buy(uint _amount, string _sku, address _addr_appc, address _dev, address _appstore, address _oem, string packageName, bytes2 countryCode) public view returns (bool);
 }
 
 contract AppCoinsIAB is AppCoinsIABInterface {
