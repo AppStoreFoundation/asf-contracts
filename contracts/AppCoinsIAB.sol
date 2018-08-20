@@ -69,7 +69,7 @@ contract AppCoinsIAB is AppCoinsIABInterface {
     }
 
 
-    function buy(uint256 _amount, string _sku, address _addr_appc, address _dev, address _appstore, address _oem, string packageName, bytes2 countryCode) public view returns (bool) {
+    function buy(uint256 _amount, string _sku, string _packageName, address _addr_appc, address _dev, address _appstore, address _oem, bytes2 _countryCode) public view returns (bool) {
         require(_addr_appc != 0x0);
         require(_dev != 0x0);
         require(_appstore != 0x0);
@@ -91,7 +91,7 @@ contract AppCoinsIAB is AppCoinsIABInterface {
         appc.transferFrom(msg.sender, _appstore, amounts[1]);
         appc.transferFrom(msg.sender, _oem, amounts[2]);
 
-        emit Buy(_amount, _sku, msg.sender, _dev, _appstore, _oem, packageName, countryCode);
+        emit Buy(_amount, _sku, msg.sender, _dev, _appstore, _oem, _packageName, _countryCode);
 
         return true;
     }
