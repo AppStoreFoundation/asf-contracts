@@ -50,7 +50,7 @@ contract('AppCoinsIAB', function(accounts) {
 
 		var price = 10000000;
 		await appcInstance.approve(appIABInstance.address,price);
-		await appIABInstance.buy.sendTransaction(price,"e",appcInstance.address,devAcc,appStoreAcc,oemAcc, packageName, countryCode);
+		await appIABInstance.buy.sendTransaction(packageName,"e",price,appcInstance.address,devAcc,appStoreAcc,oemAcc, countryCode);
 
 		var userFinalBalance = await TestUtils.getBalance(userAcc);
 		var devFinalBalance = await TestUtils.getBalance(devAcc);
@@ -67,7 +67,7 @@ contract('AppCoinsIAB', function(accounts) {
 		var price = 10000000;
 
 		await TestUtils.expectErrorMessageTest("Not enough allowance",() => {
-			return appIABInstance.buy.sendTransaction(price,"example",appcInstance.address,devAcc,appStoreAcc,oemAcc, packageName, countryCode);
+			return appIABInstance.buy.sendTransaction(packageName, "example", price,appcInstance.address,devAcc,appStoreAcc,oemAcc, countryCode);
 		});
 	})
 
