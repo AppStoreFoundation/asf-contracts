@@ -1,6 +1,7 @@
 var AdvertisementStorage = artifacts.require("./AdvertisementStorage.sol");
 var chai = require('chai');
 var web3 = require('web3');
+var TestUtils = require('./TestUtils.js');
 var expect = chai.expect;
 var chaiAsPromissed = require('chai-as-promised');
 chai.use(chaiAsPromissed);
@@ -21,9 +22,9 @@ var expectRevert = RegExp('revert');
 
 contract('AdvertisementStorage', function(accounts) {
     beforeEach('Setting Advertisement test...',async () => {
-
+        
         AdvertisementStorageInstance = await AdvertisementStorage.new();
-
+        TestUtils.setContractInstance(AdvertisementStorageInstance);
     });
 
     it('should store a campaign from a valid address', async function () {
@@ -42,9 +43,46 @@ contract('AdvertisementStorage', function(accounts) {
             { from: allowedAddress }
         );
 
-        var advertStartDate = await AdvertisementStorageInstance.getCampaignStartDateById.call(testCampaign.bidId);
+        var advertStartDate = 
+            await AdvertisementStorageInstance.getCampaignStartDateById.call(testCampaign.bidId);
 
-        expect(JSON.parse(advertStartDate)).to.be.equal(testCampaign.startDate, "Campaign was not saved");
+        expect(JSON.parse(advertStartDate))
+        .to.be.equal(testCampaign.startDate, "Campaign was not saved");
+
+    })
+
+    it('should emit a campaign update if the campaign is already created', async function () {
+        var allowedAddress = accounts[1];
+        await AdvertisementStorageInstance.setAllowedAddresses(allowedAddress, true);
+
+        //Add to campaign map
+        await AdvertisementStorageInstance.setCampaign(
+            testCampaign.bidId,
+            testCampaign.price,
+            testCampaign.budget,
+            testCampaign.startDate,
+            testCampaign.endDate,
+            testCampaign.valid,
+            testCampaign.owner,
+            { from: allowedAddress }
+        );
+
+        var advertStartDate = 
+            await AdvertisementStorageInstance.getCampaignStartDateById.call(testCampaign.bidId);
+
+        expect(JSON.parse(advertStartDate))
+        .to.be.equal(testCampaign.startDate, "Campaign was not saved");
+
+        
+        await TestUtils.expectEventTest('CampaignUpdated', async () => {
+            await AdvertisementStorageInstance.setCampaignBudgetById(testCampaign.bidId,0);
+            
+        });
+
+        await TestUtils.expectEventTest('CampaignUpdated', async () => {
+            await AdvertisementStorageInstance.setCampaignValidById(testCampaign.bidId, false);
+        });
+
 
     })
 
