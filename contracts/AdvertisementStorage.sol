@@ -200,7 +200,7 @@ contract AdvertisementStorage {
 
     function emitEvent(CampaignLibrary.Campaign campaign) private {
 
-        if (campaigns[campaign.bidId].bidId == 0x0) {
+        if (campaigns[campaign.bidId].owner == 0x0) {
             emit CampaignCreated(
                 campaign.bidId,
                 campaign.price,
