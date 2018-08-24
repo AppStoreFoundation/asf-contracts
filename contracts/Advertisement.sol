@@ -7,9 +7,10 @@ import "./AdvertisementFinance.sol";
 import "./AppCoins.sol";
 
 /**
- * The Advertisement contract collects campaigns registered by developers
- * and executes payments to users using campaign registered applications
- * after proof of Attention.
+@title Advertisement contract
+@author App Store Foundation
+@dev The Advertisement contract collects campaigns registered by developers and executes payments 
+to users using campaign registered applications after proof of Attention.
  */
 contract Advertisement {
 
@@ -67,6 +68,15 @@ contract Advertisement {
         address[] devs;
     }
 
+    /**
+    @notice Upgrade finance contract used by this contract
+    @dev
+        This function is part of the upgrade mechanism avaliable to the advertisement contracts.
+        Using this function it is possible to update to a new Advertisement Finance contract without 
+        the need to cancel avaliable campaigns.
+        Upgrade finance function can only be called by the Advertisement contract owner.
+    @param addrAdverFinance Address of the new Advertisement Finance contract 
+    */
     function upgradeFinance (address addrAdverFinance) public onlyOwner {
         AdvertisementFinance newAdvFinance = AdvertisementFinance(addrAdverFinance);
         Map storage devBalance;    
@@ -94,11 +104,13 @@ contract Advertisement {
     }
 
     /**
-    * Upgrade storage function
-    *
-    * Upgrades AdvertisementStorage contract addres with no need to redeploy
-    * Advertisement contract however every campaign in the old contract will
-    * be canceled
+    @notice Upgrade storage contract used by this contract
+    @dev
+        Upgrades Advertisement Storage contract addres with no need to redeploy
+        Advertisement contract. However every campaign in the old contract will
+        be canceled. 
+        This function can only be called by the Advertisement contract owner.
+    @param addrAdverStorage Address of the new Advertisement Storage contract
     */
 
     function upgradeStorage (address addrAdverStorage) public onlyOwner {
@@ -112,10 +124,12 @@ contract Advertisement {
     }
 
     /**
-    * Get AdvertisementStorageAddress
-    *
-    * Is required to upgrade Advertisement contract address on
-    * Advertisement Finance contract
+    @notice Get Advertisement Storage Address used by this contract
+    @dev
+        This function is required to upgrade Advertisement contract address on Advertisement 
+        Finance contract. This function can only be called by the Advertisement Finance 
+        contract registered in this contract.
+    @return {"_contract" : "Address of the Advertisement Storage contract used by this contract"}
     */
 
     function getAdvertisementStorageAddress() public view returns(address _contract) {
@@ -126,8 +140,23 @@ contract Advertisement {
 
 
     /**
-    * Creates a campaign for a certain package name with
-    * a defined price and budget
+    @notice Creates a campaign 
+    @dev 
+        Method to create a campaign of user aquisition for a certain application.
+        This method will emit a Campaign Information event with every information 
+        provided in the arguments of this method.
+    @param packageName Package name of the appication subject to the user aquisition campaign
+    @param countries Encoded list of 3 integers intended to include every 
+    county where this campaign will be avaliable.
+    For more detain on this encoding refer to wiki documentation.
+    @param vercodes List of version codes to which the user aquisition campaign is applied.
+    @param price Value (in wei) the campaign owner pays for each proof-of-attention.
+    @param budget Total budget (in wei) the campaign owner will deposit 
+    to pay for the proof-of-attention.
+    @param startDate Date (in miliseconds) on which the campaign will start to be 
+    avaliable to users.
+    @param endDate Date (in miliseconds) on which the campaign will no longer be avaliable to users.
+
     */
 
     function createCampaign (
@@ -174,6 +203,15 @@ contract Advertisement {
             vercodes);
     }
 
+    /** 
+    @notice Add Campaign to Advertisement Storage contract
+    @dev
+        Internal function executed when a campaign is created that adds the campaign 
+        information to Advertisement Storage contract.
+    @param campaign Structure containing every information necessary to create and 
+    maintain a campaign avaliable.
+    */
+
     function addCampaign(CampaignLibrary.Campaign campaign) internal {
 
 		//Add to bidIdList
@@ -191,6 +229,32 @@ contract Advertisement {
         );
 
     }
+
+    /**
+    @notice Register a proof of attention
+    @dev
+        This function verifies the campaign avaliability as well as the validity of 
+        the proof of attention submited. In case any of the verifications fails, the function will 
+        be stopped and an Error event will be emitted with further error information.
+        A PoARegistered event with the same information submited as arguments of this function will 
+        be emmited if the proof of attention is processed correctly.
+        For more information on the proof of attention design refer to the wiki documentation or to 
+        Appcoins Protocol Whitepaper.
+
+    @param packageName Package name of the application from which the proof of attention refers to.
+    @param bidId Campaign id of the campaign to which the proof of attention is submitted
+    @param timestampList List of 12 timestamps generated 10 seconds apart from each other, 
+    as part of the proof of attention. The timestamp list should be arranged in ascending order
+    @param nonces List of 12 nonces generated during the proof of attention. The index of each 
+    nounce should be acording to the corresponding timestamp index on the timestamp list submitted
+    @param appstore Address of the Appstore receiving part of the proof of attention reward
+    @param oem Address of the OEM receiving part of the proof of attention reward
+    @param walletName Package name of the wallet submitting the proof of attention
+    @param countryCode String with the 2 character identifying the country from which the 
+    proof of attention was processed
+
+    @return { "result" : "Proof of attention registered succesfully"}
+    */
 
     function registerPoA (
         string packageName, bytes32 bidId,
@@ -243,6 +307,15 @@ contract Advertisement {
         emit PoARegistered(bidId, packageName, timestampList, nonces, walletName, countryCode);
     }
 
+    /**
+    @notice Cancel a campaign and give the remaining budget to the campaign owner
+    @dev
+        When a campaing owner wants to cancel a campaign, the campaign owner needs 
+        to call this function. This function can only be called either by the campaign owner or by 
+        the Advertisement contract owner. This function results in campaign cancelation and 
+        retreival of the remaining budged to the respective campaign owner.
+    @param bidId Campaign id to which the cancelation referes to 
+     */
     function cancelCampaign (bytes32 bidId) public {
         address campaignOwner = getOwnerOfCampaign(bidId);
 
@@ -256,22 +329,57 @@ contract Advertisement {
         advertisementStorage.setCampaignValidById(bidId, false);
     }
 
+    /**
+    @notice Get a campaign validity state
+    @param bidId Campaign id to which the query refers
+    @return { "state" : "Validity of the campaign"}
+    */
     function getCampaignValidity(bytes32 bidId) public view returns(bool){
         return advertisementStorage.getCampaignValidById(bidId);
     }
 
+    /**
+    @notice Get the price of a campaign
+    @dev
+        Based on the Campaign id return the value paid for each proof of attention registered.
+    @param bidId Campaign id to which the query refers
+    @return { "price" : "Reward (in wei) for each proof of attention registered"} 
+    */
     function getPriceOfCampaign (bytes32 bidId) public view returns(uint) {
         return advertisementStorage.getCampaignPriceById(bidId);
     }
 
+    /** 
+    @notice Get the start date of a campaign
+    @dev
+        Based on the Campaign id return the value (in miliseconds) corresponding to the start Date
+        of the campaign.
+    @param bidId Campaign id to which the query refers
+    @return { "startDate" : "Start date (in miliseconds) of the campaign"} 
+    */
     function getStartDateOfCampaign (bytes32 bidId) public view returns(uint) {
         return advertisementStorage.getCampaignStartDateById(bidId);
     }
 
+    /** 
+    @notice Get the end date of a campaign
+    @dev
+        Based on the Campaign id return the value (in miliseconds) corresponding to the end Date
+        of the campaign.
+    @param bidId Campaign id to which the query refers
+    @return { "endDate" : "End date (in miliseconds) of the campaign"} 
+    */
     function getEndDateOfCampaign (bytes32 bidId) public view returns(uint) {
         return advertisementStorage.getCampaignEndDateById(bidId);
     }
 
+    /**
+    @notice Get the budget avaliable of a campaign
+    @dev
+        Based on the Campaign id return the total value avaliable to paid for proofs of attention.
+    @param bidId Campaign id to which the query refers
+    @return { "budget" : "Total value (in wei) spendable in proof of attention rewards"} 
+    */
     function getBudgetOfCampaign (bytes32 bidId) public view returns(uint) {
         return advertisementStorage.getCampaignBudgetById(bidId);
     }
