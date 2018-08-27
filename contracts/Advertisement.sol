@@ -51,9 +51,12 @@ contract Advertisement {
     );
 
     /**
-    * Constructor function
-    *
-    * Initializes contract with default validation rules
+    @notice Constructor function
+    @dev
+        Initializes contract with default validation rules
+    @param _addrAppc Address of the AppCoins (ERC-20) contract
+    @param _addrAdverStorage Address of the Advertisement Storage contract to be used
+    @param _addrAdverFinance Address of the Advertisement Finance contract to be used
     */
     function Advertisement (address _addrAppc, address _addrAdverStorage, address _addrAdverFinance) public {
         rules = ValidationRules(false, true, true, 2, 1);
