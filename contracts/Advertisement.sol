@@ -376,7 +376,7 @@ contract Advertisement {
     /**
     @notice Get the budget avaliable of a campaign
     @dev
-        Based on the Campaign id return the total value avaliable to paid for proofs of attention.
+        Based on the Campaign id return the total value avaliable to pay for proofs of attention.
     @param bidId Campaign id to which the query refers
     @return { "budget" : "Total value (in wei) spendable in proof of attention rewards"} 
     */
@@ -384,14 +384,36 @@ contract Advertisement {
         return advertisementStorage.getCampaignBudgetById(bidId);
     }
 
+
+    /**
+    @notice Get the owner of a campaign 
+    @dev 
+        Based on the Campaign id return the address of the campaign owner
+    @param bidId Campaign id to which the query refers
+    @return { "owner" : "Address of the campaign owner" } 
+    */
     function getOwnerOfCampaign (bytes32 bidId) public view returns(address) {
         return advertisementStorage.getCampaignOwnerById(bidId);
     }
 
+    /**
+    @notice Get the list of Campaign BidIds registered in the contract
+    @dev
+        Returns the list of BidIds of the campaigns ever registered in the contract
+    @return { "BidIdList" : "List of BidIds registered in the contract" }
+    */
     function getBidIdList() public view returns(bytes32[]) {
         return bidIdList;
     }
 
+    /**
+    @notice Check if a certain campaign is still valid
+    @dev
+        Returns a boolean representing the validity of the campaign
+        Has value of True if the campaign is still valid else has value of False
+    @param bidId Campaign id to which the query refers
+    @return { "valid" : "validity of the campaign" }
+    */
     function isCampaignValid(bytes32 bidId) public view returns(bool) {
         uint startDate = advertisementStorage.getCampaignStartDateById(bidId);
         uint endDate = advertisementStorage.getCampaignEndDateById(bidId);
@@ -401,6 +423,15 @@ contract Advertisement {
         return valid && startDate < nowInMilliseconds && endDate > nowInMilliseconds;
     }
 
+    /**
+    @notice Internal function to distribute payouts
+    @dev
+        Distributes the value defined in the campaign for a Proof-of-attention to the user, 
+        Appstore and OEM ajusted to their respective shares.
+    @param bidId Campaign id from which a payment will be made
+    @param appstore Address of the Appstore receiving it's share
+    @param oem Address of the OEM receiving it's share
+    */
     function payFromCampaign (bytes32 bidId, address appstore, address oem) internal {
         uint devShare = 85;
         uint appstoreShare = 10;
@@ -430,6 +461,17 @@ contract Advertisement {
         }
     }
 
+    /**
+    @notice Checks if a given list of nonces is valid for a certain proof-of-attention
+    @dev
+        Internal function that checks if the submitted nonces are valid
+        It's part of the proof-of-attention validation process on the blockchain
+    @param packageName Package name to which the proof-of-attention refers to
+    @param timestampList List of timestamps used to compute the proof-of-attention
+    @param nonces List of nonces generated based on the packageName and timestamp list
+    @return { "validity" : "Returns True if all nonces are valid else it returns False"}
+    
+    */
     function areNoncesValid (bytes packageName,uint64[] timestampList, uint64[] nonces) internal returns(bool) {
 
         for(uint i = 0; i < nonces.length; i++){
@@ -474,12 +516,26 @@ contract Advertisement {
         return true;
     }
 
-
+    /**
+    @notice Returns the division of two numbers
+    @dev
+        Function used for division operations inside the smartcontract
+    @param numerator Numerator part of the division
+    @param denominator Denominator part of the division
+    @return { "result" : "Result of the division"}
+    */
     function division(uint numerator, uint denominator) public view returns (uint) {
         uint _quotient = numerator / denominator;
         return _quotient;
     }
 
+    /**
+    @notice Converts a uint256 type variable to a byte32 type variable
+    @dev
+        Mostly used internaly
+    @param i number to be converted
+    @return { "b" : "Input number converted to bytes"}
+    */
     function uintToBytes (uint256 i) public view returns(bytes32 b) {
         b = bytes32(i);
     }
