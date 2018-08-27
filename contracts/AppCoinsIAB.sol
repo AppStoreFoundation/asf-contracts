@@ -15,11 +15,11 @@ contract AppCoinsIABInterface {
     @notice Returns the division of two numbers
     @dev
         Function used for division operations inside the smartcontract
-    @param numerator Numerator part of the division
-    @param denominator Denominator part of the division
+    @param _numerator Numerator part of the division
+    @param _denominator Denominator part of the division
     @return { "result" : "Result of the division"}
     */
-    function division(uint numerator, uint denominator) public view returns (uint);
+    function division(uint _numerator, uint _denominator) public view returns (uint);
     /**
     @notice Function to register a in-app-billing operation
     @dev
@@ -123,8 +123,8 @@ contract AppCoinsIAB is AppCoinsIABInterface {
     @notice Returns the division of two numbers
     @dev
         Function used for division operations inside the smartcontract
-    @param numerator Numerator part of the division
-    @param denominator Denominator part of the division
+    @param _numerator Numerator part of the division
+    @param _denominator Denominator part of the division
     @return { "result" : "Result of the division"}
     */
     function division(uint _numerator, uint _denominator) public view returns (uint) {

@@ -159,7 +159,6 @@ contract Advertisement {
     @param startDate Date (in miliseconds) on which the campaign will start to be 
     avaliable to users.
     @param endDate Date (in miliseconds) on which the campaign will no longer be avaliable to users.
-
     */
 
     function createCampaign (
