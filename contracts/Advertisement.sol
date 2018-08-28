@@ -69,17 +69,17 @@ contract Advertisement {
 
     function upgradeFinance (address addrAdverFinance) public onlyOwner {
         AdvertisementFinance newAdvFinance = AdvertisementFinance(addrAdverFinance);
-        Map storage devBalance;    
+        Map storage devBalance;
 
         for(uint i = 0; i < bidIdList.length; i++) {
             address dev = advertisementStorage.getCampaignOwnerById(bidIdList[i]);
-            
+
             if(devBalance.balance[dev] == 0){
                 devBalance.devs.push(dev);
             }
-            
+
             devBalance.balance[dev] += advertisementStorage.getCampaignBudgetById(bidIdList[i]);
-        }        
+        }
 
         for(i = 0; i < devBalance.devs.length; i++) {
             advertisementFinance.pay(devBalance.devs[i],address(newAdvFinance),devBalance.balance[devBalance.devs[i]]);
@@ -196,23 +196,23 @@ contract Advertisement {
         string packageName, bytes32 bidId,
         uint64[] timestampList, uint64[] nonces,
         address appstore, address oem,
-        string walletName, bytes2 countryCode) external {
+        string walletName, bytes2 countryCode) external returns(bool) {
 
         if(!isCampaignValid(bidId)){
             emit Error(
                 "registerPoA","Registering a Proof of attention to a invalid campaign");
-            return;
+            return false;
         }
 
         if(timestampList.length != expectedPoALength){
             emit Error("registerPoA","Proof-of-attention should have exactly 12 proofs");
-            return;
+            return false;
         }
 
         if(timestampList.length != nonces.length){
             emit Error(
                 "registerPoA","Nounce list and timestamp list must have same length");
-            return;
+            return false;
         }
         //Expect ordered array arranged in ascending order
         for (uint i = 0; i < timestampList.length - 1; i++) {
@@ -220,20 +220,20 @@ contract Advertisement {
             if((timestampDiff / 1000) != 10){
                 emit Error(
                     "registerPoA","Timestamps should be spaced exactly 10 secounds");
-                return;
+                return false;
             }
         }
 
         /* if(!areNoncesValid(bytes(packageName), timestampList, nonces)){
             emit Error(
                 "registerPoA","Incorrect nounces for submited proof of attention");
-            return;
+            return false;
         } */
 
         if(userAttributions[msg.sender][bidId]){
             emit Error(
                 "registerPoA","User already registered a proof of attention for this campaign");
-            return;
+            return false;
         }
         //atribute
         userAttributions[msg.sender][bidId] = true;
@@ -241,6 +241,8 @@ contract Advertisement {
         payFromCampaign(bidId, appstore, oem);
 
         emit PoARegistered(bidId, packageName, timestampList, nonces, walletName, countryCode);
+
+        return true;
     }
 
     function cancelCampaign (bytes32 bidId) public {
