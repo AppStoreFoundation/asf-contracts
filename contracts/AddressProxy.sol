@@ -37,9 +37,9 @@ contract AddressProxy {
     /**
     @notice Get all avaliable ids registered on the contract
     @dev Just shows the list of ids registerd on the contract
-    @return { "Id List" : "List of registered ids" }
+    @return { "IdList" : "List of registered ids" }
      */
-    function getAvailableIds() public view returns (bytes32[]) {
+    function getAvailableIds() public view returns (bytes32[] IdList) {
         return availableIds;
     }
 
@@ -79,7 +79,7 @@ contract AddressProxy {
     @param id Id of the registry
     @return { 'name' : 'Name of the contract associated to the given id' }
      */
-    function getContractNameById(bytes32 id) public view returns(string) {
+    function getContractNameById(bytes32 id) public view returns(string name) {
         return contractsAddress[id].name;
     }
 
@@ -87,9 +87,9 @@ contract AddressProxy {
     /**
     @notice Get the contract address associated to a certain id
     @param id Id of the registry
-    @return { 'address' : 'Address of the contract associated to the given id' }
+    @return { 'contractAddr' : 'Address of the contract associated to the given id' }
      */
-    function getContractAddressById(bytes32 id) public view returns(address) {
+    function getContractAddressById(bytes32 id) public view returns(address contractAddr) {
         return contractsAddress[id].at;
     }
 
@@ -99,7 +99,7 @@ contract AddressProxy {
     @param id Id of the registry
     @return { 'time' : 'Time in miliseconds of the first time the given id was registered' }
      */
-    function getContractCreatedTimeById(bytes32 id) public view returns(uint) {
+    function getContractCreatedTimeById(bytes32 id) public view returns(uint time) {
         return contractsAddress[id].createdTime;
     }
 
@@ -108,7 +108,7 @@ contract AddressProxy {
     @param id Id of the registry
     @return { 'time' : 'Time in miliseconds of the last time the given id was updated' }
      */
-    function getContractUpdatedTimeById(bytes32 id) public view returns(uint) {
+    function getContractUpdatedTimeById(bytes32 id) public view returns(uint time) {
         return contractsAddress[id].updatedTime;
     }
 

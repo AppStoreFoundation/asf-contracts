@@ -74,26 +74,26 @@ contract AdvertisementStorage {
         Based on a camapaign Id (bidId), returns all stored information for that campaign.
     @param campaignId Id of the campaign
     @return {
-        "bid" : "Id of the campaign",
+        "bidId" : "Id of the campaign",
         "price" : "Value to pay for each proof-of-attention",
         "budget" : "Total value avaliable to be spent on the campaign",
         "startDate" : "Start date of the campaign (in miliseconds)",
         "endDate" : "End date of the campaign (in miliseconds)"
         "valid" : "Boolean informing if the campaign is valid",
-        "owner" : "Address of the campaing's owner"
+        "campOwner" : "Address of the campaing's owner"
     }
     */
     function getCampaign(bytes32 campaignId)
         public
         view
         returns (
-            bytes32,
-            uint,
-            uint,
-            uint,
-            uint,
-            bool,
-            address
+            bytes32 bidId,
+            uint price,
+            uint budget,
+            uint startDate,
+            uint endDate,
+            bool valid,
+            address campOwner
         ) {
 
         CampaignLibrary.Campaign storage campaign = campaigns[campaignId];
@@ -165,7 +165,7 @@ contract AdvertisementStorage {
     function getCampaignPriceById(bytes32 bidId)
         public
         view
-        returns (uint) {
+        returns (uint price) {
         return campaigns[bidId].price;
     }
 
@@ -195,7 +195,7 @@ contract AdvertisementStorage {
     function getCampaignBudgetById(bytes32 bidId)
         public
         view
-        returns (uint) {
+        returns (uint budget) {
         return campaigns[bidId].budget;
     }
 
@@ -228,7 +228,7 @@ contract AdvertisementStorage {
     function getCampaignStartDateById(bytes32 bidId)
         public
         view
-        returns (uint) {
+        returns (uint startDate) {
         return campaigns[bidId].startDate;
     }
 
@@ -259,7 +259,7 @@ contract AdvertisementStorage {
     function getCampaignEndDateById(bytes32 bidId)
         public
         view
-        returns (uint) {
+        returns (uint endDate) {
         return campaigns[bidId].endDate;
     }
 
@@ -289,7 +289,7 @@ contract AdvertisementStorage {
     function getCampaignValidById(bytes32 bidId)
         public
         view
-        returns (bool) {
+        returns (bool valid) {
         return campaigns[bidId].valid;
     }
 
@@ -314,12 +314,12 @@ contract AdvertisementStorage {
     @dev 
         Based on the Campaign id, return the address of the campaign owner.
     @param bidId Campaign id to which the query refers
-    @return { "owner" : "Address of the campaign owner" } 
+    @return { "campOwner" : "Address of the campaign owner" } 
     */
     function getCampaignOwnerById(bytes32 bidId)
         public
         view
-        returns (address) {
+        returns (address campOwner) {
         return campaigns[bidId].owner;
     }
 

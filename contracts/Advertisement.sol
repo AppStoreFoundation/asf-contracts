@@ -132,10 +132,12 @@ contract Advertisement {
         This function is required to upgrade Advertisement contract address on Advertisement 
         Finance contract. This function can only be called by the Advertisement Finance 
         contract registered in this contract.
-    @return {"_contract" : "Address of the Advertisement Storage contract used by this contract"}
+    @return {
+        "storageContract" : "Address of the Advertisement Storage contract used by this contract"
+        }
     */
 
-    function getAdvertisementStorageAddress() public view returns(address _contract) {
+    function getAdvertisementStorageAddress() public view returns(address storageContract) {
         require (msg.sender == address(advertisementFinance));
 
         return address(advertisementStorage);
@@ -254,8 +256,6 @@ contract Advertisement {
     @param walletName Package name of the wallet submitting the proof of attention
     @param countryCode String with the 2 character identifying the country from which the 
     proof of attention was processed
-
-    @return { "result" : "Proof of attention registered succesfully"}
     */
 
     function registerPoA (
@@ -336,7 +336,7 @@ contract Advertisement {
     @param bidId Campaign id to which the query refers
     @return { "state" : "Validity of the campaign"}
     */
-    function getCampaignValidity(bytes32 bidId) public view returns(bool){
+    function getCampaignValidity(bytes32 bidId) public view returns(bool state){
         return advertisementStorage.getCampaignValidById(bidId);
     }
 
@@ -347,7 +347,7 @@ contract Advertisement {
     @param bidId Campaign id to which the query refers
     @return { "price" : "Reward (in wei) for each proof of attention registered"} 
     */
-    function getPriceOfCampaign (bytes32 bidId) public view returns(uint) {
+    function getPriceOfCampaign (bytes32 bidId) public view returns(uint price) {
         return advertisementStorage.getCampaignPriceById(bidId);
     }
 
@@ -359,7 +359,7 @@ contract Advertisement {
     @param bidId Campaign id to which the query refers
     @return { "startDate" : "Start date (in miliseconds) of the campaign"} 
     */
-    function getStartDateOfCampaign (bytes32 bidId) public view returns(uint) {
+    function getStartDateOfCampaign (bytes32 bidId) public view returns(uint startDate) {
         return advertisementStorage.getCampaignStartDateById(bidId);
     }
 
@@ -371,7 +371,7 @@ contract Advertisement {
     @param bidId Campaign id to which the query refers
     @return { "endDate" : "End date (in miliseconds) of the campaign"} 
     */
-    function getEndDateOfCampaign (bytes32 bidId) public view returns(uint) {
+    function getEndDateOfCampaign (bytes32 bidId) public view returns(uint endDate) {
         return advertisementStorage.getCampaignEndDateById(bidId);
     }
 
@@ -382,7 +382,7 @@ contract Advertisement {
     @param bidId Campaign id to which the query refers
     @return { "budget" : "Total value (in wei) spendable in proof of attention rewards"} 
     */
-    function getBudgetOfCampaign (bytes32 bidId) public view returns(uint) {
+    function getBudgetOfCampaign (bytes32 bidId) public view returns(uint budget) {
         return advertisementStorage.getCampaignBudgetById(bidId);
     }
 
@@ -392,9 +392,9 @@ contract Advertisement {
     @dev 
         Based on the Campaign id return the address of the campaign owner
     @param bidId Campaign id to which the query refers
-    @return { "owner" : "Address of the campaign owner" } 
+    @return { "campaignOwner" : "Address of the campaign owner" } 
     */
-    function getOwnerOfCampaign (bytes32 bidId) public view returns(address) {
+    function getOwnerOfCampaign (bytes32 bidId) public view returns(address campaignOwner) {
         return advertisementStorage.getCampaignOwnerById(bidId);
     }
 
@@ -402,9 +402,9 @@ contract Advertisement {
     @notice Get the list of Campaign BidIds registered in the contract
     @dev
         Returns the list of BidIds of the campaigns ever registered in the contract
-    @return { "BidIdList" : "List of BidIds registered in the contract" }
+    @return { "bidIds" : "List of BidIds registered in the contract" }
     */
-    function getBidIdList() public view returns(bytes32[]) {
+    function getBidIdList() public view returns(bytes32[] bidIds) {
         return bidIdList;
     }
 
@@ -416,13 +416,13 @@ contract Advertisement {
     @param bidId Campaign id to which the query refers
     @return { "valid" : "validity of the campaign" }
     */
-    function isCampaignValid(bytes32 bidId) public view returns(bool) {
+    function isCampaignValid(bytes32 bidId) public view returns(bool valid) {
         uint startDate = advertisementStorage.getCampaignStartDateById(bidId);
         uint endDate = advertisementStorage.getCampaignEndDateById(bidId);
-        bool valid = advertisementStorage.getCampaignValidById(bidId);
+        bool validity = advertisementStorage.getCampaignValidById(bidId);
 
         uint nowInMilliseconds = now * 1000;
-        return valid && startDate < nowInMilliseconds && endDate > nowInMilliseconds;
+        return validity && startDate < nowInMilliseconds && endDate > nowInMilliseconds;
     }
 
     /**
@@ -471,10 +471,11 @@ contract Advertisement {
     @param packageName Package name to which the proof-of-attention refers to
     @param timestampList List of timestamps used to compute the proof-of-attention
     @param nonces List of nonces generated based on the packageName and timestamp list
-    @return { "validity" : "Returns True if all nonces are valid else it returns False"}
+    @return { "valid" : "Returns True if all nonces are valid else it returns False"}
     
     */
-    function areNoncesValid (bytes packageName,uint64[] timestampList, uint64[] nonces) internal returns(bool) {
+    function areNoncesValid (bytes packageName,uint64[] timestampList, uint64[] nonces) 
+        internal returns(bool valid) {
 
         for(uint i = 0; i < nonces.length; i++){
             bytes8 timestamp = bytes8(timestampList[i]);
@@ -526,7 +527,7 @@ contract Advertisement {
     @param denominator Denominator part of the division
     @return { "result" : "Result of the division"}
     */
-    function division(uint numerator, uint denominator) public view returns (uint) {
+    function division(uint numerator, uint denominator) public view returns (uint result) {
         uint _quotient = numerator / denominator;
         return _quotient;
     }

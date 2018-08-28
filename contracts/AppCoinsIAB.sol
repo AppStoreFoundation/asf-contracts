@@ -19,7 +19,7 @@ contract AppCoinsIABInterface {
     @param _denominator Denominator part of the division
     @return { "result" : "Result of the division"}
     */
-    function division(uint _numerator, uint _denominator) public view returns (uint);
+    function division(uint _numerator, uint _denominator) public view returns (uint result);
     /**
     @notice Function to register a in-app-billing operation
     @dev
@@ -35,7 +35,11 @@ contract AppCoinsIABInterface {
     @param _countryCode Country code of the country from which the transaction was issued
     @return {"result" : "True if the transaction was successfull"}
     */
-    function buy(string _packageName, string _sku, uint256 _amount, address _addr_appc, address _dev, address _appstore, address _oem, bytes2 _countryCode) public view returns (bool);
+    function buy(
+        string _packageName, string _sku, uint256 _amount, address _addr_appc, address _dev, 
+        address _appstore, address _oem, bytes2 _countryCode) 
+        public view 
+        returns (bool result);
 }
 
 contract AppCoinsIAB is AppCoinsIABInterface {
@@ -127,7 +131,7 @@ contract AppCoinsIAB is AppCoinsIABInterface {
     @param _denominator Denominator part of the division
     @return { "result" : "Result of the division"}
     */
-    function division(uint _numerator, uint _denominator) public view returns (uint) {
+    function division(uint _numerator, uint _denominator) public view returns (uint result) {
         uint quotient = _numerator / _denominator;
         return quotient;
     }
