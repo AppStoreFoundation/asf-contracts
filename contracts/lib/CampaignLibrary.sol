@@ -13,10 +13,24 @@ library CampaignLibrary {
         address  owner;
     }
 
-    function convertCountryIndexToBytes(uint[] countries) internal returns (uint,uint,uint){
-        uint countries1 = 0;
-        uint countries2 = 0;
-        uint countries3 = 0;
+    /**
+    @notice Converts country index list into 3 uints
+    @dev  
+        Expects a list of country indexes such that the 2 digit country code is converted to an 
+        index. Countries are expected to be indexed so a "AA" country code is mapped to index 0 and 
+        "ZZ" country is mapped to index 675.
+    @param countries List of country indexes
+    @return {
+        "countries1" : "First third of the byte array converted in a 256 bytes uint",
+        "countries2" : "Second third of the byte array converted in a 256 bytes uint",
+        "countries3" : "Third third of the byte array converted in a 256 bytes uint"
+    }
+    */
+    function convertCountryIndexToBytes(uint[] countries) public 
+        returns (uint countries1,uint countries2,uint countries3){
+        countries1 = 0;
+        countries2 = 0;
+        countries3 = 0;
         for(uint i = 0; i < countries.length; i++){
             uint index = countries[i];
 
