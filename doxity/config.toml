@@ -1,0 +1,12 @@
+linkPrefix = "/doxity-simpleton"
+name = "asf-contracts"
+version = "1.0.0"
+description = "Contracts for the AppStore Fundation"
+buildTime = 2018-08-29T12:22:13.131Z
+target = "doxity"
+src = "contracts/*"
+dir = "pages/docs"
+out = "docs"
+homepage = "https://AppStoreFoundation.github.io"
+
+[interaction]

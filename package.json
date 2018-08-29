@@ -19,6 +19,11 @@
     "typedarray-to-buffer": "^3.1.5",
     "web3": "^1.0.0-beta.35"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AppStoreFoundation/asf-contracts.git"
+  },
+  "homepage": "https://AppStoreFoundation.github.io",
   "devDependencies": {
     "cz-conventional-changelog": "^2.1.0",
     "semantic-release": "^15.5.1",
