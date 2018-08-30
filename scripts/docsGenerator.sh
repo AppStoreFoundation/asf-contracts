@@ -1,15 +1,15 @@
 #!/bin/sh
 cont="/contracts"
-path="$( $(dirname $0) ; pwd -P)"
+path="$( cd $(dirname $0) ; pwd -P)/.."
 echo $path
 cd $path
 
-homepage=$(grep -o "\"homepage.*" package.json)
-url=$(grep -o "\"url.*" package.json )
-author=$(grep -o "\"author.*" package.json)
-name=$(grep -o "\"name.*" package.json)
-desc=$(grep -o "\"desc.*" package.json)
-version=$(grep -o "\"version.*" package.json)
+homepage=$(grep -o "\"homepage.*" $path/package.json)
+url=$(grep -o "\"url.*" $path/package.json )
+author=$(grep -o "\"author.*" $path/package.json)
+name=$(grep -o "\"name.*" $path/package.json)
+desc=$(grep -o "\"desc.*" $path/package.json)
+version=$(grep -o "\"version.*" $path/package.json)
 
 cd /tmp
 git clone git@github.com:RyanHendricks/doxity-simpleton.git
@@ -41,5 +41,10 @@ npm install
 cp -rf docs $path
 cp -rf doxity $path
 
+cd $path
+path="$(pwd)"
+
+echo "Moved Documentation to $path/docs"
+echo "Moved Doxity website to $path/doxity"
 cd /tmp
 rm -rf /tmp/doxity-simpleton
