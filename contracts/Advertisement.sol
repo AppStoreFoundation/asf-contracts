@@ -83,15 +83,18 @@ contract Advertisement {
     function upgradeFinance (address addrAdverFinance) public onlyOwner {
         AdvertisementFinance newAdvFinance = AdvertisementFinance(addrAdverFinance);
         Map storage devBalance;    
+        address dev; 
+        uint balance;
 
         for(uint i = 0; i < bidIdList.length; i++) {
-            address dev = advertisementStorage.getCampaignOwnerById(bidIdList[i]);
-            
+
+            (,,balance,,,,dev) = advertisementStorage.getCampaign(bidIdList[i]);
+
             if(devBalance.balance[dev] == 0){
                 devBalance.devs.push(dev);
             }
             
-            devBalance.balance[dev] += advertisementStorage.getCampaignBudgetById(bidIdList[i]);
+            devBalance.balance[dev] += balance;
         }        
 
         for(i = 0; i < devBalance.devs.length; i++) {
