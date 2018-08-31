@@ -96,7 +96,7 @@ contract('Advertisement', function(accounts) {
 
         await adFinanceInstance.setAdsContractAddress(addInstance.address);
         await adFinanceInstance.setAdsStorageAddress(AdvertisementStorageInstance.address);
-        await AdvertisementStorageInstance.setAllowedAddresses(addInstance.address, true);
+        await AdvertisementStorageInstance.addAddressToWhitelist(addInstance.address);
 
 		TestUtils.setAppCoinsInstance(appcInstance);
 		TestUtils.setContractInstance(addInstance);
@@ -420,7 +420,7 @@ contract('Advertisement', function(accounts) {
         AdvertisementStorageInstance = await AdvertisementStorage.new();
 
 		await addInstance.upgradeStorage(AdvertisementStorageInstance.address);
-        await AdvertisementStorageInstance.setAllowedAddresses(addInstance.address, true);
+        await AdvertisementStorageInstance.addAddressToWhitelist(addInstance.address);
 
 		var addsFinalBalance = await TestUtils.getBalance(AdvertisementStorageInstance.address);
 		var user0FinalBalance = await TestUtils.getBalance(accounts[0]);
@@ -453,7 +453,7 @@ contract('Advertisement', function(accounts) {
 
 		expect(JSON.parse(budget)).to.be.equal(campaignBudget,"Campaign budget is incorrect");
 
-		await AdvertisementStorageInstance.setAllowedAddresses(addInstance.address, true);
+		await AdvertisementStorageInstance.addAddressToWhitelist(addInstance.address);
 
 		return addInstance.registerPoA(examplePoA.packageName,examplePoA.bid,examplePoA.timestamp,examplePoA.nonce,appstore,oem,walletName, countryCode, { from : user }).then( async instance => {
 			expect(instance.logs.length).to.be.equal(1);

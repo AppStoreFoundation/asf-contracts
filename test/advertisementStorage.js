@@ -29,7 +29,7 @@ contract('AdvertisementStorage', function(accounts) {
 
     it('should store a campaign from a valid address', async function () {
         var allowedAddress = accounts[1];
-        await AdvertisementStorageInstance.setAllowedAddresses(allowedAddress, true);
+        await AdvertisementStorageInstance.addAddressToWhitelist(allowedAddress);
 
         //Add to campaign map
         await AdvertisementStorageInstance.setCampaign(
@@ -53,7 +53,7 @@ contract('AdvertisementStorage', function(accounts) {
 
     it('should emit a campaign update if the campaign is already created', async function () {
         var allowedAddress = accounts[1];
-        await AdvertisementStorageInstance.setAllowedAddresses(allowedAddress, true);
+        await AdvertisementStorageInstance.addAddressToWhitelist(allowedAddress);
 
         //Add to campaign map
         await AdvertisementStorageInstance.setCampaign(
