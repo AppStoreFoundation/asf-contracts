@@ -6,13 +6,15 @@ import "./AdvertisementStorage.sol";
 import "./AdvertisementFinance.sol";
 import "./AppCoins.sol";
 
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+
 /**
 @title Advertisement contract
 @author App Store Foundation
 @dev The Advertisement contract collects campaigns registered by developers and executes payments 
 to users using campaign registered applications after proof of Attention.
  */
-contract Advertisement {
+contract Advertisement is Ownable {
 
     struct ValidationRules {
         bool vercode;
@@ -29,13 +31,8 @@ contract Advertisement {
     AppCoins appc;
     AdvertisementStorage advertisementStorage;
     AdvertisementFinance advertisementFinance;
-    address public owner;
-    mapping (address => mapping (bytes32 => bool)) userAttributions;
 
-    modifier onlyOwner() {
-        require(msg.sender == owner);
-        _;
-    }
+    mapping (address => mapping (bytes32 => bool)) userAttributions;
 
 
     event PoARegistered(bytes32 bidId, string packageName,uint64[] timestampList,uint64[] nonceList,string walletName, bytes2 countryCode);
@@ -60,7 +57,7 @@ contract Advertisement {
     */
     function Advertisement (address _addrAppc, address _addrAdverStorage, address _addrAdverFinance) public {
         rules = ValidationRules(false, true, true, 2, 1);
-        owner = msg.sender;
+
         appc = AppCoins(_addrAppc);
         advertisementStorage = AdvertisementStorage(_addrAdverStorage);
         advertisementFinance = AdvertisementFinance(_addrAdverFinance);
