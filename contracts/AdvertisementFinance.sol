@@ -151,7 +151,26 @@ contract AdvertisementFinance {
             withdraw(developers[i],balanceDevelopers[developers[i]]);
         }
     }
-    
 
+    /**
+    @notice Get list of developers with coins stored in the contract 
+    @dev
+        This function can only be called by the Advertisement contract        
+    @return { '_devList' : ' List of developers registered in the contract'}
+    */
+    function getDeveloperList() public view onlyAds returns(address[] _devList){
+        return developers;
+    }
+
+    /**
+    @notice Get balance of coins stored in the contract by a specific developer
+    @dev
+        This function can only be called by the Advertisement contract
+    @param _dev Developer's address
+    @return { '_balance' : 'Balance of coins deposited in the contract by the address' }
+    */
+    function getDeveloperBalance(address _dev) public view onlyAds returns(uint256 _balance){
+        return balanceDevelopers[_dev];
+    }
 }	
 
