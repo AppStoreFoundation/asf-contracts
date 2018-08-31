@@ -1,5 +1,7 @@
 pragma solidity ^0.4.19;
 
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+
 /**
 @title AddressProxy contract
 @author App Store Foundation
@@ -7,7 +9,7 @@ pragma solidity ^0.4.19;
 version's contracts deployed to the network.
  */
 
-contract AddressProxy {
+contract AddressProxy is Ownable {
 
     struct ContractAddress {
         bytes32 id;
@@ -17,20 +19,13 @@ contract AddressProxy {
         uint updatedTime;
     }
 
-    address public owner;
     mapping(bytes32 => ContractAddress) private contractsAddress;
     bytes32[] public availableIds;
-
-    modifier onlyOwner() {
-        require(msg.sender == owner);
-        _;
-    }
 
     event AddressCreated(bytes32 id, string name, address at, uint createdTime, uint updatedTime);
     event AddressUpdated(bytes32 id, string name, address at, uint createdTime, uint updatedTime);
 
     function AddressProxy() public {
-        owner = msg.sender;
     }
 
 
