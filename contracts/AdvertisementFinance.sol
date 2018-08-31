@@ -1,5 +1,7 @@
 pragma solidity ^0.4.21;
 
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+
 import "./AppCoins.sol";
 import "./Advertisement.sol";
 
@@ -10,21 +12,16 @@ import "./Advertisement.sol";
 Advertisemnt contract. This contract is responsible for storing all the amount of AppCoins destined 
 to user aquisition campaigns.
 */
-contract AdvertisementFinance {
+contract AdvertisementFinance is Ownable {
 
     mapping (address => uint256) balanceDevelopers;
     mapping (address => bool) developerExists;
     
     address[] developers;
-    address owner;
     address advertisementContract;
     address advStorageContract;
     AppCoins appc;
 
-    modifier onlyOwner() { 
-        require(owner == msg.sender); 
-        _; 
-    }
 
     modifier onlyAds() { 
         require(advertisementContract == msg.sender); 
@@ -44,7 +41,6 @@ contract AdvertisementFinance {
     */
     function AdvertisementFinance (address _addrAppc) 
         public {
-        owner = msg.sender;
         appc = AppCoins(_addrAppc);
         advStorageContract = 0x0;
     }
