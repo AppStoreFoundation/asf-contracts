@@ -155,7 +155,9 @@ contract AppCoinsIAB is AppCoinsIABInterface {
         amounts[1] = division(_amount * appstore_share, 100);
         amounts[2] = division(_amount * oem_share, 100);
 
-        appc.transferFrom(msg.sender, _dev, amounts[0]);
+        uint remaining = _amount - (amounts[0] + amounts[1] + amounts[2]);
+
+        appc.transferFrom(msg.sender, _dev, amounts[0] + remaining);
         appc.transferFrom(msg.sender, _appstore, amounts[1]);
         appc.transferFrom(msg.sender, _oem, amounts[2]);
 
