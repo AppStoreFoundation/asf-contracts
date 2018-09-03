@@ -106,7 +106,7 @@ contract('AppCoinsIAB', function(accounts) {
 		var walletAddress1 = accounts[4];
 		var walletAddress2 = accounts[5];
 		await TestUtils.expectErrorMessageTest("Operation can only be performed by Whitelisted Addresses", () => {
-			return appIABInstance.informOffChainBuy.sendTransaction([walletAddress1,walletAddress2],[walletAddress1,walletAddress2]);
+			return appIABInstance.informOffChainBuy.sendTransaction([walletAddress1,walletAddress2],[walletAddress1,walletAddress2], { from : walletAddress2});
 		});
 	})
 
