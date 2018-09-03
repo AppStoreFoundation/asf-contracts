@@ -1,6 +1,6 @@
 pragma solidity ^0.4.19;
 
-import "openzeppelin-solidity/contracts/access/Whitelist.sol";
+import "./Base/Whitelist.sol";
 
 import  { CampaignLibrary } from "./lib/CampaignLibrary.sol";
 
