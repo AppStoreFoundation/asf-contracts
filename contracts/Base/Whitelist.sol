@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "./Ownable.sol";
 import "openzeppelin-solidity/contracts/access/rbac/RBAC.sol";
 
 /**
@@ -35,7 +35,7 @@ contract Whitelist is Ownable, RBAC {
     */
     function addAddressToWhitelist(address _operator)
         public
-        onlyOwner
+        onlyOwner("addAddressToWhitelist")
     {
         addRole(_operator, ROLE_WHITELISTED);
     }
@@ -59,7 +59,7 @@ contract Whitelist is Ownable, RBAC {
     */
     function addAddressesToWhitelist(address[] _operators)
         public
-        onlyOwner
+        onlyOwner("addAddressesToWhitelist")
     {
         for (uint256 i = 0; i < _operators.length; i++) {
             addAddressToWhitelist(_operators[i]);
@@ -74,7 +74,7 @@ contract Whitelist is Ownable, RBAC {
     */
     function removeAddressFromWhitelist(address _operator)
         public
-        onlyOwner
+        onlyOwner("removeAddressFromWhitelist")
     {
         removeRole(_operator, ROLE_WHITELISTED);
     }
@@ -87,7 +87,7 @@ contract Whitelist is Ownable, RBAC {
     */
     function removeAddressesFromWhitelist(address[] _operators)
         public
-        onlyOwner
+        onlyOwner("removeAddressesFromWhitelist")
     {
         for (uint256 i = 0; i < _operators.length; i++) {
             removeAddressFromWhitelist(_operators[i]);
