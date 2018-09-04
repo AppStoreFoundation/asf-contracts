@@ -166,7 +166,26 @@ contract('AdvertisementStorage', function(accounts) {
             });
     });
             
-    it('should update a campaign start date of an existing campaign');
+    it('should update a campaign start date of an existing campaign', async () => {
+        await AdvertisementStorageInstance.setCampaign.sendTransaction(
+            testCampaign.bidId,
+            testCampaign.price,
+            testCampaign.budget,
+            testCampaign.startDate,
+            testCampaign.endDate,
+            testCampaign.valid,
+            testCampaign.owner
+        );
+
+        await TestUtils.expectEventTest('CampaignUpdated', async () => {
+            await AdvertisementStorageInstance
+                .setCampaignStartDateById.sendTransaction(testCampaign.bidId,1234438600);
+            var startDate = 
+                await AdvertisementStorageInstance.getCampaignStartDateById.call(testCampaign.bidId);
+            expect(JSON.parse(startDate))
+                .to.be.equal(1234438600, "Campaign was not updated");
+        });
+    });
 
     it('should revert if a campaign start date is set to a campaign that does not exist', async () => {
         await TestUtils.expectRevertTest( () => {
