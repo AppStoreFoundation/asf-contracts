@@ -29,10 +29,10 @@ contract('AdvertisementStorage', function(accounts) {
 
     it('should store a campaign from a valid address', async function () {
         var allowedAddress = accounts[1];
-        await AdvertisementStorageInstance.setAllowedAddresses(allowedAddress, true);
+        await AdvertisementStorageInstance.setAllowedAddresses.sendTransaction(allowedAddress, true);
 
         //Add to campaign map
-        await AdvertisementStorageInstance.setCampaign(
+        await AdvertisementStorageInstance.setCampaign.sendTransaction(
             testCampaign.bidId,
             testCampaign.price,
             testCampaign.budget,
@@ -53,10 +53,10 @@ contract('AdvertisementStorage', function(accounts) {
 
     it('should emit a campaign update if the campaign is already created', async function () {
         var allowedAddress = accounts[1];
-        await AdvertisementStorageInstance.setAllowedAddresses(allowedAddress, true);
+        await AdvertisementStorageInstance.setAllowedAddresses.sendTransaction(allowedAddress, true);
 
         //Add to campaign map
-        await AdvertisementStorageInstance.setCampaign(
+        await AdvertisementStorageInstance.setCampaign.sendTransaction(
             testCampaign.bidId,
             testCampaign.price,
             testCampaign.budget,
@@ -75,12 +75,17 @@ contract('AdvertisementStorage', function(accounts) {
 
         
         await TestUtils.expectEventTest('CampaignUpdated', async () => {
-            await AdvertisementStorageInstance.setCampaignBudgetById(testCampaign.bidId,0);
-            
+            await AdvertisementStorageInstance.setCampaignBudgetById.sendTransaction(testCampaign.bidId,0);
+            var budget = await AdvertisementStorageInstance.getCampaignBudgetById.call(testCampaign.bidId);
+            expect(JSON.parse(budget))
+            .to.be.equal(0, "Campaign was not updated");
         });
 
         await TestUtils.expectEventTest('CampaignUpdated', async () => {
-            await AdvertisementStorageInstance.setCampaignValidById(testCampaign.bidId, false);
+            await AdvertisementStorageInstance.setCampaignValidById.sendTransaction(testCampaign.bidId, false);
+            var valid = await AdvertisementStorageInstance.getCampaignValidById.call(testCampaign.bidId);
+            expect(JSON.parse(valid))
+            .to.be.equal(valid, "Campaign was not updated");
         });
 
 
