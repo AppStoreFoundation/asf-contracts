@@ -109,22 +109,47 @@ contract('AdvertisementStorage', function(accounts) {
         });
     });
 
+    it('should update a campaign price of an existing campaign', async () => {
+        await AdvertisementStorageInstance.setCampaign.sendTransaction(
+            testCampaign.bidId,
+            testCampaign.price,
+            testCampaign.budget,
+            testCampaign.startDate,
+            testCampaign.endDate,
+            testCampaign.valid,
+            testCampaign.owner
+        );
+
+        await TestUtils.expectEventTest('CampaignUpdated', async () => {
+            await AdvertisementStorageInstance.setCampaignPriceById.sendTransaction(testCampaign.bidId,10);
+            var price = await AdvertisementStorageInstance.getCampaignPriceById.call(testCampaign.bidId);
+            expect(JSON.parse(price))
+                .to.be.equal(10, "Campaign was not updated");
+        });
+    });
+    
     it('should revert if a campaign price is set to a campaign that does not exist', async () => {
         await TestUtils.expectRevertTest( () => {
             
             return AdvertisementStorageInstance.setCampaignPriceById(
                 testCampaign.bidId,
                 testCampaign.price);
+            });
         });
-    });
+
+    it('should update a campaign budget of an existing campaign');
+        
     it('should revert if a campaign budget is set to a campaign that does not exist', async () => {
         await TestUtils.expectRevertTest( () => {
             
             return AdvertisementStorageInstance.setCampaignBudgetById(
                 testCampaign.bidId,
                 testCampaign.budget);
-        });
+            });
     });
+            
+    it('should update a campaign start date of an existing campaign');
+
     it('should revert if a campaign start date is set to a campaign that does not exist', async () => {
         await TestUtils.expectRevertTest( () => {
             
@@ -133,6 +158,8 @@ contract('AdvertisementStorage', function(accounts) {
                 testCampaign.startDate);
         });
     });
+
+    it('should update a campaign end date of an existing campaign');
 
     it('should revert if a campaign end date is set to a campaign that does not exist', async () => {
         await TestUtils.expectRevertTest( () => {
@@ -143,6 +170,8 @@ contract('AdvertisementStorage', function(accounts) {
         });
     });
 
+    it('should update a campaign validity of an existing campaign');
+
     it('should revert if a campaign validity is set to a campaign that does not exist', async () => {
         await TestUtils.expectRevertTest( () => {
             
@@ -151,6 +180,8 @@ contract('AdvertisementStorage', function(accounts) {
                 false);
         });
     });
+    
+    it('should update a campaign owner of an existing campaign');
 
     it('should revert if a campaign owner is set to a campaign that does not exist', async () => {
         await TestUtils.expectRevertTest( () => {
