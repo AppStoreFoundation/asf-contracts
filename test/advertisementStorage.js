@@ -137,7 +137,25 @@ contract('AdvertisementStorage', function(accounts) {
             });
         });
 
-    it('should update a campaign budget of an existing campaign');
+    it('should update a campaign budget of an existing campaign', async () => {
+        await AdvertisementStorageInstance.setCampaign.sendTransaction(
+            testCampaign.bidId,
+            testCampaign.price,
+            testCampaign.budget,
+            testCampaign.startDate,
+            testCampaign.endDate,
+            testCampaign.valid,
+            testCampaign.owner
+        );
+
+        await TestUtils.expectEventTest('CampaignUpdated', async () => {
+            await AdvertisementStorageInstance
+                .setCampaignBudgetById.sendTransaction(testCampaign.bidId,10000);
+            var budget = await AdvertisementStorageInstance.getCampaignBudgetById.call(testCampaign.bidId);
+            expect(JSON.parse(budget))
+                .to.be.equal(10000, "Campaign was not updated");
+        });
+    });
         
     it('should revert if a campaign budget is set to a campaign that does not exist', async () => {
         await TestUtils.expectRevertTest( () => {
