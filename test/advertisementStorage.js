@@ -256,7 +256,27 @@ contract('AdvertisementStorage', function(accounts) {
         });
     });
     
-    it('should update a campaign owner of an existing campaign');
+    it('should update a campaign owner of an existing campaign', async () => {
+        await AdvertisementStorageInstance.setCampaign.sendTransaction(
+            testCampaign.bidId,
+            testCampaign.price,
+            testCampaign.budget,
+            testCampaign.startDate,
+            testCampaign.endDate,
+            testCampaign.valid,
+            testCampaign.owner
+        );
+
+        await TestUtils.expectEventTest('CampaignUpdated', async () => {
+            var newOwner = web3.utils.toHex("0x0000000000000000000000000000000000099338");
+            await AdvertisementStorageInstance
+                .setCampaignOwnerById.sendTransaction(testCampaign.bidId,newOwner);
+            var owner = 
+                await AdvertisementStorageInstance.getCampaignOwnerById.call(testCampaign.bidId);
+            expect(owner)
+                .to.be.equal(newOwner, "Campaign was not updated");
+        });
+    });
 
     it('should revert if a campaign owner is set to a campaign that does not exist', async () => {
         await TestUtils.expectRevertTest( () => {
