@@ -34,5 +34,16 @@ module.exports = {
 		});
 
 		assert.equal(eventLog.event, eventName, "Expected event of type "+eventName);
+	},
+	expectRevertTest: async function (callback){
+		var reverted = false;
+		var expectRevert = RegExp('revert');
+		await callback().catch(
+			(err) => {
+				reverted = expectRevert.test(err.message);
+			}
+		);
+
+		assert.equal(reverted, true, "The transaction should have reverted.");
 	}
 }

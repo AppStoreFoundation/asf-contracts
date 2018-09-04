@@ -87,25 +87,73 @@ contract('AdvertisementStorage', function(accounts) {
     })
 
     it('should revert if store a campaign from a invalid address', async function () {
-    	var reverted = false;
         var invalidAddress = accounts[2];
+        
+        await TestUtils.expectRevertTest( () => {
+            //Add to campaign map
+            return AdvertisementStorageInstance.setCampaign(
+                testCampaign.bidId,
+                testCampaign.price,
+                testCampaign.budget,
+                testCampaign.startDate,
+                testCampaign.endDate,
+                testCampaign.valid,
+                testCampaign.owner,
+                { from: invalidAddress }
+            );
+        });
+    });
 
-        //Add to campaign map
-        await AdvertisementStorageInstance.setCampaign(
-            testCampaign.bidId,
-            testCampaign.price,
-            testCampaign.budget,
-            testCampaign.startDate,
-            testCampaign.endDate,
-            testCampaign.valid,
-            testCampaign.owner,
-            { from: invalidAddress }
-        ).catch(
-    		(err) => {
-    			reverted = expectRevert.test(err.message);
-    		});
+    it('should revert if a campaign price is set to a campaign that does not exist', async () => {
+        await TestUtils.expectRevertTest( () => {
+            
+            return AdvertisementStorageInstance.setCampaignPriceById(
+                testCampaign.bidId,
+                testCampaign.price);
+        });
+    });
+    it('should revert if a campaign budget is set to a campaign that does not exist', async () => {
+        await TestUtils.expectRevertTest( () => {
+            
+            return AdvertisementStorageInstance.setCampaignBudgetById(
+                testCampaign.bidId,
+                testCampaign.budget);
+        });
+    });
+    it('should revert if a campaign start date is set to a campaign that does not exist', async () => {
+        await TestUtils.expectRevertTest( () => {
+            
+            return AdvertisementStorageInstance.setCampaignStartDateById(
+                testCampaign.bidId,
+                testCampaign.startDate);
+        });
+    });
 
-    	expect(reverted).to.be.equal(true,"Revert expected");
+    it('should revert if a campaign end date is set to a campaign that does not exist', async () => {
+        await TestUtils.expectRevertTest( () => {
+            
+            return AdvertisementStorageInstance.setCampaignEndDateById(
+                testCampaign.bidId,
+                testCampaign.endDate);
+        });
+    });
+
+    it('should revert if a campaign validity is set to a campaign that does not exist', async () => {
+        await TestUtils.expectRevertTest( () => {
+            
+            return AdvertisementStorageInstance.setCampaignValidById(
+                testCampaign.bidId,
+                false);
+        });
+    });
+
+    it('should revert if a campaign owner is set to a campaign that does not exist', async () => {
+        await TestUtils.expectRevertTest( () => {
+            
+            return AdvertisementStorageInstance.setCampaignOwnerById(
+                testCampaign.bidId,
+                testCampaign.owner);
+        });
     });
 
 });
