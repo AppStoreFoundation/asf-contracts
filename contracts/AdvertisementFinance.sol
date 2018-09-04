@@ -121,6 +121,8 @@ contract AdvertisementFinance {
     function pay(address _developer, address _destination, uint256 _value) 
         public onlyAds{
 
+        require(balanceDevelopers[_developer] >= _value);
+
         appc.transfer( _destination, _value);
         balanceDevelopers[_developer] -= _value;
     }
