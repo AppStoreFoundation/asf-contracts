@@ -2,6 +2,7 @@ pragma solidity ^0.4.21;
 
 
 import  { CampaignLibrary } from "./lib/CampaignLibrary.sol";
+import "./Base/ErrorThrower.sol";
 import "./AdvertisementStorage.sol";
 import "./AdvertisementFinance.sol";
 import "./AppCoins.sol";
@@ -12,7 +13,7 @@ import "./AppCoins.sol";
 @dev The Advertisement contract collects campaigns registered by developers and executes payments 
 to users using campaign registered applications after proof of Attention.
  */
-contract Advertisement {
+contract Advertisement is ErrorThrower{
 
     struct ValidationRules {
         bool vercode;
@@ -39,7 +40,6 @@ contract Advertisement {
 
 
     event PoARegistered(bytes32 bidId, string packageName,uint64[] timestampList,uint64[] nonceList,string walletName, bytes2 countryCode);
-    event Error(string func, string message);
     event CampaignInformation
         (
             bytes32 bidId,

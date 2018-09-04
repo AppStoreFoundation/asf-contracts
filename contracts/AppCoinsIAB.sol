@@ -1,5 +1,7 @@
 pragma solidity ^0.4.19;
 
+import "./Base/ErrorThrower.sol";
+
 contract AppCoins {
     mapping (address => mapping (address => uint256)) public allowance;
     function balanceOf (address _owner) public view returns (uint256);
@@ -42,7 +44,7 @@ contract AppCoinsIABInterface {
         returns (bool result);
 }
 
-contract AppCoinsIAB is AppCoinsIABInterface {
+contract AppCoinsIAB is AppCoinsIABInterface, ErrorThrower {
 
     uint public dev_share = 85;
     uint public appstore_share = 10;
@@ -69,7 +71,6 @@ contract AppCoinsIAB is AppCoinsIABInterface {
 
 
     event Buy(string packageName, string _sku, uint _amount, address _from, address _dev, address _appstore, address _oem, bytes2 countryCode);
-    event Error(string func, string message);
     event OffChainBuy(address _wallet, bytes32 _rootHash);
     
     /**
