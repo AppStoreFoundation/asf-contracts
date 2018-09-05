@@ -106,7 +106,6 @@ contract Advertisement is Ownable {
             cancelCampaign(bidIdList[i]);
         }
         delete bidIdList;
-        advertisementFinance.reset();
         advertisementFinance.setAdsStorageAddress(addrAdverStorage);
         advertisementStorage = AdvertisementStorage(addrAdverStorage);
     }
