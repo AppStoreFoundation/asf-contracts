@@ -7,13 +7,15 @@ import "./AdvertisementStorage.sol";
 import "./AdvertisementFinance.sol";
 import "./AppCoins.sol";
 
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+
 /**
 @title Advertisement contract
 @author App Store Foundation
 @dev The Advertisement contract collects campaigns registered by developers and executes payments 
 to users using campaign registered applications after proof of Attention.
  */
-contract Advertisement is ErrorThrower{
+contract Advertisement is Ownable, ErrorThrower {
 
     struct ValidationRules {
         bool vercode;
@@ -30,13 +32,8 @@ contract Advertisement is ErrorThrower{
     AppCoins appc;
     AdvertisementStorage advertisementStorage;
     AdvertisementFinance advertisementFinance;
-    address public owner;
-    mapping (address => mapping (bytes32 => bool)) userAttributions;
 
-    modifier onlyOwner() {
-        require(msg.sender == owner);
-        _;
-    }
+    mapping (address => mapping (bytes32 => bool)) userAttributions;
 
 
     event PoARegistered(bytes32 bidId, string packageName,uint64[] timestampList,uint64[] nonceList,string walletName, bytes2 countryCode);
@@ -60,15 +57,10 @@ contract Advertisement is ErrorThrower{
     */
     function Advertisement (address _addrAppc, address _addrAdverStorage, address _addrAdverFinance) public {
         rules = ValidationRules(false, true, true, 2, 1);
-        owner = msg.sender;
+
         appc = AppCoins(_addrAppc);
         advertisementStorage = AdvertisementStorage(_addrAdverStorage);
         advertisementFinance = AdvertisementFinance(_addrAdverFinance);
-    }
-
-    struct Map {
-        mapping (address => uint256) balance;
-        address[] devs;
     }
 
     /**
@@ -81,23 +73,16 @@ contract Advertisement is ErrorThrower{
     @param addrAdverFinance Address of the new Advertisement Finance contract 
     */
     function upgradeFinance (address addrAdverFinance) public onlyOwner {
-        AdvertisementFinance newAdvFinance = AdvertisementFinance(addrAdverFinance);
-        Map storage devBalance;    
+        AdvertisementFinance newAdvFinance = AdvertisementFinance(addrAdverFinance);        
 
-        for(uint i = 0; i < bidIdList.length; i++) {
-            address dev = advertisementStorage.getCampaignOwnerById(bidIdList[i]);
-            
-            if(devBalance.balance[dev] == 0){
-                devBalance.devs.push(dev);
-            }
-            
-            devBalance.balance[dev] += advertisementStorage.getCampaignBudgetById(bidIdList[i]);
-        }        
+        address[] memory devList = advertisementFinance.getDeveloperList();
 
-        for(i = 0; i < devBalance.devs.length; i++) {
-            advertisementFinance.pay(devBalance.devs[i],address(newAdvFinance),devBalance.balance[devBalance.devs[i]]);
-            newAdvFinance.increaseBalance(devBalance.devs[i],devBalance.balance[devBalance.devs[i]]);
+        for(uint i = 0; i < devList.length; i++){
+            uint balance = advertisementFinance.getDeveloperBalance(devList[i]);
+            advertisementFinance.pay(devList[i],address(newAdvFinance),balance);
+            newAdvFinance.increaseBalance(devList[i],balance);
         }
+
 
         uint256 oldBalance = appc.balances(address(advertisementFinance));
 
