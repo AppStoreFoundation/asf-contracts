@@ -66,11 +66,6 @@ contract Advertisement {
         advertisementFinance = AdvertisementFinance(_addrAdverFinance);
     }
 
-    struct Map {
-        mapping (address => uint256) balance;
-        address[] devs;
-    }
-
     /**
     @notice Upgrade finance contract used by this contract
     @dev
@@ -81,23 +76,16 @@ contract Advertisement {
     @param addrAdverFinance Address of the new Advertisement Finance contract 
     */
     function upgradeFinance (address addrAdverFinance) public onlyOwner {
-        AdvertisementFinance newAdvFinance = AdvertisementFinance(addrAdverFinance);
-        Map storage devBalance;    
+        AdvertisementFinance newAdvFinance = AdvertisementFinance(addrAdverFinance);        
 
-        for(uint i = 0; i < bidIdList.length; i++) {
-            address dev = advertisementStorage.getCampaignOwnerById(bidIdList[i]);
-            
-            if(devBalance.balance[dev] == 0){
-                devBalance.devs.push(dev);
-            }
-            
-            devBalance.balance[dev] += advertisementStorage.getCampaignBudgetById(bidIdList[i]);
-        }        
+        address[] memory devList = advertisementFinance.getDeveloperList();
 
-        for(i = 0; i < devBalance.devs.length; i++) {
-            advertisementFinance.pay(devBalance.devs[i],address(newAdvFinance),devBalance.balance[devBalance.devs[i]]);
-            newAdvFinance.increaseBalance(devBalance.devs[i],devBalance.balance[devBalance.devs[i]]);
+        for(uint i = 0; i < devList.length; i++){
+            uint balance = advertisementFinance.getDeveloperBalance(devList[i]);
+            advertisementFinance.pay(devList[i],address(newAdvFinance),balance);
+            newAdvFinance.increaseBalance(devList[i],balance);
         }
+
 
         uint256 oldBalance = appc.balances(address(advertisementFinance));
 
