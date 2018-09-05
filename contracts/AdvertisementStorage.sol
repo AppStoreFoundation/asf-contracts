@@ -1,5 +1,7 @@
 pragma solidity ^0.4.19;
 
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+
 import  { CampaignLibrary } from "./lib/CampaignLibrary.sol";
 
 /**
@@ -9,19 +11,12 @@ import  { CampaignLibrary } from "./lib/CampaignLibrary.sol";
 Advertisement contract. This contract is responsible from storing information regardign user 
 aquisiton campaigns.
 */
-contract AdvertisementStorage {
+contract AdvertisementStorage is Ownable {
 
     mapping (bytes32 => CampaignLibrary.Campaign) campaigns;
     mapping (address => bool) allowedAddresses;
-    address public owner;
-
 
     event Error(string func, string message);
-
-    modifier onlyOwner() {
-        require(msg.sender == owner);
-        _;
-    }
 
     modifier onlyAllowedAddress() {
         require(allowedAddresses[msg.sender]);
@@ -64,7 +59,6 @@ contract AdvertisementStorage {
         Initializes contract and updates allowed addresses to interact with contract functions.
     */
     function AdvertisementStorage() public {
-        owner = msg.sender;
         allowedAddresses[msg.sender] = true;
     }
 
