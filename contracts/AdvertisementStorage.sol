@@ -15,6 +15,9 @@ contract AdvertisementStorage {
     mapping (address => bool) allowedAddresses;
     address public owner;
 
+
+    event Error(string func, string message);
+
     modifier onlyOwner() {
         require(msg.sender == owner);
         _;
@@ -22,6 +25,14 @@ contract AdvertisementStorage {
 
     modifier onlyAllowedAddress() {
         require(allowedAddresses[msg.sender]);
+        _;
+    }
+
+    modifier onlyIfCampaignExists(string _funcName, bytes32 _bidId) {
+        if(campaigns[_bidId].owner == 0x0){
+            emit Error(_funcName,"Campaign does not exist");
+            return;
+        }
         _;
     }
 
@@ -179,7 +190,7 @@ contract AdvertisementStorage {
     */
     function setCampaignPriceById(bytes32 bidId, uint price)
         public
-        onlyAllowedAddress
+        onlyAllowedAddress onlyIfCampaignExists("setCampaignPriceById",bidId)
         {
         campaigns[bidId].price = price;
         emitEvent(campaigns[bidId]);
@@ -211,7 +222,7 @@ contract AdvertisementStorage {
     */
     function setCampaignBudgetById(bytes32 bidId, uint newBudget)
         public
-        onlyAllowedAddress
+        onlyAllowedAddress onlyIfCampaignExists("setCampaignPriceById",bidId)
         {
         campaigns[bidId].budget = newBudget;
         emitEvent(campaigns[bidId]);
@@ -242,7 +253,7 @@ contract AdvertisementStorage {
     */
     function setCampaignStartDateById(bytes32 bidId, uint newStartDate)
         public
-        onlyAllowedAddress
+        onlyAllowedAddress onlyIfCampaignExists("setCampaignPriceById",bidId)
         {
         campaigns[bidId].startDate = newStartDate;
         emitEvent(campaigns[bidId]);
@@ -273,7 +284,7 @@ contract AdvertisementStorage {
     */
     function setCampaignEndDateById(bytes32 bidId, uint newEndDate)
         public
-        onlyAllowedAddress
+        onlyAllowedAddress onlyIfCampaignExists("setCampaignPriceById",bidId)
         {
         campaigns[bidId].endDate = newEndDate;
         emitEvent(campaigns[bidId]);
@@ -303,7 +314,7 @@ contract AdvertisementStorage {
     */
     function setCampaignValidById(bytes32 bidId, bool isValid)
         public
-        onlyAllowedAddress
+        onlyAllowedAddress onlyIfCampaignExists("setCampaignPriceById",bidId)
         {
         campaigns[bidId].valid = isValid;
         emitEvent(campaigns[bidId]);
@@ -333,7 +344,7 @@ contract AdvertisementStorage {
     */
     function setCampaignOwnerById(bytes32 bidId, address newOwner)
         public
-        onlyAllowedAddress
+        onlyAllowedAddress onlyIfCampaignExists("setCampaignPriceById",bidId)
         {
         campaigns[bidId].owner = newOwner;
         emitEvent(campaigns[bidId]);
