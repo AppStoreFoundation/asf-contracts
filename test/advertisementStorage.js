@@ -18,7 +18,6 @@ var testCampaign = {
     owner: '0x1DD02B96E9D55E16c646d2F21CA93A705ac667Bf'
 };
 
-var expectRevert = RegExp('revert');
 
 contract('AdvertisementStorage', function(accounts) {
     beforeEach('Setting Advertisement test...',async () => {
@@ -94,7 +93,7 @@ contract('AdvertisementStorage', function(accounts) {
     it('should revert if store a campaign from a invalid address', async function () {
         var invalidAddress = accounts[2];
         
-        await TestUtils.expectRevertTest( () => {
+        await TestUtils.expectRevertTest(() => {
             //Add to campaign map
             return AdvertisementStorageInstance.setCampaign(
                 testCampaign.bidId,
@@ -129,7 +128,7 @@ contract('AdvertisementStorage', function(accounts) {
     });
     
     it('should revert if a campaign price is set to a campaign that does not exist', async () => {
-        await TestUtils.expectRevertTest( () => {
+        await TestUtils.expectErrorMessageTest("Campaign does not exist", () => {
             
             return AdvertisementStorageInstance.setCampaignPriceById(
                 testCampaign.bidId,
@@ -158,7 +157,7 @@ contract('AdvertisementStorage', function(accounts) {
     });
         
     it('should revert if a campaign budget is set to a campaign that does not exist', async () => {
-        await TestUtils.expectRevertTest( () => {
+        await TestUtils.expectErrorMessageTest("Campaign does not exist", () => {
             
             return AdvertisementStorageInstance.setCampaignBudgetById(
                 testCampaign.bidId,
@@ -188,7 +187,7 @@ contract('AdvertisementStorage', function(accounts) {
     });
 
     it('should revert if a campaign start date is set to a campaign that does not exist', async () => {
-        await TestUtils.expectRevertTest( () => {
+        await TestUtils.expectErrorMessageTest("Campaign does not exist", () => {
             
             return AdvertisementStorageInstance.setCampaignStartDateById(
                 testCampaign.bidId,
@@ -218,7 +217,7 @@ contract('AdvertisementStorage', function(accounts) {
     });
 
     it('should revert if a campaign end date is set to a campaign that does not exist', async () => {
-        await TestUtils.expectRevertTest( () => {
+        await TestUtils.expectErrorMessageTest("Campaign does not exist", () => {
             
             return AdvertisementStorageInstance.setCampaignEndDateById(
                 testCampaign.bidId,
@@ -248,7 +247,7 @@ contract('AdvertisementStorage', function(accounts) {
     });
 
     it('should revert if a campaign validity is set to a campaign that does not exist', async () => {
-        await TestUtils.expectRevertTest( () => {
+        await TestUtils.expectErrorMessageTest("Campaign does not exist", () => {
             
             return AdvertisementStorageInstance.setCampaignValidById(
                 testCampaign.bidId,
@@ -279,7 +278,7 @@ contract('AdvertisementStorage', function(accounts) {
     });
 
     it('should revert if a campaign owner is set to a campaign that does not exist', async () => {
-        await TestUtils.expectRevertTest( () => {
+        await TestUtils.expectErrorMessageTest("Campaign does not exist", () => {
             
             return AdvertisementStorageInstance.setCampaignOwnerById(
                 testCampaign.bidId,
