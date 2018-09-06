@@ -37,7 +37,7 @@ contract('AppCoinsIAB', function(accounts) {
 
 		allowedAddress = accounts[7];
 
-		await appIABInstance.addAllowedAddress(allowedAddress);
+		await appIABInstance.addAddressToWhitelist(allowedAddress);
 
 
 	})
@@ -73,24 +73,24 @@ contract('AppCoinsIAB', function(accounts) {
 
 	it('should allow the contract owner to add allowed addresses', async function () {
 		var allowedAddress = accounts[8];
-		await appIABInstance.addAllowedAddress(allowedAddress);
+		await appIABInstance.addAddressToWhitelist(allowedAddress);
 	})
 
 	it('should revert if a non contract owner tries to add allowed addresses', async function () {
 		var newAllowedAddress = accounts[8];
 		await TestUtils.expectErrorMessageTest("Operation can only be performed by contract owner", () => {
-			return appIABInstance.addAllowedAddress.sendTransaction(newAllowedAddress, { from : allowedAddress });
+			return appIABInstance.addAddressToWhitelist.sendTransaction(newAllowedAddress, { from : allowedAddress });
 		});
 	})
 
 	it('should allow the contract owner to remove allowed addresses', async function () {
-		await appIABInstance.removeAllowedAddress(allowedAddress);
+		await appIABInstance.removeAddressFromWhitelist(allowedAddress);
 	})
 
-	it('should revert if a non contract owner tries to remove allowed addresses', async function () {
+	it('should throw error event if a non contract owner tries to remove allowed addresses', async function () {
 		var issuer = accounts[9];
 		await TestUtils.expectErrorMessageTest("Operation can only be performed by contract owner", () => {
-			return appIABInstance.removeAllowedAddress.sendTransaction(allowedAddress, { from : issuer });
+			return appIABInstance.removeAddressFromWhitelist.sendTransaction(allowedAddress, { from : issuer });
 		});
 	})
 
@@ -102,15 +102,15 @@ contract('AppCoinsIAB', function(accounts) {
 		});
 	})
 
-	it('should revert if a non allowed address calls offchain transaction event function', async function () {
+	it('should throw error event if a non allowed address calls offchain transaction event function', async function () {
 		var walletAddress1 = accounts[4];
 		var walletAddress2 = accounts[5];
-		await TestUtils.expectErrorMessageTest("Operation can only be performed by allowed Addresses", () => {
-			return appIABInstance.informOffChainBuy.sendTransaction([walletAddress1,walletAddress2],[walletAddress1,walletAddress2]);
+		await TestUtils.expectErrorMessageTest("Operation can only be performed by Whitelisted Addresses", () => {
+			return appIABInstance.informOffChainBuy.sendTransaction([walletAddress1,walletAddress2],[walletAddress1,walletAddress2], { from : walletAddress2});
 		});
 	})
 
-	it('should revert if offchain transaction event function is called with different wallet and roothash list lengths', async function() {
+	it('should throw error event if offchain transaction event function is called with different wallet and roothash list lengths', async function() {
 		var walletAddress1 = accounts[4];
 		var walletAddress2 = accounts[5];
 		await TestUtils.expectErrorMessageTest("Wallet list and Roothash list must have the same lengths", () => {
@@ -118,13 +118,13 @@ contract('AppCoinsIAB', function(accounts) {
 		});
 	})
 
-	it('should revert if a previously allowed address has its access revoked to offchain transaction event function', async function () {
+	it('should throw error event if a previously allowed address has its access revoked to offchain transaction event function', async function () {
 		var walletAddress1 = accounts[4];
 		var walletAddress2 = accounts[5];
 		await appIABInstance.informOffChainBuy.sendTransaction([walletAddress1,walletAddress2],[walletAddress1,walletAddress2], {from: allowedAddress});
 
-		await appIABInstance.removeAllowedAddress(allowedAddress);
-		await TestUtils.expectErrorMessageTest("Operation can only be performed by allowed Addresses", () => {
+		await appIABInstance.removeAddressFromWhitelist(allowedAddress);
+		await TestUtils.expectErrorMessageTest("Operation can only be performed by Whitelisted Addresses", () => {
 			return appIABInstance.informOffChainBuy.sendTransaction([walletAddress1,walletAddress2],[walletAddress1,walletAddress2], {from: allowedAddress});
 		})
 	})

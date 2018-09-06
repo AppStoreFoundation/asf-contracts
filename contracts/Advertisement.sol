@@ -6,7 +6,7 @@ import "./AdvertisementStorage.sol";
 import "./AdvertisementFinance.sol";
 import "./AppCoins.sol";
 
-import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "./Base/Ownable.sol";
 
 /**
 @title Advertisement contract
@@ -72,7 +72,7 @@ contract Advertisement is Ownable {
         Upgrade finance function can only be called by the Advertisement contract owner.
     @param addrAdverFinance Address of the new Advertisement Finance contract 
     */
-    function upgradeFinance (address addrAdverFinance) public onlyOwner {
+    function upgradeFinance (address addrAdverFinance) public onlyOwner("upgradeFinance") {
         AdvertisementFinance newAdvFinance = AdvertisementFinance(addrAdverFinance);        
 
         address[] memory devList = advertisementFinance.getDeveloperList();
@@ -101,7 +101,7 @@ contract Advertisement is Ownable {
     @param addrAdverStorage Address of the new Advertisement Storage contract
     */
 
-    function upgradeStorage (address addrAdverStorage) public onlyOwner {
+    function upgradeStorage (address addrAdverStorage) public onlyOwner("upgradeStorage") {
         for(uint i = 0; i < bidIdList.length; i++) {
             cancelCampaign(bidIdList[i]);
         }

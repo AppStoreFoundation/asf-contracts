@@ -1,6 +1,6 @@
 pragma solidity ^0.4.19;
 
-import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "./Base/Whitelist.sol";
 
 import  { CampaignLibrary } from "./lib/CampaignLibrary.sol";
 
@@ -11,15 +11,9 @@ import  { CampaignLibrary } from "./lib/CampaignLibrary.sol";
 Advertisement contract. This contract is responsible from storing information regardign user 
 aquisiton campaigns.
 */
-contract AdvertisementStorage is Ownable {
+contract AdvertisementStorage is Whitelist {
 
     mapping (bytes32 => CampaignLibrary.Campaign) campaigns;
-    mapping (address => bool) allowedAddresses;
-
-    modifier onlyAllowedAddress() {
-        require(allowedAddresses[msg.sender]);
-        _;
-    }
 
     event CampaignCreated
         (
@@ -49,18 +43,7 @@ contract AdvertisementStorage is Ownable {
         Initializes contract and updates allowed addresses to interact with contract functions.
     */
     function AdvertisementStorage() public {
-        allowedAddresses[msg.sender] = true;
-    }
-
-    /**
-    @notice Updates the list of allowed addresses in the contract
-    @dev
-        Updates the list of allowed or disallowed addresses to interact with the contract.
-    @param newAddress Address with need for a permission update
-    @param isAllowed Boolean with the new permissions for the specified address
-    */
-    function setAllowedAddresses(address newAddress, bool isAllowed) public onlyOwner {
-        allowedAddresses[newAddress] = isAllowed;
+        addAddressToWhitelist(msg.sender);
     }
 
     /**
@@ -130,7 +113,7 @@ contract AdvertisementStorage is Ownable {
         address owner
     )
     public
-    onlyAllowedAddress {
+    onlyIfWhitelisted(msg.sender) {
 
         CampaignLibrary.Campaign memory campaign = campaigns[campaign.bidId];
 
@@ -174,7 +157,7 @@ contract AdvertisementStorage is Ownable {
     */
     function setCampaignPriceById(bytes32 bidId, uint price)
         public
-        onlyAllowedAddress
+        onlyIfWhitelisted(msg.sender)
         {
         campaigns[bidId].price = price;
         emitEvent(campaigns[bidId]);
@@ -206,7 +189,7 @@ contract AdvertisementStorage is Ownable {
     */
     function setCampaignBudgetById(bytes32 bidId, uint newBudget)
         public
-        onlyAllowedAddress
+        onlyIfWhitelisted(msg.sender)
         {
         campaigns[bidId].budget = newBudget;
         emitEvent(campaigns[bidId]);
@@ -237,7 +220,7 @@ contract AdvertisementStorage is Ownable {
     */
     function setCampaignStartDateById(bytes32 bidId, uint newStartDate)
         public
-        onlyAllowedAddress
+        onlyIfWhitelisted(msg.sender)
         {
         campaigns[bidId].startDate = newStartDate;
         emitEvent(campaigns[bidId]);
@@ -268,7 +251,7 @@ contract AdvertisementStorage is Ownable {
     */
     function setCampaignEndDateById(bytes32 bidId, uint newEndDate)
         public
-        onlyAllowedAddress
+        onlyIfWhitelisted(msg.sender)
         {
         campaigns[bidId].endDate = newEndDate;
         emitEvent(campaigns[bidId]);
@@ -298,7 +281,7 @@ contract AdvertisementStorage is Ownable {
     */
     function setCampaignValidById(bytes32 bidId, bool isValid)
         public
-        onlyAllowedAddress
+        onlyIfWhitelisted(msg.sender)
         {
         campaigns[bidId].valid = isValid;
         emitEvent(campaigns[bidId]);
@@ -328,7 +311,7 @@ contract AdvertisementStorage is Ownable {
     */
     function setCampaignOwnerById(bytes32 bidId, address newOwner)
         public
-        onlyAllowedAddress
+        onlyIfWhitelisted(msg.sender)
         {
         campaigns[bidId].owner = newOwner;
         emitEvent(campaigns[bidId]);

@@ -29,7 +29,7 @@ contract('AdvertisementStorage', function(accounts) {
 
     it('should store a campaign from a valid address', async function () {
         var allowedAddress = accounts[1];
-        await AdvertisementStorageInstance.setAllowedAddresses(allowedAddress, true);
+        await AdvertisementStorageInstance.addAddressToWhitelist(allowedAddress);
 
         //Add to campaign map
         await AdvertisementStorageInstance.setCampaign(
@@ -53,7 +53,7 @@ contract('AdvertisementStorage', function(accounts) {
 
     it('should emit a campaign update if the campaign is already created', async function () {
         var allowedAddress = accounts[1];
-        await AdvertisementStorageInstance.setAllowedAddresses(allowedAddress, true);
+        await AdvertisementStorageInstance.addAddressToWhitelist(allowedAddress);
 
         //Add to campaign map
         await AdvertisementStorageInstance.setCampaign(
@@ -86,26 +86,25 @@ contract('AdvertisementStorage', function(accounts) {
 
     })
 
-    it('should revert if store a campaign from a invalid address', async function () {
+    it('should emit an Error if store a campaign from a invalid address', async function () {
     	var reverted = false;
         var invalidAddress = accounts[2];
 
-        //Add to campaign map
-        await AdvertisementStorageInstance.setCampaign(
-            testCampaign.bidId,
-            testCampaign.price,
-            testCampaign.budget,
-            testCampaign.startDate,
-            testCampaign.endDate,
-            testCampaign.valid,
-            testCampaign.owner,
-            { from: invalidAddress }
-        ).catch(
-    		(err) => {
-    			reverted = expectRevert.test(err.message);
-    		});
 
-    	expect(reverted).to.be.equal(true,"Revert expected");
+        await TestUtils.expectErrorMessageTest(
+            'Operation can only be performed by Whitelisted Addresses',
+            async () => {
+                await AdvertisementStorageInstance.setCampaign(
+                    testCampaign.bidId,
+                    testCampaign.price,
+                    testCampaign.budget,
+                    testCampaign.startDate,
+                    testCampaign.endDate,
+                    testCampaign.valid,
+                    testCampaign.owner,
+                    { from: invalidAddress }
+                )
+            });
     });
 
 });

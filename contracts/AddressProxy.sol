@@ -1,6 +1,6 @@
 pragma solidity ^0.4.19;
 
-import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "./Base/Ownable.sol";
 
 /**
 @title AddressProxy contract
@@ -44,7 +44,7 @@ contract AddressProxy is Ownable {
     @param name Name of the contract
     @param newAddress Address of the contract
     */
-    function addAddress(string name, address newAddress) public onlyOwner {
+    function addAddress(string name, address newAddress) public onlyOwner("addAddress") {
         bytes32 contAddId = stringToBytes32(name);
 
         uint nowInMilliseconds = now * 1000;
