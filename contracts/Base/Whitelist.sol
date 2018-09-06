@@ -14,15 +14,13 @@ import "openzeppelin-solidity/contracts/access/rbac/RBAC.sol";
 contract Whitelist is Ownable, RBAC {
     string public constant ROLE_WHITELISTED = "whitelist";
 
-    event Error(string message);
-
     /**
     * @dev Throws Error event if operator is not whitelisted.
     * @param _operator address
     */
-    modifier onlyIfWhitelisted(address _operator) {
+    modifier onlyIfWhitelisted(string _funcName,address _operator) {
         if(!hasRole(_operator, ROLE_WHITELISTED)){
-            emit Error("Operation can only be performed by Whitelisted Addresses");
+            emit Error(_funcName,"Operation can only be performed by Whitelisted Addresses");
             return;
         }
         _;

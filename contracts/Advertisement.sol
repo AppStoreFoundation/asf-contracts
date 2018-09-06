@@ -15,7 +15,7 @@ import "./Base/Ownable.sol";
 @dev The Advertisement contract collects campaigns registered by developers and executes payments 
 to users using campaign registered applications after proof of Attention.
  */
-contract Advertisement is Ownable, ErrorThrower {
+contract Advertisement is Ownable {
 
     struct ValidationRules {
         bool vercode;

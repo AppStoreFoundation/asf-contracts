@@ -1,15 +1,15 @@
 pragma solidity ^0.4.24;
 
+import "./ErrorThrower.sol";
 
 /**
  * @title Ownable
  * @dev The Ownable contract has an owner address, and provides basic authorization control
  * functions, this simplifies the implementation of "user permissions".
  */
-contract Ownable {
+contract Ownable is ErrorThrower {
     address public owner;
     
-    event Error(string funcName, string message);
     event OwnershipRenounced(address indexed previousOwner);
     event OwnershipTransferred(
         address indexed previousOwner,
