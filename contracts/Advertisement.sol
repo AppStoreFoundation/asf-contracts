@@ -106,7 +106,6 @@ contract Advertisement is Ownable {
             cancelCampaign(bidIdList[i]);
         }
         delete bidIdList;
-        advertisementFinance.reset();
         advertisementFinance.setAdsStorageAddress(addrAdverStorage);
         advertisementStorage = AdvertisementStorage(addrAdverStorage);
     }
@@ -289,7 +288,7 @@ contract Advertisement is Ownable {
         //atribute
         userAttributions[msg.sender][bidId] = true;
 
-        payFromCampaign(bidId, appstore, oem);
+        payFromCampaign(bidId, msg.sender, appstore, oem);
 
         emit PoARegistered(bidId, packageName, timestampList, nonces, walletName, countryCode);
     }
@@ -419,7 +418,7 @@ contract Advertisement is Ownable {
     @param appstore Address of the Appstore receiving it's share
     @param oem Address of the OEM receiving it's share
     */
-    function payFromCampaign (bytes32 bidId, address appstore, address oem) internal {
+    function payFromCampaign (bytes32 bidId, address user, address appstore, address oem) internal {
         uint devShare = 85;
         uint appstoreShare = 10;
         uint oemShare = 5;
@@ -433,7 +432,7 @@ contract Advertisement is Ownable {
         require(budget >= price);
 
         //transfer to user, appstore and oem
-        advertisementFinance.pay(campaignOwner,msg.sender,division(price * devShare, 100));
+        advertisementFinance.pay(campaignOwner,user,division(price * devShare, 100));
         advertisementFinance.pay(campaignOwner,appstore,division(price * appstoreShare, 100));
         advertisementFinance.pay(campaignOwner,oem,division(price * oemShare, 100));
 
