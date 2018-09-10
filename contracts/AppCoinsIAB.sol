@@ -1,5 +1,7 @@
 pragma solidity ^0.4.19;
 
+import "./Base/Whitelist.sol";
+
 contract AppCoins {
     mapping (address => mapping (address => uint256)) public allowance;
     function balanceOf (address _owner) public view returns (uint256);
@@ -42,31 +44,11 @@ contract AppCoinsIABInterface {
         returns (bool result);
 }
 
-contract AppCoinsIAB is AppCoinsIABInterface {
+contract AppCoinsIAB is AppCoinsIABInterface,Whitelist {
 
     uint public dev_share = 85;
     uint public appstore_share = 10;
     uint public oem_share = 5;
-
-    mapping (address => bool) allowedAddresses;
-    address owner;
-
-    modifier onlyAllowedAddress(string _funcName) {
-        if(!allowedAddresses[msg.sender]){
-            emit Error(_funcName, "Operation can only be performed by allowed Addresses");
-            return;
-        }
-        _;
-    }
-
-    modifier onlyOwner(string _funcName) {
-        if(owner != msg.sender){
-            emit Error(_funcName, "Operation can only be performed by contract owner");
-            return;
-        }
-        _;
-    }
-
 
     event Buy(string packageName, string _sku, uint _amount, address _from, address _dev, address _appstore, address _oem, bytes2 countryCode);
     event Error(string func, string message);
@@ -78,28 +60,7 @@ contract AppCoinsIAB is AppCoinsIABInterface {
         Initializes contract and registers the contract owner.
     */
     function AppCoinsIAB() public {
-        owner = msg.sender;
-    }
-
-    /**
-    @notice Adds address to allowed list
-    @dev
-        Adds a new address to the allowed list to perform certain operations using the IAB contract.
-    @param _account Address to add to the allowed adresses list
-    */
-    function addAllowedAddress(address _account) public onlyOwner("addAllowedAddress"){
-        allowedAddresses[_account] = true;
-    }
-
-
-    /**
-    @notice Removes address to allowed list
-    @dev
-        Removes an address from the allowed list, denying certain operations using the IAB contract.
-    @param _account Address to remove from the allowed adresses list
-    */
-    function removeAllowedAddress(address _account) public onlyOwner("removeAllowedAddress") {
-        allowedAddresses[_account] = false;
+        addAddressToWhitelist(msg.sender);
     }
 
     /**
@@ -113,7 +74,10 @@ contract AppCoinsIAB is AppCoinsIABInterface {
     @param _walletList List of wallets for which a OffChainBuy event will be issued
     @param _rootHashList List of roothashs for given transactions
     */
-    function informOffChainBuy(address[] _walletList, bytes32[] _rootHashList) public onlyAllowedAddress("informOffChainTransaction") {
+    function informOffChainBuy(address[] _walletList, bytes32[] _rootHashList) 
+        public 
+        onlyIfWhitelisted("informOffChainBuy",msg.sender) 
+    {
         if(_walletList.length != _rootHashList.length){
             emit Error("informOffChainTransaction", "Wallet list and Roothash list must have the same lengths");
             return;

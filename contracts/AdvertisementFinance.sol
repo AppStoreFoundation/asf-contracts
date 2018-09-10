@@ -1,6 +1,6 @@
 pragma solidity ^0.4.21;
 
-import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "./Base/Ownable.sol";
 
 import "./AppCoins.sol";
 import "./Advertisement.sol";
@@ -72,7 +72,7 @@ contract AdvertisementFinance is Ownable {
         Storage contract earlier registered in this Advertisement Finance contract.
     @param _addrAdvert Address of the new Advertisement contract 
     */
-    function setAdsContractAddress (address _addrAdvert) external onlyOwner {
+    function setAdsContractAddress (address _addrAdvert) external onlyOwner("setAdsContractAddress") {
         // Verify if the new Ads contract is using the same storage as before 
         if (advertisementContract != 0x0){
             Advertisement adsContract = Advertisement(advertisementContract);
@@ -116,6 +116,8 @@ contract AdvertisementFinance is Ownable {
     */
     function pay(address _developer, address _destination, uint256 _value) 
         public onlyAds{
+
+        require(balanceDevelopers[_developer] >= _value);
 
         appc.transfer( _destination, _value);
         balanceDevelopers[_developer] -= _value;

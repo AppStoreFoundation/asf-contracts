@@ -28,7 +28,8 @@ contract('AdvertisementStorage', function(accounts) {
 
     it('should store a campaign from a valid address', async function () {
         var allowedAddress = accounts[1];
-        await AdvertisementStorageInstance.setAllowedAddresses.sendTransaction(allowedAddress, true);
+
+        await AdvertisementStorageInstance.addAddressToWhitelist.sendTransaction(allowedAddress);
 
         //Add to campaign map
         await AdvertisementStorageInstance.setCampaign.sendTransaction(
@@ -52,7 +53,7 @@ contract('AdvertisementStorage', function(accounts) {
 
     it('should emit a campaign update if the campaign is already created', async function () {
         var allowedAddress = accounts[1];
-        await AdvertisementStorageInstance.setAllowedAddresses.sendTransaction(allowedAddress, true);
+        await AdvertisementStorageInstance.addAddressToWhitelist.sendTransaction(allowedAddress);
 
         //Add to campaign map
         await AdvertisementStorageInstance.setCampaign.sendTransaction(
@@ -90,12 +91,16 @@ contract('AdvertisementStorage', function(accounts) {
 
     })
 
-    it('should revert if store a campaign from a invalid address', async function () {
+
+    it('should emit an Error if store a campaign from a invalid address', async function () {
         var invalidAddress = accounts[2];
         
-        await TestUtils.expectRevertTest(() => {
-            //Add to campaign map
-            return AdvertisementStorageInstance.setCampaign(
+            
+        await TestUtils.expectErrorMessageTest(
+            'Operation can only be performed by Whitelisted Addresses',
+            async () => {
+                //Add to campaign map
+                await AdvertisementStorageInstance.setCampaign(
                 testCampaign.bidId,
                 testCampaign.price,
                 testCampaign.budget,
@@ -104,9 +109,10 @@ contract('AdvertisementStorage', function(accounts) {
                 testCampaign.valid,
                 testCampaign.owner,
                 { from: invalidAddress }
-            );
+            )
         });
     });
+
 
     it('should update a campaign price of an existing campaign', async () => {
         await AdvertisementStorageInstance.setCampaign.sendTransaction(
@@ -126,15 +132,16 @@ contract('AdvertisementStorage', function(accounts) {
                 .to.be.equal(10, "Campaign was not updated");
         });
     });
-    
+
     it('should revert if a campaign price is set to a campaign that does not exist', async () => {
         await TestUtils.expectErrorMessageTest("Campaign does not exist", () => {
             
             return AdvertisementStorageInstance.setCampaignPriceById(
                 testCampaign.bidId,
                 testCampaign.price);
-            });
         });
+    });
+   
 
     it('should update a campaign budget of an existing campaign', async () => {
         await AdvertisementStorageInstance.setCampaign.sendTransaction(
