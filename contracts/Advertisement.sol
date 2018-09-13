@@ -7,6 +7,7 @@ import "./AdvertisementFinance.sol";
 import "./AppCoins.sol";
 
 import "./Base/Ownable.sol";
+import "./Base/BaseAdvertisement.sol";
 
 /**
 @title Advertisement contract
@@ -14,7 +15,7 @@ import "./Base/Ownable.sol";
 @dev The Advertisement contract collects campaigns registered by developers and executes payments 
 to users using campaign registered applications after proof of Attention.
  */
-contract Advertisement is Ownable {
+contract Advertisement is Ownable, BaseAdvertisement{
 
     struct ValidationRules {
         bool vercode;
@@ -27,25 +28,9 @@ contract Advertisement is Ownable {
     uint constant expectedPoALength = 12;
 
     ValidationRules public rules;
-    bytes32[] bidIdList;
-    AppCoins appc;
+
     AdvertisementStorage advertisementStorage;
     AdvertisementFinance advertisementFinance;
-
-    mapping (address => mapping (bytes32 => bool)) userAttributions;
-
-
-    event PoARegistered(bytes32 bidId, string packageName,uint64[] timestampList,uint64[] nonceList,string walletName, bytes2 countryCode);
-    event Error(string func, string message);
-    event CampaignInformation
-        (
-            bytes32 bidId,
-            address  owner,
-            string ipValidator,
-            string packageName,
-            uint[3] countries,
-            uint[] vercodes
-    );
 
     /**
     @notice Constructor function
@@ -55,10 +40,11 @@ contract Advertisement is Ownable {
     @param _addrAdverStorage Address of the Advertisement Storage contract to be used
     @param _addrAdverFinance Address of the Advertisement Finance contract to be used
     */
-    function Advertisement (address _addrAppc, address _addrAdverStorage, address _addrAdverFinance) public {
-        rules = ValidationRules(false, true, true, 2, 1);
+    function Advertisement (address _addrAppc, address _addrAdverStorage, address _addrAdverFinance) public 
+        BaseAdvertisement(_addrAppc)
+    {
 
-        appc = AppCoins(_addrAppc);
+        rules = ValidationRules(false, true, true, 2, 1);
         advertisementStorage = AdvertisementStorage(_addrAdverStorage);
         advertisementFinance = AdvertisementFinance(_addrAdverFinance);
     }
@@ -280,13 +266,13 @@ contract Advertisement is Ownable {
             return;
         } */
 
-        if(userAttributions[msg.sender][bidId]){
+        if(userAttributions[bidId][msg.sender] > 0){
             emit Error(
                 "registerPoA","User already registered a proof of attention for this campaign");
             return;
         }
         //atribute
-        userAttributions[msg.sender][bidId] = true;
+        userAttributions[bidId][msg.sender] += 1;
 
         payFromCampaign(bidId, msg.sender, appstore, oem);
 
