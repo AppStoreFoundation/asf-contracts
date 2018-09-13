@@ -2,7 +2,11 @@ pragma solidity ^0.4.24;
 
 import "../AppCoins.sol";
 
-
+/**
+@title Base Advertisement contract
+@author App Store Foundation
+@dev Abstract contract for user aquisition campaign contracts.
+ */
 contract BaseAdvertisement {
     
     AppCoins appc;
