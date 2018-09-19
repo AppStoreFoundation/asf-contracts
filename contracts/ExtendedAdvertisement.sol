@@ -14,25 +14,25 @@ contract ExtendedAdvertisement is Whitelist, BaseAdvertisement {
         uint startDate,
         uint endDate)
         external 
-        onlyWhitelist(msg.sender)
+        onlyIfWhitelisted("createCampaign",msg.sender)
         {
-        emit Error("Function not implemented.");
+        emit Error("createCampaign","Function not implemented.");
         return;
     }
 
-    function cancelCampaign(bidId) 
+    function cancelCampaign(bytes32 bidId) 
         public 
-        onlyWhitelist(msg.sender)
+        onlyIfWhitelisted("createCampaign",msg.sender)
         {
-        emit Error("Function not implemented.");
+        emit Error("createCampaign","Function not implemented.");
         return;
     }
 
     function bulckRegisterPoA() 
         public 
-        onlyWhitelist(msg.sender)
+        onlyIfWhitelisted("createCampaign",msg.sender)
         {
-        emit Error("Function not implemented.");
+        emit Error("createCampaign","Function not implemented.");
         return;
     }
 
