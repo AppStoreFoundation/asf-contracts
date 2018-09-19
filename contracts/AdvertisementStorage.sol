@@ -15,6 +15,14 @@ contract AdvertisementStorage is Whitelist {
 
     mapping (bytes32 => CampaignLibrary.Campaign) campaigns;
 
+    modifier onlyIfCampaignExists(string _funcName, bytes32 _bidId) {
+        if(campaigns[_bidId].owner == 0x0){
+            emit Error(_funcName,"Campaign does not exist");
+            return;
+        }
+        _;
+    }
+
     event CampaignCreated
         (
             bytes32 bidId,
@@ -113,7 +121,7 @@ contract AdvertisementStorage is Whitelist {
         address owner
     )
     public
-    onlyIfWhitelisted(msg.sender) {
+    onlyIfWhitelisted("setCampaign",msg.sender) {
 
         CampaignLibrary.Campaign memory campaign = campaigns[campaign.bidId];
 
@@ -157,7 +165,8 @@ contract AdvertisementStorage is Whitelist {
     */
     function setCampaignPriceById(bytes32 bidId, uint price)
         public
-        onlyIfWhitelisted(msg.sender)
+        onlyIfWhitelisted("setCampaignPriceById",msg.sender) 
+        onlyIfCampaignExists("setCampaignPriceById",bidId)      
         {
         campaigns[bidId].price = price;
         emitEvent(campaigns[bidId]);
@@ -189,7 +198,8 @@ contract AdvertisementStorage is Whitelist {
     */
     function setCampaignBudgetById(bytes32 bidId, uint newBudget)
         public
-        onlyIfWhitelisted(msg.sender)
+        onlyIfCampaignExists("setCampaignBudgetById",bidId)
+        onlyIfWhitelisted("setCampaignBudgetById",msg.sender)
         {
         campaigns[bidId].budget = newBudget;
         emitEvent(campaigns[bidId]);
@@ -220,7 +230,8 @@ contract AdvertisementStorage is Whitelist {
     */
     function setCampaignStartDateById(bytes32 bidId, uint newStartDate)
         public
-        onlyIfWhitelisted(msg.sender)
+        onlyIfCampaignExists("setCampaignStartDateById",bidId)
+        onlyIfWhitelisted("setCampaignStartDateById",msg.sender)
         {
         campaigns[bidId].startDate = newStartDate;
         emitEvent(campaigns[bidId]);
@@ -251,7 +262,8 @@ contract AdvertisementStorage is Whitelist {
     */
     function setCampaignEndDateById(bytes32 bidId, uint newEndDate)
         public
-        onlyIfWhitelisted(msg.sender)
+        onlyIfCampaignExists("setCampaignEndDateById",bidId)
+        onlyIfWhitelisted("setCampaignEndDateById",msg.sender)
         {
         campaigns[bidId].endDate = newEndDate;
         emitEvent(campaigns[bidId]);
@@ -281,7 +293,8 @@ contract AdvertisementStorage is Whitelist {
     */
     function setCampaignValidById(bytes32 bidId, bool isValid)
         public
-        onlyIfWhitelisted(msg.sender)
+        onlyIfCampaignExists("setCampaignValidById",bidId)
+        onlyIfWhitelisted("setCampaignValidById",msg.sender)
         {
         campaigns[bidId].valid = isValid;
         emitEvent(campaigns[bidId]);
@@ -311,7 +324,8 @@ contract AdvertisementStorage is Whitelist {
     */
     function setCampaignOwnerById(bytes32 bidId, address newOwner)
         public
-        onlyIfWhitelisted(msg.sender)
+        onlyIfCampaignExists("setCampaignOwnerById",bidId)
+        onlyIfWhitelisted("setCampaignOwnerById",msg.sender)
         {
         campaigns[bidId].owner = newOwner;
         emitEvent(campaigns[bidId]);

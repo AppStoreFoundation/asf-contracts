@@ -2,6 +2,7 @@ pragma solidity ^0.4.19;
 
 import "./Base/Whitelist.sol";
 
+
 contract AppCoins {
     mapping (address => mapping (address => uint256)) public allowance;
     function balanceOf (address _owner) public view returns (uint256);
@@ -44,14 +45,14 @@ contract AppCoinsIABInterface {
         returns (bool result);
 }
 
-contract AppCoinsIAB is AppCoinsIABInterface,Whitelist {
+
+contract AppCoinsIAB is AppCoinsIABInterface, Whitelist {
 
     uint public dev_share = 85;
     uint public appstore_share = 10;
     uint public oem_share = 5;
 
     event Buy(string packageName, string _sku, uint _amount, address _from, address _dev, address _appstore, address _oem, bytes2 countryCode);
-    event Error(string func, string message);
     event OffChainBuy(address _wallet, bytes32 _rootHash);
     
     /**
@@ -74,7 +75,10 @@ contract AppCoinsIAB is AppCoinsIABInterface,Whitelist {
     @param _walletList List of wallets for which a OffChainBuy event will be issued
     @param _rootHashList List of roothashs for given transactions
     */
-    function informOffChainBuy(address[] _walletList, bytes32[] _rootHashList) public onlyIfWhitelisted(msg.sender) {
+    function informOffChainBuy(address[] _walletList, bytes32[] _rootHashList) 
+        public 
+        onlyIfWhitelisted("informOffChainBuy",msg.sender) 
+    {
         if(_walletList.length != _rootHashList.length){
             emit Error("informOffChainTransaction", "Wallet list and Roothash list must have the same lengths");
             return;

@@ -2,6 +2,7 @@ pragma solidity ^0.4.21;
 
 
 import  { CampaignLibrary } from "./lib/CampaignLibrary.sol";
+import "./Base/ErrorThrower.sol";
 import "./AdvertisementStorage.sol";
 import "./AdvertisementFinance.sol";
 import "./AppCoins.sol";

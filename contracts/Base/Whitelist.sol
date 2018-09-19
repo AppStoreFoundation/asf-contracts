@@ -2,6 +2,7 @@ pragma solidity ^0.4.24;
 
 import "./Ownable.sol";
 import "openzeppelin-solidity/contracts/access/rbac/RBAC.sol";
+import "./ErrorThrower.sol";
 
 /**
 *  @title Whitelist
@@ -14,15 +15,13 @@ import "openzeppelin-solidity/contracts/access/rbac/RBAC.sol";
 contract Whitelist is Ownable, RBAC {
     string public constant ROLE_WHITELISTED = "whitelist";
 
-    event Error(string message);
-
     /**
     * @dev Throws Error event if operator is not whitelisted.
     * @param _operator address
     */
-    modifier onlyIfWhitelisted(address _operator) {
+    modifier onlyIfWhitelisted(string _funcname, address _operator) {
         if(!hasRole(_operator, ROLE_WHITELISTED)){
-            emit Error("Operation can only be performed by Whitelisted Addresses");
+            emit Error(_funcname, "Operation can only be performed by Whitelisted Addresses");
             return;
         }
         _;
