@@ -12,7 +12,7 @@ import "./ErrorThrower.sol";
 *       Whitelist's original contract (version 1.12.0) is the use of Error event instead of a revert.
  */
 
-contract Whitelist is Ownable, RBAC, ErrorThrower {
+contract Whitelist is Ownable, RBAC {
     string public constant ROLE_WHITELISTED = "whitelist";
 
     /**
