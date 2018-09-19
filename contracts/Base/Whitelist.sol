@@ -2,6 +2,7 @@ pragma solidity ^0.4.24;
 
 import "./Ownable.sol";
 import "openzeppelin-solidity/contracts/access/rbac/RBAC.sol";
+import "./ErrorThrower.sol";
 
 /**
 *  @title Whitelist
@@ -11,10 +12,8 @@ import "openzeppelin-solidity/contracts/access/rbac/RBAC.sol";
 *       Whitelist's original contract (version 1.12.0) is the use of Error event instead of a revert.
  */
 
-contract Whitelist is Ownable, RBAC {
+contract Whitelist is Ownable, RBAC, ErrorThrower {
     string public constant ROLE_WHITELISTED = "whitelist";
-
-    event Error(string func, string message);
 
     /**
     * @dev Throws Error event if operator is not whitelisted.
