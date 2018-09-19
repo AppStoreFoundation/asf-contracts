@@ -75,7 +75,10 @@ contract AppCoinsIAB is AppCoinsIABInterface, Whitelist {
     @param _walletList List of wallets for which a OffChainBuy event will be issued
     @param _rootHashList List of roothashs for given transactions
     */
-    function informOffChainBuy(address[] _walletList, bytes32[] _rootHashList) public onlyIfWhitelisted("informOffChainBuy",msg.sender) {
+    function informOffChainBuy(address[] _walletList, bytes32[] _rootHashList) 
+        public 
+        onlyIfWhitelisted("informOffChainBuy",msg.sender) 
+    {
         if(_walletList.length != _rootHashList.length){
             emit Error("informOffChainTransaction", "Wallet list and Roothash list must have the same lengths");
             return;

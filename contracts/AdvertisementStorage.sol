@@ -15,6 +15,14 @@ contract AdvertisementStorage is Whitelist {
 
     mapping (bytes32 => CampaignLibrary.Campaign) campaigns;
 
+    modifier onlyIfCampaignExists(string _funcName, bytes32 _bidId) {
+        if(campaigns[_bidId].owner == 0x0){
+            emit Error(_funcName,"Campaign does not exist");
+            return;
+        }
+        _;
+    }
+
     event CampaignCreated
         (
             bytes32 bidId,
@@ -157,7 +165,8 @@ contract AdvertisementStorage is Whitelist {
     */
     function setCampaignPriceById(bytes32 bidId, uint price)
         public
-        onlyIfWhitelisted("setCampaignPriceById",msg.sender)
+        onlyIfWhitelisted("setCampaignPriceById",msg.sender) 
+        onlyIfCampaignExists("setCampaignPriceById",bidId)      
         {
         campaigns[bidId].price = price;
         emitEvent(campaigns[bidId]);
@@ -189,6 +198,7 @@ contract AdvertisementStorage is Whitelist {
     */
     function setCampaignBudgetById(bytes32 bidId, uint newBudget)
         public
+        onlyIfCampaignExists("setCampaignBudgetById",bidId)
         onlyIfWhitelisted("setCampaignBudgetById",msg.sender)
         {
         campaigns[bidId].budget = newBudget;
@@ -220,6 +230,7 @@ contract AdvertisementStorage is Whitelist {
     */
     function setCampaignStartDateById(bytes32 bidId, uint newStartDate)
         public
+        onlyIfCampaignExists("setCampaignStartDateById",bidId)
         onlyIfWhitelisted("setCampaignStartDateById",msg.sender)
         {
         campaigns[bidId].startDate = newStartDate;
@@ -251,6 +262,7 @@ contract AdvertisementStorage is Whitelist {
     */
     function setCampaignEndDateById(bytes32 bidId, uint newEndDate)
         public
+        onlyIfCampaignExists("setCampaignEndDateById",bidId)
         onlyIfWhitelisted("setCampaignEndDateById",msg.sender)
         {
         campaigns[bidId].endDate = newEndDate;
@@ -281,6 +293,7 @@ contract AdvertisementStorage is Whitelist {
     */
     function setCampaignValidById(bytes32 bidId, bool isValid)
         public
+        onlyIfCampaignExists("setCampaignValidById",bidId)
         onlyIfWhitelisted("setCampaignValidById",msg.sender)
         {
         campaigns[bidId].valid = isValid;
@@ -311,6 +324,7 @@ contract AdvertisementStorage is Whitelist {
     */
     function setCampaignOwnerById(bytes32 bidId, address newOwner)
         public
+        onlyIfCampaignExists("setCampaignOwnerById",bidId)
         onlyIfWhitelisted("setCampaignOwnerById",msg.sender)
         {
         campaigns[bidId].owner = newOwner;
