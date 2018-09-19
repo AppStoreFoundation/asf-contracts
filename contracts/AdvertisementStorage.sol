@@ -198,8 +198,8 @@ contract AdvertisementStorage is Whitelist {
     */
     function setCampaignBudgetById(bytes32 bidId, uint newBudget)
         public
-        onlyIfCampaignExists("setCampaignPriceById",bidId)
-        onlyIfWhitelisted("setCampaignPriceById",msg.sender)
+        onlyIfCampaignExists("setCampaignBudgetById",bidId)
+        onlyIfWhitelisted("setCampaignBudgetById",msg.sender)
         {
         campaigns[bidId].budget = newBudget;
         emitEvent(campaigns[bidId]);
@@ -230,8 +230,8 @@ contract AdvertisementStorage is Whitelist {
     */
     function setCampaignStartDateById(bytes32 bidId, uint newStartDate)
         public
-        onlyIfCampaignExists("setCampaignPriceById",bidId)
-        onlyIfWhitelisted("setCampaignPriceById",msg.sender)
+        onlyIfCampaignExists("setCampaignStartDateById",bidId)
+        onlyIfWhitelisted("setCampaignStartDateById",msg.sender)
         {
         campaigns[bidId].startDate = newStartDate;
         emitEvent(campaigns[bidId]);
@@ -262,8 +262,8 @@ contract AdvertisementStorage is Whitelist {
     */
     function setCampaignEndDateById(bytes32 bidId, uint newEndDate)
         public
-        onlyIfCampaignExists("setCampaignPriceById",bidId)
-        onlyIfWhitelisted("setCampaignPriceById",msg.sender)
+        onlyIfCampaignExists("setCampaignEndDateById",bidId)
+        onlyIfWhitelisted("setCampaignEndDateById",msg.sender)
         {
         campaigns[bidId].endDate = newEndDate;
         emitEvent(campaigns[bidId]);
@@ -293,8 +293,8 @@ contract AdvertisementStorage is Whitelist {
     */
     function setCampaignValidById(bytes32 bidId, bool isValid)
         public
-        onlyIfCampaignExists("setCampaignPriceById",bidId)
-        onlyIfWhitelisted("setCampaignPriceById",msg.sender)
+        onlyIfCampaignExists("setCampaignValidById",bidId)
+        onlyIfWhitelisted("setCampaignValidById",msg.sender)
         {
         campaigns[bidId].valid = isValid;
         emitEvent(campaigns[bidId]);
@@ -324,8 +324,8 @@ contract AdvertisementStorage is Whitelist {
     */
     function setCampaignOwnerById(bytes32 bidId, address newOwner)
         public
-        onlyIfCampaignExists("setCampaignPriceById",bidId)
-        onlyIfWhitelisted("setCampaignPriceById",msg.sender)
+        onlyIfCampaignExists("setCampaignOwnerById",bidId)
+        onlyIfWhitelisted("setCampaignOwnerById",msg.sender)
         {
         campaigns[bidId].owner = newOwner;
         emitEvent(campaigns[bidId]);
