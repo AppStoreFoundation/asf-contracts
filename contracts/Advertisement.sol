@@ -4,7 +4,7 @@ pragma solidity ^0.4.21;
 import  { CampaignLibrary } from "./lib/CampaignLibrary.sol";
 import "./Base/ErrorThrower.sol";
 import "./AdvertisementStorage.sol";
-import "./AdvertisementFinance.sol";
+import "./Base/BaseFinance.sol";
 import "./AppCoins.sol";
 
 import "./Base/Ownable.sol";
@@ -31,7 +31,7 @@ contract Advertisement is Ownable {
     bytes32[] bidIdList;
     AppCoins appc;
     AdvertisementStorage advertisementStorage;
-    AdvertisementFinance advertisementFinance;
+    BaseFinance advertisementFinance;
 
     mapping (address => mapping (bytes32 => bool)) userAttributions;
 
@@ -60,7 +60,7 @@ contract Advertisement is Ownable {
 
         appc = AppCoins(_addrAppc);
         advertisementStorage = AdvertisementStorage(_addrAdverStorage);
-        advertisementFinance = AdvertisementFinance(_addrAdverFinance);
+        advertisementFinance = BaseFinance(_addrAdverFinance);
     }
 
     /**
@@ -73,12 +73,12 @@ contract Advertisement is Ownable {
     @param addrAdverFinance Address of the new Advertisement Finance contract 
     */
     function upgradeFinance (address addrAdverFinance) public onlyOwner("upgradeFinance") {
-        AdvertisementFinance newAdvFinance = AdvertisementFinance(addrAdverFinance);        
+        BaseFinance newAdvFinance = BaseFinance(addrAdverFinance);        
 
-        address[] memory devList = advertisementFinance.getDeveloperList();
+        address[] memory devList = advertisementFinance.getUserList();
 
         for(uint i = 0; i < devList.length; i++){
-            uint balance = advertisementFinance.getDeveloperBalance(devList[i]);
+            uint balance = advertisementFinance.getUserBalance(devList[i]);
             advertisementFinance.pay(devList[i],address(newAdvFinance),balance);
             newAdvFinance.increaseBalance(devList[i],balance);
         }
