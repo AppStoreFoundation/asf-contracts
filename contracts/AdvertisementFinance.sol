@@ -12,11 +12,11 @@ to user aquisition campaigns.
 contract AdvertisementFinance is BaseFinance {
 
     constructor(address _appc) BaseFinance(_appc){
-        
+
     }
 
     function pay(address _user, address _destination, uint256 _value) 
-        public onlyAds{
+        public onlyAllowed{
 
         require(balanceUsers[_user] >= _value);
 
@@ -25,7 +25,7 @@ contract AdvertisementFinance is BaseFinance {
     }
 
 
-    function withdraw(address _user, uint256 _value) public onlyOwnerOrAds {
+    function withdraw(address _user, uint256 _value) public onlyOwnerOrAllowed {
 
         require(balanceUsers[_user] >= _value);
         

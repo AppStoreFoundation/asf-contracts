@@ -3,6 +3,7 @@ pragma solidity ^0.4.21;
 
 import  { CampaignLibrary } from "./lib/CampaignLibrary.sol";
 import "./Base/ErrorThrower.sol";
+import "./Base/StorageUser.sol";
 import "./AdvertisementStorage.sol";
 import "./Base/BaseFinance.sol";
 import "./AppCoins.sol";
@@ -15,7 +16,7 @@ import "./Base/Ownable.sol";
 @dev The Advertisement contract collects campaigns registered by developers and executes payments 
 to users using campaign registered applications after proof of Attention.
  */
-contract Advertisement is Ownable {
+contract Advertisement is Ownable, StorageUser {
 
     struct ValidationRules {
         bool vercode;
@@ -121,7 +122,7 @@ contract Advertisement is Ownable {
         }
     */
 
-    function getAdvertisementStorageAddress() public view returns(address storageContract) {
+    function getStorageAddress() public view returns(address storageContract) {
         require (msg.sender == address(advertisementFinance));
 
         return address(advertisementStorage);

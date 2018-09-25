@@ -3,29 +3,19 @@ pragma solidity ^0.4.24;
 import "./Ownable.sol";
 import "../AppCoins.sol";
 import "../Advertisement.sol";
+import "./StorageUser.sol";
+import "./SingleAllowance.sol";
 
-
-contract BaseFinance is Ownable {
+contract BaseFinance is SingleAllowance {
 
     mapping (address => uint256) balanceUsers;
     mapping (address => bool) userExists;
 
     address[] users;
 
-    address advertisementContract;
     address advStorageContract;
 
     AppCoins appc;
-
-    modifier onlyAds() { 
-        require(advertisementContract == msg.sender); 
-        _; 
-    }
-
-    modifier onlyOwnerOrAds() { 
-        require(msg.sender == owner || msg.sender == advertisementContract); 
-        _; 
-    }	
 
     /**
     @notice Constructor function
@@ -51,7 +41,7 @@ contract BaseFinance is Ownable {
         this contract.
     @param _addrStorage Address of the new Advertisement Storage contract
     */
-    function setAdsStorageAddress (address _addrStorage) external onlyOwnerOrAds {
+    function setAdsStorageAddress (address _addrStorage) external onlyOwnerOrAllowed {
         reset();
         advStorageContract = _addrStorage;
     }
@@ -65,18 +55,18 @@ contract BaseFinance is Ownable {
         contract for Advertisement Storage used by the new Advertisement contract is checked. 
         This function reverts if the new Advertisement contract does not use the same Advertisement 
         Storage contract earlier registered in this Advertisement Finance contract.
-    @param _addrAdvert Address of the new Advertisement contract 
+    @param _addr Address of the newly allowed contract 
     */
-    function setAdsContractAddress (address _addrAdvert) external onlyOwner("setAdsContractAddress") {
+    function setAllowedAddress (address _addr) public onlyOwner("setAllowedAddress") {
         // Verify if the new Ads contract is using the same storage as before 
-        if (advertisementContract != 0x0){
-            Advertisement adsContract = Advertisement(advertisementContract);
-            address adsStorage = adsContract.getAdvertisementStorageAddress();
-            require (adsStorage == advStorageContract);
+        if (allowedAddress != 0x0){
+            StorageUser storageUser = StorageUser(_addr);
+            address storageContract = storageUser.getStorageAddress();
+            require (storageContract == advStorageContract);
         }
         
         //Update contract
-        advertisementContract = _addrAdvert;
+        super.setAllowedAddress(_addr);
     }
 
     /**
@@ -90,7 +80,7 @@ contract BaseFinance is Ownable {
     @param _value Value of coins to increase the user's balance
     */
     function increaseBalance(address _user, uint256 _value) 
-        public onlyAds{
+        public onlyAllowed{
 
         if(userExists[_user] == false){
             users.push(_user);
@@ -110,7 +100,7 @@ contract BaseFinance is Ownable {
     @param _destination Address receiving the value transfered
     @param _value Value to be transfered in AppCoins
     */
-    function pay(address _user, address _destination, uint256 _value) public onlyAds;
+    function pay(address _user, address _destination, uint256 _value) public onlyAllowed;
 
     /**
     @notice Withdraws a certain value from a user's balance back to the user's account
@@ -119,7 +109,7 @@ contract BaseFinance is Ownable {
     @param _user Address of the user
     @param _value Value to be transfered in AppCoins
     */
-    function withdraw(address _user, uint256 _value) public onlyOwnerOrAds;
+    function withdraw(address _user, uint256 _value) public onlyOwnerOrAllowed;
 
 
     /**
@@ -128,7 +118,7 @@ contract BaseFinance is Ownable {
         This function is used in case a contract reset is needed or the contract needs to be 
         deactivated. Thus returns every fund deposited to it's respective owner.
     */
-    function reset() public onlyOwnerOrAds {
+    function reset() public onlyOwnerOrAllowed {
         for(uint i = 0; i < users.length; i++){
             withdraw(users[i],balanceUsers[users[i]]);
         }
@@ -142,7 +132,7 @@ contract BaseFinance is Ownable {
     @param _user Developer's address
     @return { '_balance' : 'Balance of coins deposited in the contract by the address' }
     */
-    function getUserBalance(address _user) public view onlyAds returns(uint256 _balance){
+    function getUserBalance(address _user) public view onlyAllowed returns(uint256 _balance){
         return balanceUsers[_user];
     }
 
@@ -152,7 +142,7 @@ contract BaseFinance is Ownable {
         This function can only be called by the Advertisement contract        
     @return { '_userList' : ' List of users registered in the contract'}
     */
-    function getUserList() public view onlyAds returns(address[] _userList){
+    function getUserList() public view onlyAllowed returns(address[] _userList){
         return users;
     }
 }
