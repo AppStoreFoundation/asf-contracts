@@ -94,7 +94,7 @@ contract('AppCoinsTimelock', function(accounts) {
         .to.be.equal(testAmounts[0], "The contract is not saving the correct bulks amounts");
     })
 
-    it('should release funds when the time passes', async function () {
+    it('should enable release fund after time expires', async function () {
         const releaseTime = (new Date("2000-01-01")).getTime();
 
         AppCoinsTimelockInstance = await AppCoinsTimelock.new(appcInstance.address, releaseTime);
