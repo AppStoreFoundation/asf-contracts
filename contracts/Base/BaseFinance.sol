@@ -31,15 +31,15 @@ contract BaseFinance is SingleAllowance {
 
 
     /**
-    @notice Sets the Advertisement Storage contract address used by the Advertisement contract
+    @notice Sets the Storage contract address used by the allowed contract
     @dev
-        The Advertisement Storage contract address is mostly used as part of a failsafe mechanism to
-        ensure Advertisement contract upgrades are executed using the same Advertisement Storage 
+        The Storage contract address is mostly used as part of a failsafe mechanism to
+        ensure contract upgrades are executed using the same Storage 
         contract. This function returns every value of AppCoins stored in this contract to their 
-        owners, thus requiring new campaigns to be created. This function can only be called by the 
-        Advertisement Finance contract owner or by the Advertisement contract registered earlier in 
+        owners. This function can only be called by the 
+        Finance contract owner or by the allowed contract registered earlier in 
         this contract.
-    @param _addrStorage Address of the new Advertisement Storage contract
+    @param _addrStorage Address of the new Storage contract
     */
     function setAdsStorageAddress (address _addrStorage) external onlyOwnerOrAllowed {
         reset();
