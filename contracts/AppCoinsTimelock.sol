@@ -95,11 +95,12 @@ contract AppCoinsTimelock {
     @param _address address to be funded
     */
     function release(address _address) public {
+        require(balances[_address] > 0);
         uint nowInMilliseconds = block.timestamp * 1000;
         require(nowInMilliseconds >= releaseTime);
         uint amount = balances[_address];
-        appc.transfer(_address, amount);
         balances[_address] = 0;
+        appc.transfer(_address, amount);
         emit FundsReleased(_address, amount);
     }
 }
