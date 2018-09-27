@@ -29,12 +29,12 @@ contract Advertisement is Ownable {
 
     ValidationRules public rules;
     bytes32[] bidIdList;
+    bytes32 lastBidId = 0x0;
     AppCoins appc;
     AdvertisementStorage advertisementStorage;
     AdvertisementFinance advertisementFinance;
 
     mapping (address => mapping (bytes32 => bool)) userAttributions;
-
 
     event PoARegistered(bytes32 bidId, string packageName,uint64[] timestampList,uint64[] nonceList,string walletName, bytes2 countryCode);
     event CampaignInformation
@@ -61,6 +61,7 @@ contract Advertisement is Ownable {
         appc = AppCoins(_addrAppc);
         advertisementStorage = AdvertisementStorage(_addrAdverStorage);
         advertisementFinance = AdvertisementFinance(_addrAdverFinance);
+        lastBidId = advertisementStorage.getLastBidId();
     }
 
     /**
@@ -106,6 +107,8 @@ contract Advertisement is Ownable {
             cancelCampaign(bidIdList[i]);
         }
         delete bidIdList;
+
+        lastBidId = advertisementStorage.getLastBidId();
         advertisementFinance.setAdsStorageAddress(addrAdverStorage);
         advertisementStorage = AdvertisementStorage(addrAdverStorage);
     }
@@ -176,10 +179,13 @@ contract Advertisement is Ownable {
 
         advertisementFinance.increaseBalance(msg.sender,budget);
 
+        uint newBidId = bytesToUint(lastBidId);
+        lastBidId = uintToBytes(++newBidId);
+
         newCampaign.budget = budget;
         newCampaign.owner = msg.sender;
         newCampaign.valid = true;
-        newCampaign.bidId = uintToBytes(bidIdList.length);
+        newCampaign.bidId = lastBidId;
         addCampaign(newCampaign);
 
         emit CampaignInformation(
@@ -527,4 +533,8 @@ contract Advertisement is Ownable {
         b = bytes32(i);
     }
 
+    function bytesToUint(bytes32 b) public view returns (uint) 
+    {
+        return uint(b) & 0xfff;
+    }
 }
