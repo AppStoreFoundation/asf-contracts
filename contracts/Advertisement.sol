@@ -8,6 +8,7 @@ import "./AdvertisementFinance.sol";
 import "./AppCoins.sol";
 
 import "./Base/Ownable.sol";
+import "./Base/BaseAdvertisement.sol";
 
 /**
 @title Advertisement contract
@@ -15,7 +16,7 @@ import "./Base/Ownable.sol";
 @dev The Advertisement contract collects campaigns registered by developers and executes payments 
 to users using campaign registered applications after proof of Attention.
  */
-contract Advertisement is Ownable {
+contract Advertisement is Ownable, BaseAdvertisement{
 
     struct ValidationRules {
         bool vercode;
@@ -28,6 +29,7 @@ contract Advertisement is Ownable {
     uint constant expectedPoALength = 12;
 
     ValidationRules public rules;
+
     bytes32[] bidIdList;
     bytes32 lastBidId = 0x0;
     AppCoins appc;
@@ -55,10 +57,11 @@ contract Advertisement is Ownable {
     @param _addrAdverStorage Address of the Advertisement Storage contract to be used
     @param _addrAdverFinance Address of the Advertisement Finance contract to be used
     */
-    function Advertisement (address _addrAppc, address _addrAdverStorage, address _addrAdverFinance) public {
-        rules = ValidationRules(false, true, true, 2, 1);
+    function Advertisement (address _addrAppc, address _addrAdverStorage, address _addrAdverFinance) public 
+        BaseAdvertisement(_addrAppc)
+    {
 
-        appc = AppCoins(_addrAppc);
+        rules = ValidationRules(false, true, true, 2, 1);
         advertisementStorage = AdvertisementStorage(_addrAdverStorage);
         advertisementFinance = AdvertisementFinance(_addrAdverFinance);
         lastBidId = advertisementStorage.getLastBidId();
@@ -286,13 +289,13 @@ contract Advertisement is Ownable {
             return;
         } */
 
-        if(userAttributions[msg.sender][bidId]){
+        if(userAttributions[bidId][msg.sender] > 0){
             emit Error(
                 "registerPoA","User already registered a proof of attention for this campaign");
             return;
         }
         //atribute
-        userAttributions[msg.sender][bidId] = true;
+        userAttributions[bidId][msg.sender] += 1;
 
         payFromCampaign(bidId, msg.sender, appstore, oem);
 
@@ -386,16 +389,6 @@ contract Advertisement is Ownable {
     */
     function getOwnerOfCampaign (bytes32 bidId) public view returns(address campaignOwner) {
         return advertisementStorage.getCampaignOwnerById(bidId);
-    }
-
-    /**
-    @notice Get the list of Campaign BidIds registered in the contract
-    @dev
-        Returns the list of BidIds of the campaigns ever registered in the contract
-    @return { "bidIds" : "List of BidIds registered in the contract" }
-    */
-    function getBidIdList() public view returns(bytes32[] bidIds) {
-        return bidIdList;
     }
 
     /**
