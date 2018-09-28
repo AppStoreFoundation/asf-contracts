@@ -132,9 +132,15 @@ contract AdvertisementStorage is Whitelist {
         campaign.setEndDate(endDate);
         campaign.setValidity(valid);
 
-        emitEvent(campaign);
+        bool newCampaign = (campaigns[bidId].getOwner() == 0x0);
 
         campaign.setOwner(owner);
+
+        if(newCampaign){
+            emitCampaignCreated(campaign);
+        } else {
+            emitCampaignUpdated(campaign);
+        }
     }
 
     /**
@@ -165,7 +171,7 @@ contract AdvertisementStorage is Whitelist {
         onlyIfCampaignExists("setCampaignPriceById",bidId)      
         {
         campaigns[bidId].setPrice(price);
-        emitEvent(campaigns[bidId]);
+        emitCampaignUpdated(campaigns[bidId]);
     }
 
     /**
@@ -198,7 +204,7 @@ contract AdvertisementStorage is Whitelist {
         onlyIfWhitelisted("setCampaignBudgetById",msg.sender)
         {
         campaigns[bidId].setBudget(newBudget);
-        emitEvent(campaigns[bidId]);
+        emitCampaignUpdated(campaigns[bidId]);
     }
 
     /** 
@@ -230,7 +236,7 @@ contract AdvertisementStorage is Whitelist {
         onlyIfWhitelisted("setCampaignStartDateById",msg.sender)
         {
         campaigns[bidId].setStartDate(newStartDate);
-        emitEvent(campaigns[bidId]);
+        emitCampaignUpdated(campaigns[bidId]);
     }
     
     /** 
@@ -262,7 +268,7 @@ contract AdvertisementStorage is Whitelist {
         onlyIfWhitelisted("setCampaignEndDateById",msg.sender)
         {
         campaigns[bidId].setEndDate(newEndDate);
-        emitEvent(campaigns[bidId]);
+        emitCampaignUpdated(campaigns[bidId]);
     }
     /** 
     @notice Get information regarding validity of a campaign.
@@ -293,7 +299,7 @@ contract AdvertisementStorage is Whitelist {
         onlyIfWhitelisted("setCampaignValidById",msg.sender)
         {
         campaigns[bidId].setValidity(isValid);
-        emitEvent(campaigns[bidId]);
+        emitCampaignUpdated(campaigns[bidId]);
     }
 
     /**
@@ -324,38 +330,40 @@ contract AdvertisementStorage is Whitelist {
         onlyIfWhitelisted("setCampaignOwnerById",msg.sender)
         {
         campaigns[bidId].setOwner(newOwner);
-        emitEvent(campaigns[bidId]);
+        emitCampaignUpdated(campaigns[bidId]);
     }
 
     /**
-    @notice Internal function for event emission
+    @notice Function to emit campaign updates
     @dev
-        Checks if a campaign is already stored in contract. If the campaign exists, it emits a 
-        CampaignUpdated event with the new campaign information. In case it is a new campaign, the 
-        same information is emited as a CampaingCreatedEvent. 
+        It emits a CampaignUpdated event with the new campaign information. 
     */
-    function emitEvent(CampaignLibrary.Campaign storage campaign) private {
+    function emitCampaignUpdated(CampaignLibrary.Campaign storage campaign) private {
+        emit CampaignUpdated(
+            campaign.getBidId(),
+            campaign.getPrice(),
+            campaign.getBudget(),
+            campaign.getStartDate(),
+            campaign.getEndDate(),
+            campaign.getValidity(),
+            campaign.getOwner()
+        );
+    }
 
-        if (campaigns[campaign.bidId].owner == 0x0) {
-            emit CampaignCreated(
-                campaign.getBidId(),
-                campaign.getPrice(),
-                campaign.getBudget(),
-                campaign.getStartDate(),
-                campaign.getEndDate(),
-                campaign.getValidity(),
-                campaign.getOwner()
-            );
-        } else {
-            emit CampaignUpdated(
-                campaign.getBidId(),
-                campaign.getPrice(),
-                campaign.getBudget(),
-                campaign.getStartDate(),
-                campaign.getEndDate(),
-                campaign.getValidity(),
-                campaign.getOwner()
-            );
-        }
+    /**
+    @notice Function to emit campaign creations
+    @dev
+        It emits a CampaignCreated event with the new campaign created. 
+    */
+    function emitCampaignCreated(CampaignLibrary.Campaign storage campaign) private {
+        emit CampaignCreated(
+            campaign.getBidId(),
+            campaign.getPrice(),
+            campaign.getBudget(),
+            campaign.getStartDate(),
+            campaign.getEndDate(),
+            campaign.getValidity(),
+            campaign.getOwner()
+        );
     }
 }
