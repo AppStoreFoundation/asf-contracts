@@ -39,7 +39,7 @@ contract BaseAdvertisementStorage is Whitelist {
             address  owner
     );
 
- /**
+    /**
     @notice Get a Campaign information
     @dev 
         Based on a camapaign Id (bidId), returns all stored information for that campaign.
@@ -62,9 +62,8 @@ contract BaseAdvertisementStorage is Whitelist {
         return campaigns[campaignId];
     }
 
-    // SetCampaign
 
-     /**
+    /**
     @notice Add or update a campaign information
     @dev
         Based on a campaign Id (bidId), a campaign can be created (if non existent) or updated.
