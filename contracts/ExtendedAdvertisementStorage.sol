@@ -29,7 +29,6 @@ contract ExtendedAdvertisementStorage is BaseAdvertisementStorage {
         "_endDate" : "End date of the campaign (in miliseconds)"
         "_valid" : "Boolean informing if the campaign is valid",
         "_campOwner" : "Address of the campaing's owner",
-        "_endPoint" : "URL of the signing serivce";
     }
     */
     function getCampaign(bytes32 _campaignId)
@@ -63,8 +62,10 @@ contract ExtendedAdvertisementStorage is BaseAdvertisementStorage {
     @dev
         Based on a campaign Id (bidId), a campaign can be created (if non existent) or updated.
         This function can only be called by the set of allowed addresses registered earlier.
-        An event will be emited during this function's execution, a CampaignCreated event if the 
-        campaign does not exist yet or a CampaignUpdated if the campaign id is already registered.
+        An event will be emited during this function's execution, a CampaignCreated and a 
+        ExtendedCampaignEndPointCreated event if the campaign does not exist yet or a 
+        CampaignUpdated and a ExtendedCampaignEndPointUpdated event if the campaign id is already 
+        registered.
 
     @param _bidId Id of the campaign
     @param _price Value to pay for each proof-of-attention
@@ -100,10 +101,25 @@ contract ExtendedAdvertisementStorage is BaseAdvertisementStorage {
         }
     }
 
+    /**
+    @notice Get campaign signing web service endpoint
+    @dev
+        Get the end point to which the user should submit the proof of attention to be signed
+    @param _bidId Id of the campaign
+    @return { "_endPoint": "URL for the signing web service"}
+    */
+
     function getCampaignEndPointById(bytes32 _bidId) public returns (string _endPoint){
         return campaignEndPoints[_bidId];
     }
 
+    /**
+    @notice Set campaign signing web service endpoint
+    @dev
+        Sets the webservice's endpoint to which the user should submit the proof of attention
+    @param _bidId Id of the campaign
+    @param _endPoint URL for the signing web service
+    */
     function setCampaignEndPointById(bytes32 _bidId, string _endPoint) 
         public 
         onlyIfCampaignExists("setCampaignEndPointById",_bidId)
