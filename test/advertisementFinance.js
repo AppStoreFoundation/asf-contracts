@@ -46,7 +46,7 @@ contract('AdvertisementFinance', function(accounts) {
         var budget = 50000000000000000;
         var developer = accounts[2];
 
-        await AdvertisementFinanceInstance.setAdsContractAddress(allowedAddress);
+        await AdvertisementFinanceInstance.setAllowedAddress(allowedAddress);
 
         await appcInstance.transfer(AdvertisementFinanceInstance.address, budget, { from: allowedAddress});
 
@@ -61,7 +61,7 @@ contract('AdvertisementFinance', function(accounts) {
         var budget = 50000000000000000;
         var developer = accounts[2];
 
-        await AdvertisementFinanceInstance.setAdsContractAddress(allowedAddress);
+        await AdvertisementFinanceInstance.setAllowedAddress(allowedAddress);
 
         await appcInstance.transfer(AdvertisementFinanceInstance.address, budget, { from: allowedAddress});
 
@@ -81,7 +81,7 @@ contract('AdvertisementFinance', function(accounts) {
         var developer = accounts[2];
         var initDevBalance = await TestUtils.getBalance(developer);
        
-        await AdvertisementFinanceInstance.setAdsContractAddress(allowedAddress);
+        await AdvertisementFinanceInstance.setAllowedAddress(allowedAddress);
         
         await appcInstance.transfer(AdvertisementFinanceInstance.address, budget);
        
@@ -106,7 +106,7 @@ contract('AdvertisementFinance', function(accounts) {
         var developer = accounts[2];
         var initDevBalance = await TestUtils.getBalance(developer);
 
-        await AdvertisementFinanceInstance.setAdsContractAddress(allowedAddress);
+        await AdvertisementFinanceInstance.setAllowedAddress(allowedAddress);
 
         await appcInstance.transfer(AdvertisementFinanceInstance.address, budget);
 
@@ -129,7 +129,7 @@ contract('AdvertisementFinance', function(accounts) {
         var initialbalance2 = await TestUtils.getBalance(developers[0]);
         var initialbalance3 = await TestUtils.getBalance(developers[1]);
 
-        await AdvertisementFinanceInstance.setAdsContractAddress(allowedAddress);
+        await AdvertisementFinanceInstance.setAllowedAddress(allowedAddress);
 
         await appcInstance.transfer(AdvertisementFinanceInstance.address, developers.length*budget)
         
@@ -156,7 +156,7 @@ contract('AdvertisementFinance', function(accounts) {
         var initialbalance2 = await TestUtils.getBalance(accounts[2]);
         var initialbalance3 = await TestUtils.getBalance(accounts[3]);
 
-        await AdvertisementFinanceInstance.setAdsContractAddress(allowedAddress);
+        await AdvertisementFinanceInstance.setAllowedAddress(allowedAddress);
         
         await appcInstance.transfer(AdvertisementFinanceInstance.address, developers.length*budget)
 
@@ -180,7 +180,7 @@ contract('AdvertisementFinance', function(accounts) {
         var developer = accounts[2];
         var initDevBalance = TestUtils.getBalance(developer);
 
-        await AdvertisementFinanceInstance.setAdsContractAddress(allowedAddress);
+        await AdvertisementFinanceInstance.setAllowedAddress(allowedAddress);
 
         await appcInstance.transfer(AdvertisementFinanceInstance.address, budget);
 
@@ -204,7 +204,7 @@ contract('AdvertisementFinance', function(accounts) {
         var developer = accounts[4];
         var initDevBalance = TestUtils.getBalance(developer);
 
-        await AdvertisementFinanceInstance.setAdsContractAddress(allowedAddress);
+        await AdvertisementFinanceInstance.setAllowedAddress(allowedAddress);
 
         await appcInstance.transfer(AdvertisementFinanceInstance.address, budget);
 
@@ -234,7 +234,7 @@ contract('AdvertisementFinance', function(accounts) {
         var developer = accounts[4];
         var initDevBalance =await TestUtils.getBalance(developer);
 
-        await AdvertisementFinanceInstance.setAdsContractAddress(allowedAddress);
+        await AdvertisementFinanceInstance.setAllowedAddress(allowedAddress);
 
         await appcInstance.transfer(AdvertisementFinanceInstance.address, budget);
 
