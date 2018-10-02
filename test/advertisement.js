@@ -94,7 +94,7 @@ contract('Advertisement', function(accounts) {
 		adFinanceInstance = await AdvertisementFinance.new(appcInstance.address);
 		addInstance = await	Advertisement.new(appcInstance.address, AdvertisementStorageInstance.address,adFinanceInstance.address);
 
-        await adFinanceInstance.setAdsContractAddress(addInstance.address);
+        await adFinanceInstance.setAllowedAddress(addInstance.address);
         await adFinanceInstance.setAdsStorageAddress(AdvertisementStorageInstance.address);
         await AdvertisementStorageInstance.addAddressToWhitelist(addInstance.address);
 
@@ -463,7 +463,7 @@ contract('Advertisement', function(accounts) {
 		var balanceUser = await TestUtils.getBalance(user);
 
 		await appcInstance.transfer(accounts[1],campaignBudget);
-		await adFinanceInstance.setAdsContractAddress(addInstance.address);
+		await adFinanceInstance.setAllowedAddress(addInstance.address);
 
 		var budget = await addInstance.getBudgetOfCampaign.call(examplePoA.bid);
 
@@ -485,7 +485,7 @@ contract('Advertisement', function(accounts) {
 		
 		var advertisementFinanceInstance = await AdvertisementFinance.new(appcInstance.address);
 		
-		await advertisementFinanceInstance.setAdsContractAddress.sendTransaction(addInstance.address)
+		await advertisementFinanceInstance.setAllowedAddress.sendTransaction(addInstance.address)
 
 		var newFinanceInitBalance = await TestUtils.getBalance(advertisementFinanceInstance.address);
 		var bidIdListBeforeUpgrade = await addInstance.getBidIdList.call();

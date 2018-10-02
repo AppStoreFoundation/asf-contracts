@@ -3,20 +3,20 @@ pragma solidity ^0.4.21;
 
 import  { CampaignLibrary } from "./lib/CampaignLibrary.sol";
 import "./Base/ErrorThrower.sol";
+import "./Base/StorageUser.sol";
 import "./AdvertisementStorage.sol";
-import "./AdvertisementFinance.sol";
+import "./Base/BaseFinance.sol";
 import "./AppCoins.sol";
 
 import "./Base/Ownable.sol";
-import "./Base/BaseAdvertisement.sol";
 
 /**
 @title Advertisement contract
 @author App Store Foundation
-@dev The Advertisement contract collects campaigns registered by developers and executes payments 
+@dev The Advertisement contract collects campaigns registered by developers and executes payments
 to users using campaign registered applications after proof of Attention.
  */
-contract Advertisement is Ownable, BaseAdvertisement{
+contract Advertisement is Ownable, StorageUser {
 
     struct ValidationRules {
         bool vercode;
@@ -32,9 +32,24 @@ contract Advertisement is Ownable, BaseAdvertisement{
 
     bytes32[] bidIdList;
     bytes32 lastBidId = 0x0;
+
     AppCoins appc;
     AdvertisementStorage advertisementStorage;
-    AdvertisementFinance advertisementFinance;
+    BaseFinance advertisementFinance;
+
+    mapping (address => mapping (bytes32 => bool)) userAttributions;
+
+
+    event PoARegistered(bytes32 bidId, string packageName,uint64[] timestampList,uint64[] nonceList,string walletName, bytes2 countryCode);
+    event CampaignInformation
+        (
+            bytes32 bidId,
+            address  owner,
+            string ipValidator,
+            string packageName,
+            uint[3] countries,
+            uint[] vercodes
+    );
 
     mapping (address => mapping (bytes32 => bool)) userAttributions;
 
@@ -57,32 +72,32 @@ contract Advertisement is Ownable, BaseAdvertisement{
     @param _addrAdverStorage Address of the Advertisement Storage contract to be used
     @param _addrAdverFinance Address of the Advertisement Finance contract to be used
     */
-    function Advertisement (address _addrAppc, address _addrAdverStorage, address _addrAdverFinance) public 
-        BaseAdvertisement(_addrAppc)
-    {
-
+    function Advertisement (address _addrAppc, address _addrAdverStorage, address _addrAdverFinance) public {
         rules = ValidationRules(false, true, true, 2, 1);
+
+        appc = AppCoins(_addrAppc);
         advertisementStorage = AdvertisementStorage(_addrAdverStorage);
         advertisementFinance = AdvertisementFinance(_addrAdverFinance);
         lastBidId = advertisementStorage.getLastBidId();
+
     }
 
     /**
     @notice Upgrade finance contract used by this contract
     @dev
         This function is part of the upgrade mechanism avaliable to the advertisement contracts.
-        Using this function it is possible to update to a new Advertisement Finance contract without 
+        Using this function it is possible to update to a new Advertisement Finance contract without
         the need to cancel avaliable campaigns.
         Upgrade finance function can only be called by the Advertisement contract owner.
-    @param addrAdverFinance Address of the new Advertisement Finance contract 
+    @param addrAdverFinance Address of the new Advertisement Finance contract
     */
     function upgradeFinance (address addrAdverFinance) public onlyOwner("upgradeFinance") {
-        AdvertisementFinance newAdvFinance = AdvertisementFinance(addrAdverFinance);        
+        BaseFinance newAdvFinance = BaseFinance(addrAdverFinance);
 
-        address[] memory devList = advertisementFinance.getDeveloperList();
+        address[] memory devList = advertisementFinance.getUserList();
 
         for(uint i = 0; i < devList.length; i++){
-            uint balance = advertisementFinance.getDeveloperBalance(devList[i]);
+            uint balance = advertisementFinance.getUserBalance(devList[i]);
             advertisementFinance.pay(devList[i],address(newAdvFinance),balance);
             newAdvFinance.increaseBalance(devList[i],balance);
         }
@@ -100,7 +115,7 @@ contract Advertisement is Ownable, BaseAdvertisement{
     @dev
         Upgrades Advertisement Storage contract addres with no need to redeploy
         Advertisement contract. However every campaign in the old contract will
-        be canceled. 
+        be canceled.
         This function can only be called by the Advertisement contract owner.
     @param addrAdverStorage Address of the new Advertisement Storage contract
     */
@@ -119,15 +134,15 @@ contract Advertisement is Ownable, BaseAdvertisement{
     /**
     @notice Get Advertisement Storage Address used by this contract
     @dev
-        This function is required to upgrade Advertisement contract address on Advertisement 
-        Finance contract. This function can only be called by the Advertisement Finance 
+        This function is required to upgrade Advertisement contract address on Advertisement
+        Finance contract. This function can only be called by the Advertisement Finance
         contract registered in this contract.
     @return {
         "storageContract" : "Address of the Advertisement Storage contract used by this contract"
         }
     */
 
-    function getAdvertisementStorageAddress() public view returns(address storageContract) {
+    function getStorageAddress() public view returns(address storageContract) {
         require (msg.sender == address(advertisementFinance));
 
         return address(advertisementStorage);
@@ -135,20 +150,20 @@ contract Advertisement is Ownable, BaseAdvertisement{
 
 
     /**
-    @notice Creates a campaign 
-    @dev 
+    @notice Creates a campaign
+    @dev
         Method to create a campaign of user aquisition for a certain application.
-        This method will emit a Campaign Information event with every information 
+        This method will emit a Campaign Information event with every information
         provided in the arguments of this method.
     @param packageName Package name of the appication subject to the user aquisition campaign
-    @param countries Encoded list of 3 integers intended to include every 
+    @param countries Encoded list of 3 integers intended to include every
     county where this campaign will be avaliable.
     For more detain on this encoding refer to wiki documentation.
     @param vercodes List of version codes to which the user aquisition campaign is applied.
     @param price Value (in wei) the campaign owner pays for each proof-of-attention.
-    @param budget Total budget (in wei) the campaign owner will deposit 
+    @param budget Total budget (in wei) the campaign owner will deposit
     to pay for the proof-of-attention.
-    @param startDate Date (in miliseconds) on which the campaign will start to be 
+    @param startDate Date (in miliseconds) on which the campaign will start to be
     avaliable to users.
     @param endDate Date (in miliseconds) on which the campaign will no longer be avaliable to users.
     */
@@ -200,12 +215,12 @@ contract Advertisement is Ownable, BaseAdvertisement{
             vercodes);
     }
 
-    /** 
+    /**
     @notice Add Campaign to Advertisement Storage contract
     @dev
-        Internal function executed when a campaign is created that adds the campaign 
+        Internal function executed when a campaign is created that adds the campaign
         information to Advertisement Storage contract.
-    @param campaign Structure containing every information necessary to create and 
+    @param campaign Structure containing every information necessary to create and
     maintain a campaign avaliable.
     */
 
@@ -230,24 +245,24 @@ contract Advertisement is Ownable, BaseAdvertisement{
     /**
     @notice Register a proof of attention
     @dev
-        This function verifies the campaign avaliability as well as the validity of 
-        the proof of attention submited. In case any of the verifications fails, the function will 
+        This function verifies the campaign avaliability as well as the validity of
+        the proof of attention submited. In case any of the verifications fails, the function will
         be stopped and an Error event will be emitted with further error information.
-        A PoARegistered event with the same information submited as arguments of this function will 
+        A PoARegistered event with the same information submited as arguments of this function will
         be emmited if the proof of attention is processed correctly.
-        For more information on the proof of attention design refer to the wiki documentation or to 
+        For more information on the proof of attention design refer to the wiki documentation or to
         Appcoins Protocol Whitepaper.
 
     @param packageName Package name of the application from which the proof of attention refers to.
     @param bidId Campaign id of the campaign to which the proof of attention is submitted
-    @param timestampList List of 12 timestamps generated 10 seconds apart from each other, 
+    @param timestampList List of 12 timestamps generated 10 seconds apart from each other,
     as part of the proof of attention. The timestamp list should be arranged in ascending order
-    @param nonces List of 12 nonces generated during the proof of attention. The index of each 
+    @param nonces List of 12 nonces generated during the proof of attention. The index of each
     nounce should be acording to the corresponding timestamp index on the timestamp list submitted
     @param appstore Address of the Appstore receiving part of the proof of attention reward
     @param oem Address of the OEM receiving part of the proof of attention reward
     @param walletName Package name of the wallet submitting the proof of attention
-    @param countryCode String with the 2 character identifying the country from which the 
+    @param countryCode String with the 2 character identifying the country from which the
     proof of attention was processed
     */
 
@@ -289,13 +304,13 @@ contract Advertisement is Ownable, BaseAdvertisement{
             return;
         } */
 
-        if(userAttributions[bidId][msg.sender] > 0){
+        if(userAttributions[msg.sender][bidId]){
             emit Error(
                 "registerPoA","User already registered a proof of attention for this campaign");
             return;
         }
         //atribute
-        userAttributions[bidId][msg.sender] += 1;
+        userAttributions[msg.sender][bidId] = true;
 
         payFromCampaign(bidId, msg.sender, appstore, oem);
 
@@ -305,11 +320,11 @@ contract Advertisement is Ownable, BaseAdvertisement{
     /**
     @notice Cancel a campaign and give the remaining budget to the campaign owner
     @dev
-        When a campaing owner wants to cancel a campaign, the campaign owner needs 
-        to call this function. This function can only be called either by the campaign owner or by 
-        the Advertisement contract owner. This function results in campaign cancelation and 
+        When a campaing owner wants to cancel a campaign, the campaign owner needs
+        to call this function. This function can only be called either by the campaign owner or by
+        the Advertisement contract owner. This function results in campaign cancelation and
         retreival of the remaining budged to the respective campaign owner.
-    @param bidId Campaign id to which the cancelation referes to 
+    @param bidId Campaign id to which the cancelation referes to
      */
     function cancelCampaign (bytes32 bidId) public {
         address campaignOwner = getOwnerOfCampaign(bidId);
@@ -338,31 +353,31 @@ contract Advertisement is Ownable, BaseAdvertisement{
     @dev
         Based on the Campaign id return the value paid for each proof of attention registered.
     @param bidId Campaign id to which the query refers
-    @return { "price" : "Reward (in wei) for each proof of attention registered"} 
+    @return { "price" : "Reward (in wei) for each proof of attention registered"}
     */
     function getPriceOfCampaign (bytes32 bidId) public view returns(uint price) {
         return advertisementStorage.getCampaignPriceById(bidId);
     }
 
-    /** 
+    /**
     @notice Get the start date of a campaign
     @dev
         Based on the Campaign id return the value (in miliseconds) corresponding to the start Date
         of the campaign.
     @param bidId Campaign id to which the query refers
-    @return { "startDate" : "Start date (in miliseconds) of the campaign"} 
+    @return { "startDate" : "Start date (in miliseconds) of the campaign"}
     */
     function getStartDateOfCampaign (bytes32 bidId) public view returns(uint startDate) {
         return advertisementStorage.getCampaignStartDateById(bidId);
     }
 
-    /** 
+    /**
     @notice Get the end date of a campaign
     @dev
         Based on the Campaign id return the value (in miliseconds) corresponding to the end Date
         of the campaign.
     @param bidId Campaign id to which the query refers
-    @return { "endDate" : "End date (in miliseconds) of the campaign"} 
+    @return { "endDate" : "End date (in miliseconds) of the campaign"}
     */
     function getEndDateOfCampaign (bytes32 bidId) public view returns(uint endDate) {
         return advertisementStorage.getCampaignEndDateById(bidId);
@@ -373,7 +388,7 @@ contract Advertisement is Ownable, BaseAdvertisement{
     @dev
         Based on the Campaign id return the total value avaliable to pay for proofs of attention.
     @param bidId Campaign id to which the query refers
-    @return { "budget" : "Total value (in wei) spendable in proof of attention rewards"} 
+    @return { "budget" : "Total value (in wei) spendable in proof of attention rewards"}
     */
     function getBudgetOfCampaign (bytes32 bidId) public view returns(uint budget) {
         return advertisementStorage.getCampaignBudgetById(bidId);
@@ -381,14 +396,24 @@ contract Advertisement is Ownable, BaseAdvertisement{
 
 
     /**
-    @notice Get the owner of a campaign 
-    @dev 
+    @notice Get the owner of a campaign
+    @dev
         Based on the Campaign id return the address of the campaign owner
     @param bidId Campaign id to which the query refers
-    @return { "campaignOwner" : "Address of the campaign owner" } 
+    @return { "campaignOwner" : "Address of the campaign owner" }
     */
     function getOwnerOfCampaign (bytes32 bidId) public view returns(address campaignOwner) {
         return advertisementStorage.getCampaignOwnerById(bidId);
+    }
+
+    /**
+    @notice Get the list of Campaign BidIds registered in the contract
+    @dev
+        Returns the list of BidIds of the campaigns ever registered in the contract
+    @return { "bidIds" : "List of BidIds registered in the contract" }
+    */
+    function getBidIdList() public view returns(bytes32[] bidIds) {
+        return bidIdList;
     }
 
     /**
@@ -411,7 +436,7 @@ contract Advertisement is Ownable, BaseAdvertisement{
     /**
     @notice Internal function to distribute payouts
     @dev
-        Distributes the value defined in the campaign for a Proof-of-attention to the user, 
+        Distributes the value defined in the campaign for a Proof-of-attention to the user,
         Appstore and OEM ajusted to their respective shares.
     @param bidId Campaign id from which a payment will be made
     @param appstore Address of the Appstore receiving it's share
@@ -455,9 +480,9 @@ contract Advertisement is Ownable, BaseAdvertisement{
     @param timestampList List of timestamps used to compute the proof-of-attention
     @param nonces List of nonces generated based on the packageName and timestamp list
     @return { "valid" : "Returns True if all nonces are valid else it returns False"}
-    
+
     */
-    function areNoncesValid (bytes packageName,uint64[] timestampList, uint64[] nonces) 
+    function areNoncesValid (bytes packageName,uint64[] timestampList, uint64[] nonces)
         internal returns(bool valid) {
 
         for(uint i = 0; i < nonces.length; i++){
