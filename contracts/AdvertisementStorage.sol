@@ -9,6 +9,7 @@ import "./Base/BaseAdvertisementStorage.sol";
 Advertisement contract. This contract is responsible from storing information regardign user 
 aquisiton campaigns.
 */
+
 contract AdvertisementStorage is BaseAdvertisementStorage() {
   
     /**
@@ -78,8 +79,34 @@ contract AdvertisementStorage is BaseAdvertisementStorage() {
         address owner
     )
     public
-    onlyIfWhitelisted("setCampaign",msg.sender) {
+    onlyIfWhitelisted("setCampaign",msg.sender){
 
         _setCampaign(bidId, price, budget, startDate, endDate, valid, owner);
+
+    }
+    
+    /**
+    @notice Internal function to set most recent bidId
+    @dev
+        This value is stored to avoid conflicts between
+        Advertisement contract upgrades.
+    @param _newBidId Newer bidId
+     */
+    function setLastBidId(bytes32 _newBidId) internal {    
+        lastBidId = _newBidId;
+    }
+
+    /**
+    @notice Returns the greatest BidId ever registered to the contract
+    @dev
+        This function can only be called by whitelisted addresses
+    @return { '_lastBidId' : 'Greatest bidId registered to the contract'}
+     */
+    function getLastBidId() 
+        external 
+        onlyIfWhitelisted("getLastBidId",msg.sender)
+        returns (bytes32 _lastBidId){
+        
+        return lastBidId;
     }
 }
