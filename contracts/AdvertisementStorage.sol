@@ -85,28 +85,4 @@ contract AdvertisementStorage is BaseAdvertisementStorage() {
 
     }
     
-    /**
-    @notice Internal function to set most recent bidId
-    @dev
-        This value is stored to avoid conflicts between
-        Advertisement contract upgrades.
-    @param _newBidId Newer bidId
-     */
-    function setLastBidId(bytes32 _newBidId) internal {    
-        lastBidId = _newBidId;
-    }
-
-    /**
-    @notice Returns the greatest BidId ever registered to the contract
-    @dev
-        This function can only be called by whitelisted addresses
-    @return { '_lastBidId' : 'Greatest bidId registered to the contract'}
-     */
-    function getLastBidId() 
-        external 
-        onlyIfWhitelisted("getLastBidId",msg.sender)
-        returns (bytes32 _lastBidId){
-        
-        return lastBidId;
-    }
 }
