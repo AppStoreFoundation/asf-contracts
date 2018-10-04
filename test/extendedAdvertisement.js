@@ -35,148 +35,148 @@ function convertCountryCodeToIndex(countryCode) {
 }
 
 contract('ExtendedAdvertisement', function(accounts) {
-  beforeEach('Setting ExtendedAdvertisement test...',async () => {
+    beforeEach('Setting Advertisement test...',async () => {
 
-		nonceWrongTs = [ 70356,
-						45021,
-						32669,
-						37785,
-						15906,
-						10179,
-						17014,
-						167317,
-						63419,
-						381,
-						31182,
-						52274];
+  		nonceWrongTs = [ 70356,
+  						45021,
+  						32669,
+  						37785,
+  						15906,
+  						10179,
+  						17014,
+  						167317,
+  						63419,
+  						381,
+  						31182,
+  						52274];
 
-		nonceList = [ 75824,
-					111779,
-					188882,
-					15136,
-					5936,
-					41188,
-					55418,
-					162348,
-					29001,
-					99111,
-					119649,
-					30337];
+  		nonceList = [ 75824,
+  					111779,
+  					188882,
+  					15136,
+  					5936,
+  					41188,
+  					55418,
+  					162348,
+  					29001,
+  					99111,
+  					119649,
+  					30337];
 
-		timestamp = [ 1524042553578,
-					  1524042563843,
-					  1524042574305,
-					  1524042584823,
-					  1524042595355,
-					  1524042605651,
-					  1524042615837,
-					  1524042626245,
-					  1524042636491,
-					  1524042646740,
-					  1524042657099,
-					  1524042667471 ];
+  		timestamp = [ 1524042553578,
+  					  1524042563843,
+  					  1524042574305,
+  					  1524042584823,
+  					  1524042595355,
+  					  1524042605651,
+  					  1524042615837,
+  					  1524042626245,
+  					  1524042636491,
+  					  1524042646740,
+  					  1524042657099,
+  					  1524042667471 ];
 
-		wrongTimestamp = [ 1524042553761,
-						  1524042554294,
-						  1524042554557,
-						  1524042555200,
-						  1524042555437,
-						  1524042555714,
-						  1524042556061,
-						  1524042556318,
-						  1524042556654,
-						  1524042557044,
-						  1524042557465,
-						  1524042557509 ];
+  		wrongTimestamp = [ 1524042553761,
+  						  1524042554294,
+  						  1524042554557,
+  						  1524042555200,
+  						  1524042555437,
+  						  1524042555714,
+  						  1524042556061,
+  						  1524042556318,
+  						  1524042556654,
+  						  1524042557044,
+  						  1524042557465,
+  						  1524042557509 ];
 
         appcInstance = await AppCoins.new();
         AdvertisementStorageInstance = await ExtendedAdvertisementStorage.new();
-		adFinanceInstance = await ExtendeAdvertisementFinance.new(appcInstance.address);
-		addInstance = await	ExtendedAdvertisement.new(appcInstance.address, AdvertisementStorageInstance.address,adFinanceInstance.address);
+  		adFinanceInstance = await ExtendeAdvertisementFinance.new(appcInstance.address);
+
+        addInstance = await ExtendedAdvertisement.new(appcInstance.address, AdvertisementStorageInstance.address,adFinanceInstance.address);
 
         await adFinanceInstance.setAllowedAddress(addInstance.address);
         await adFinanceInstance.setAdsStorageAddress(AdvertisementStorageInstance.address);
-		await AdvertisementStorageInstance.addAddressToWhitelist(addInstance.address);
-		await addInstance.addAddressToWhitelist(accounts[1]);
+        await AdvertisementStorageInstance.addAddressToWhitelist(addInstance.address);
 
-		TestUtils.setAppCoinsInstance(appcInstance);
-		TestUtils.setContractInstance(addInstance);
+  		TestUtils.setAppCoinsInstance(appcInstance);
+  		TestUtils.setContractInstance(addInstance);
 
-		campaignPrice = 50000000000000000;
-		campaignBudget = 1000000000000000000;
+  		campaignPrice = 50000000000000000;
+  		campaignBudget = 1000000000000000000;
 
-		var countryList = []
+  		var countryList = []
 
-		countryList.push(convertCountryCodeToIndex("PT"))
-		countryList.push(convertCountryCodeToIndex("GB"))
-		countryList.push(convertCountryCodeToIndex("FR"))
+  		countryList.push(convertCountryCodeToIndex("PT"))
+  		countryList.push(convertCountryCodeToIndex("GB"))
+  		countryList.push(convertCountryCodeToIndex("FR"))
 
-        countryCode = countryList[0]
+          countryCode = countryList[0]
 
-		startDate = 20;
-		endDate = 1922838059980;
-		packageName = "com.facebook.orca";
+  		startDate = 20;
+  		endDate = 1922838059980;
+  		packageName = "com.facebook.orca";
 
-		await appcInstance.approve(addInstance.address,campaignBudget);
-		
-		await addInstance.createCampaign(packageName,countryList,[1,2],campaignPrice,campaignBudget,startDate,endDate);
-		
-		await appcInstance.transfer(accounts[1],campaignBudget);
-		countryList.push(convertCountryCodeToIndex("PT"))
-		countryList.push(convertCountryCodeToIndex("GB"))
-		countryList.push(convertCountryCodeToIndex("FR"))
-		countryList.push(convertCountryCodeToIndex("PA"))
-		await appcInstance.approve(addInstance.address,campaignBudget, { from: accounts[1]});
-		await addInstance.createCampaign(packageName,countryList,[1,2],campaignPrice,campaignBudget,startDate,endDate, { from : accounts[1]});
+  		await appcInstance.approve(addInstance.address,campaignBudget);
+
+  		await addInstance.createCampaign(packageName,countryList,[1,2],campaignPrice,campaignBudget,startDate,endDate, "appcoins.io");
+
+  		await appcInstance.transfer(accounts[1],campaignBudget);
+  		countryList.push(convertCountryCodeToIndex("PT"))
+  		countryList.push(convertCountryCodeToIndex("GB"))
+  		countryList.push(convertCountryCodeToIndex("FR"))
+  		countryList.push(convertCountryCodeToIndex("PA"))
+  		await appcInstance.approve(addInstance.address,campaignBudget, { from: accounts[1]});
+  		await addInstance.createCampaign(packageName,countryList,[1,2],campaignPrice,campaignBudget,startDate,endDate , "appcoins.io",  { from : accounts[1]});
 
 
-		examplePoA = new Object();
-		examplePoA.packageName = "com.facebook.orca";
-		// Need to get bid generated by create Campaign
-		examplePoA.bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000001");
-		examplePoA.timestamp = new Array();
-		examplePoA.nonce = new Array();
+  		examplePoA = new Object();
+  		examplePoA.packageName = "com.facebook.orca";
+  		// Need to get bid generated by create Campaign
+  		examplePoA.bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000001");
+  		examplePoA.timestamp = new Array();
+  		examplePoA.nonce = new Array();
 
-		example2PoA = new Object();
-		example2PoA.packageName = "com.facebook.orca";
-		example2PoA.bid = examplePoA.bid;
-		example2PoA.timestamp = new Array();
-		example2PoA.nonce = new Array();
+  		example2PoA = new Object();
+  		example2PoA.packageName = "com.facebook.orca";
+  		example2PoA.bid = examplePoA.bid;
+  		example2PoA.timestamp = new Array();
+  		example2PoA.nonce = new Array();
 
-		wrongTimestampPoA = new Object();
-		wrongTimestampPoA.packageName = "com.facebook.orca";
-		wrongTimestampPoA.bid = examplePoA.bid;
-		wrongTimestampPoA.timestamp = new Array();
-		wrongTimestampPoA.nonce = new Array();
+  		wrongTimestampPoA = new Object();
+  		wrongTimestampPoA.packageName = "com.facebook.orca";
+  		wrongTimestampPoA.bid = examplePoA.bid;
+  		wrongTimestampPoA.timestamp = new Array();
+  		wrongTimestampPoA.nonce = new Array();
 
-		wrongNoncePoA = new Object();
-		wrongNoncePoA.packageName = examplePoA.packageName;
-		wrongNoncePoA.bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000001");
-		wrongNoncePoA.timestamp = new Array();
-		// any nounce list except the correct one will work here
-		wrongNoncePoA.nonce = new Array();
+  		wrongNoncePoA = new Object();
+  		wrongNoncePoA.packageName = examplePoA.packageName;
+  		wrongNoncePoA.bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000001");
+  		wrongNoncePoA.timestamp = new Array();
+  		// any nounce list except the correct one will work here
+  		wrongNoncePoA.nonce = new Array();
 
-		walletName = "com.asfoundation.wallet.dev"
+  		walletName = "com.asfoundation.wallet.dev"
 
-		for(var i = 0; i < 12; i++){
-			//var timeNow = new Date().getTime();
-			var time = timestamp[i];
-			//var time = 158326;
+  		for(var i = 0; i < 12; i++){
+  			//var timeNow = new Date().getTime();
+  			var time = timestamp[i];
+  			//var time = 158326;
 
-			var wrongTime = wrongTimestamp[i];
-			//var correctNonce = Math.floor(Math.random()*520*i);
-			var correctNonce = nonceList[i];
-			var wrongTimeNonce = nonceWrongTs[i];
-			examplePoA.timestamp.push(time);
-			examplePoA.nonce.push(correctNonce);
-			example2PoA.timestamp.push(time);
-			example2PoA.nonce.push(correctNonce);
-			wrongTimestampPoA.timestamp.push(wrongTime);
-			wrongTimestampPoA.nonce.push(wrongTimeNonce);
-			wrongNoncePoA.timestamp.push(time);
-			wrongNoncePoA.nonce.push(nonceWrongTs[i]);
-		}
-	});
+  			var wrongTime = wrongTimestamp[i];
+  			//var correctNonce = Math.floor(Math.random()*520*i);
+  			var correctNonce = nonceList[i];
+  			var wrongTimeNonce = nonceWrongTs[i];
+  			examplePoA.timestamp.push(time);
+  			examplePoA.nonce.push(correctNonce);
+  			example2PoA.timestamp.push(time);
+  			example2PoA.nonce.push(correctNonce);
+  			wrongTimestampPoA.timestamp.push(wrongTime);
+  			wrongTimestampPoA.nonce.push(wrongTimeNonce);
+  			wrongNoncePoA.timestamp.push(time);
+  			wrongNoncePoA.nonce.push(nonceWrongTs[i]);
+  		}
+  	});
 
   	it('should create a campaign', async function() {
 		var bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000003");
@@ -193,8 +193,8 @@ contract('ExtendedAdvertisement', function(accounts) {
 		var eventsStorage = AdvertisementStorageInstance.allEvents();
 		var eventsInfo = addInstance.allEvents();
 		var packageName1 = "com.instagram.android";
-		
-		await addInstance.createCampaign(packageName1,countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980);
+
+		await addInstance.createCampaign(packageName1,countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980, "appcoins.io");
 
 		var eventStorageLog = await new Promise(
 				function(resolve, reject){
@@ -291,7 +291,7 @@ contract('ExtendedAdvertisement', function(accounts) {
 			var countryList = [];
 			countryList.push(convertCountryCodeToIndex("GB"));
 			countryList.push(convertCountryCodeToIndex("FR"));
-			await addInstance.createCampaign.sendTransaction("org.telegram.messenger",countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980);
+			await addInstance.createCampaign.sendTransaction("org.telegram.messenger",countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980, "appcoins.io");
 		})
 
 		var newUserBalance = await TestUtils.getBalance(accounts[0]);
@@ -427,7 +427,7 @@ contract('ExtendedAdvertisement', function(accounts) {
 
 		await appcInstance.approve(addInstance.address,campaignBudget, {from: accounts[1]});
 
-		await addInstance.createCampaign(packageName,countryList,[1,2],campaignPrice,campaignBudget,startDate,endDate, { from : accounts[1]});
+		await addInstance.createCampaign(packageName,countryList,[1,2],campaignPrice,campaignBudget,startDate,endDate, "appcoins.io", { from : accounts[1]});
 		var newBid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000003");
 		var bidIdList = await addInstance.getBidIdList.call();
 
@@ -466,14 +466,14 @@ contract('ExtendedAdvertisement', function(accounts) {
 	it('should upgrade advertisement finance and transfer campaign money to the new contract', async function () {
 		var addsBalance = await TestUtils.getBalance(AdvertisementStorageInstance.address);
 		var oldFinanceInitBalance = await TestUtils.getBalance(adFinanceInstance.address);
-		
+
 		var advertisementFinanceInstance = await AdvertisementFinance.new(appcInstance.address);
-		
+
 		await advertisementFinanceInstance.setAllowedAddress.sendTransaction(addInstance.address)
 
 		var newFinanceInitBalance = await TestUtils.getBalance(advertisementFinanceInstance.address);
 		var bidIdListBeforeUpgrade = await addInstance.getBidIdList.call();
-		
+
 		expect(newFinanceInitBalance).to.be.equal(0,'New advertisement finance contract should have an initial balance of 0');
 
 		await addInstance.upgradeFinance(advertisementFinanceInstance.address);
@@ -482,7 +482,7 @@ contract('ExtendedAdvertisement', function(accounts) {
 		var newFinanceFinalBalance = await TestUtils.getBalance(advertisementFinanceInstance.address);
 
 		var bidIdListAfterUpgrade = await addInstance.getBidIdList.call();
-		
+
 		expect(newFinanceFinalBalance).to.equal(oldFinanceInitBalance,'New finance contract after upgrade should have the same balance as the old finance contract before upgrade');
 		expect(oldFinanceFinalBalance).to.equal(0,'Old finance contract should have a balance of 0 after upgrade');
 		expect(bidIdListAfterUpgrade).to.eql(bidIdListBeforeUpgrade,'Bid Id List should suffer no change from this upgrade');
@@ -508,7 +508,7 @@ contract('ExtendedAdvertisement', function(accounts) {
 			var dev = devsList[j];
 			await advertisementFinanceInstance.withdraw.sendTransaction(dev,devsBalance[dev]);
 		}
-		
+
 		var newFinanceResetBalance = await TestUtils.getBalance(advertisementFinanceInstance.address);
 		expect(newFinanceResetBalance).to.be.equal(0,'Each developer should have the same money each deposited after the upgrade on the new finance contract');
 

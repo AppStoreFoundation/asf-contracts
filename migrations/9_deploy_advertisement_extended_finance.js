@@ -3,13 +3,15 @@ var ExtendedFinance = artifacts.require("./ExtendedFinance.sol");
 
 require('dotenv').config();
 
-module.exports = function(deployer, network) {
+module.exports = async function(deployer, network) {
     switch (network) {
         case 'development':
-            AppCoins.deployed()
-            .then(function() {
-                return deployer.deploy(ExtendedFinance,AppCoins.address);
-            })
+            try {
+                const appcoins = await AppCoins.deployed();
+                await deployer.deploy(ExtendedFinance,appcoins.address);
+            } catch (e) {
+                console.log(e);
+            }
 
             break;
 
