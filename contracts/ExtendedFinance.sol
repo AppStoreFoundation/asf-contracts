@@ -11,9 +11,6 @@ to user aquisition campaigns.
 */
 contract ExtendedFinance is BaseFinance {
 
-    constructor(address _appc) BaseFinance(_appc){
-
-    }
 
     function pay(address _user, address _destination, uint256 _value) 
         public onlyAllowed{
