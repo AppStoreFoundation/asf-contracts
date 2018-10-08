@@ -13,8 +13,8 @@ module.exports = {
               return new HDWalletProvider(process.env.INFURA_ROPSTEN_MNEMONIC, `https://ropsten.infura.io/${process.env.INFURA_KEY}`)
             },
             network_id: "3",
-            gas: 4000000, // Gas limit used for deploys
-            gasPrice: 20000000000
+            gas: 6000000, // Gas limit used for deploys
+            gasPrice: 40000000000
         },
         kovan: {
             provider: function() {
