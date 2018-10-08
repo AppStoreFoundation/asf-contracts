@@ -49,7 +49,9 @@ contract BaseAdvertisement is StorageUser,Ownable {
         Upgrade finance function can only be called by the Advertisement contract owner.
     @param addrAdverFinance Address of the new Advertisement Finance contract
     */
-    function upgradeFinance (address addrAdverFinance) public onlyOwner("upgradeFinance") {
+    function upgradeFinance (address addrAdverFinance) public onlyOwner("upgradeFinance");
+    
+    function _upgradeFinance (address addrAdverFinance) internal returns (BaseFinance) {
         BaseFinance newAdvFinance = BaseFinance(addrAdverFinance);
 
         address[] memory devList = advertisementFinance.getUserList();
@@ -59,13 +61,7 @@ contract BaseAdvertisement is StorageUser,Ownable {
             advertisementFinance.pay(devList[i],address(newAdvFinance),balance);
             newAdvFinance.increaseBalance(devList[i],balance);
         }
-
-
-        uint256 oldBalance = appc.balances(address(advertisementFinance));
-
-        require(oldBalance == 0);
-
-        advertisementFinance = newAdvFinance;
+        return newAdvFinance;
     }
 
     /**

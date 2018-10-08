@@ -9,7 +9,7 @@ import "./ExtendedFinance.sol";
 
 contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
 
-    event PoARegistered(bytes32 bidId,bytes32 rootHash,bytes32 signedrootHash,uint256 newPoAs,uint256 convertedPoAs);
+    event BulkPoARegistered(bytes32 bidId,bytes32 rootHash,bytes32 signedrootHash,uint256 newPoAs,uint256 convertedPoAs);
     event CampaignInformation
         (
             bytes32 bidId,
@@ -118,7 +118,11 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
         _getFinance().pay(owner,msg.sender,totalPay);
         _getStorage().setCampaignBudgetById(bidId,newBudget);
 
-        emit PoARegistered(bidId,rootHash,signedRootHash,newHashes,effectiveConversions);
+        if(newBudget < price){
+            _getStorage().setCampaignValidById(bidId,false);
+        }
+
+        emit BulkPoARegistered(bidId,rootHash,signedRootHash,newHashes,effectiveConversions);
     }
 
     /**
@@ -136,9 +140,27 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
         _getFinance().withdraw(msg.sender,balance);
     }
 
+    function getBalance()
+        public 
+        onlyIfWhitelisted("withdraw",msg.sender)
+        returns (uint256 _balance)
+        {
+        return _getFinance().getUserBalance(msg.sender);    
+    }
 
     function getEndPointOfCampaign (bytes32 bidId) public view returns (string url){
         return ExtendedAdvertisementStorage(address(_getStorage())).getCampaignEndPointById(bidId);
     }
 
+
+    function upgradeFinance (address addrAdverFinance) public onlyOwner("upgradeFinance") {
+        BaseFinance newContract = super._upgradeFinance(addrAdverFinance);
+      
+        uint balance = advertisementFinance.getUserBalance(address(this));
+        advertisementFinance.withdraw(address(this),balance);
+        uint256 oldBalance = appc.balances(address(advertisementFinance));
+
+        require(oldBalance == 0);
+        advertisementFinance = newContract;
+    }
 }

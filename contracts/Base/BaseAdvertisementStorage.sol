@@ -361,13 +361,10 @@ contract BaseAdvertisementStorage is Whitelist {
 
     /**
     @notice Returns the greatest BidId ever registered to the contract
-    @dev
-        This function can only be called by whitelisted addresses
     @return { '_lastBidId' : 'Greatest bidId registered to the contract'}
      */
     function getLastBidId() 
         external 
-        onlyIfWhitelisted("getLastBidId",msg.sender)
         returns (bytes32 _lastBidId){
         
         return lastBidId;
