@@ -277,7 +277,6 @@ contract('ExtendedAdvertisement', function(accounts) {
 	it('should revert if PoA root hash is incorrectly signed');
 
 	it('should upgrade advertisement storage and cancel all campaigns', async function() {
-		var addsBalance = await TestUtils.getBalance(AdvertisementStorageInstance.address);
 		var user0Balance = await TestUtils.getBalance(accounts[0]);
 		var user1Balance = await TestUtils.getBalance(accounts[1]);
 		var countryList = []
@@ -285,12 +284,12 @@ contract('ExtendedAdvertisement', function(accounts) {
 		countryList.push(convertCountryCodeToIndex("GB"))
 		countryList.push(convertCountryCodeToIndex("FR"))
 		countryList.push(convertCountryCodeToIndex("PA"))
-
+		
         AdvertisementStorageInstance = await ExtendedAdvertisementStorage.new();
-
+		
 		await addInstance.upgradeStorage(AdvertisementStorageInstance.address);
         await AdvertisementStorageInstance.addAddressToWhitelist(addInstance.address);
-
+		
 		var addsFinalBalance = await TestUtils.getBalance(AdvertisementStorageInstance.address);
 		var user0FinalBalance = await TestUtils.getBalance(accounts[0]);
 		var user1FinalBalance = await TestUtils.getBalance(accounts[1]);
@@ -298,8 +297,8 @@ contract('ExtendedAdvertisement', function(accounts) {
 
 		expect(addsFinalBalance).to.be.equal(0,'Advertisement contract balance should be 0');
 		expect(await TestUtils.getBalance(adFinanceInstance.address)).to.be.equal(0,"AdvertisementFinance contract balance should be 0");
-		expect(user0FinalBalance).to.be.equal(user0Balance+campaignBudget,'User 0 should receive campaignBudget value of his campaign');
-		expect(user1FinalBalance).to.be.equal(user1Balance+campaignPrice,'User 1 should receive campaignBudget value of his campaign');
+		expect(user0FinalBalance).to.be.equal(user0Balance+campaignPrice,'User 0 should receive campaignBudget value of his campaign');
+		expect(user1FinalBalance).to.be.equal(user1Balance+campaignBudget,'User 1 should receive campaignBudget value of his campaign');
 		expect(bidIdList.length).to.be.equal(0,'Campaign list should be 0');
 
 		await appcInstance.approve(addInstance.address,campaignBudget, {from: accounts[1]});
@@ -345,9 +344,9 @@ contract('ExtendedAdvertisement', function(accounts) {
 		var bidIdListBeforeUpgrade = await addInstance.getBidIdList.call();
 
 		expect(newFinanceInitBalance).to.be.equal(0,'New advertisement finance contract should have an initial balance of 0');
-		console.log('upgrade')
+		
 		await addInstance.upgradeFinance(advertisementFinanceInstance.address);
-		console.log('upgraded')
+		
 		var oldFinanceFinalBalance = await TestUtils.getBalance(adFinanceInstance.address);
 		var newFinanceFinalBalance = await TestUtils.getBalance(advertisementFinanceInstance.address);
 
@@ -356,7 +355,6 @@ contract('ExtendedAdvertisement', function(accounts) {
 		expect(newFinanceFinalBalance).to.equal(oldFinanceInitBalance,'New finance contract after upgrade should have the same balance as the old finance contract before upgrade');
 		expect(oldFinanceFinalBalance).to.equal(0,'Old finance contract should have a balance of 0 after upgrade');
 		expect(bidIdListAfterUpgrade).to.eql(bidIdListBeforeUpgrade,'Bid Id List should suffer no change from this upgrade');
-		console.log("cnas");
 		var devsBalance = {}
 		var devsList = []
 
