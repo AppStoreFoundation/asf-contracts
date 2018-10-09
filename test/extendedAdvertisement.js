@@ -232,7 +232,7 @@ contract('ExtendedAdvertisement', function(accounts) {
 	it('should set the Campaign validity to false when the remaining budget is smaller than the price', function () {
 		var bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000001");		
 		return addInstance.bulkRegisterPoA.sendTransaction(bid,0x02,0x02,1,{from: accounts[1]}).then( instance => {
-			return addInstance.getCampaignValidity(bid).then( valid => {
+			return addInstance.getCampaignValidity.call(bid).then( valid => {
 
 				expect(valid).to.be.equal(false);
 			});
