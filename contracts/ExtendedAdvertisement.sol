@@ -151,16 +151,4 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
     function getEndPointOfCampaign (bytes32 bidId) public view returns (string url){
         return ExtendedAdvertisementStorage(address(_getStorage())).getCampaignEndPointById(bidId);
     }
-
-
-    function upgradeFinance (address addrAdverFinance) public onlyOwner("upgradeFinance") {
-        BaseFinance newContract = super._upgradeFinance(addrAdverFinance);
-      
-        uint balance = advertisementFinance.getUserBalance(address(this));
-        advertisementFinance.withdraw(address(this),balance);
-        uint256 oldBalance = appc.balances(address(advertisementFinance));
-
-        require(oldBalance == 0);
-        advertisementFinance = newContract;
-    }
 }

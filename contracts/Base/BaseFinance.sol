@@ -123,7 +123,16 @@ contract BaseFinance is SingleAllowance {
             withdraw(users[i],balanceUsers[users[i]]);
         }
     }
-
+    /**
+    @notice Transfers all funds of the contract to a single address
+    @dev
+        This function is used for finance contract upgrades in order to be more cost efficient.
+    @param _destination Address receiving the funds
+     */
+    function transferAllFunds(address _destination) public onlyAllowed {
+        uint256 balance = appc.balanceOf(address(this));
+        appc.transfer(_destination,balance);
+    }
 
       /**
     @notice Get balance of coins stored in the contract by a specific user

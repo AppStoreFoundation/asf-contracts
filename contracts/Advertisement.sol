@@ -271,13 +271,4 @@ contract Advertisement is BaseAdvertisement {
         }
         return true;
     }
-
-    function upgradeFinance (address addrAdverFinance) public onlyOwner("upgradeFinance") {
-        BaseFinance newContract =  super._upgradeFinance(addrAdverFinance);
-   
-        uint256 oldBalance = appc.balances(address(advertisementFinance));
-
-        require(oldBalance == 0);
-        advertisementFinance = newContract;
-    }
 }
