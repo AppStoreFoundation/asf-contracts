@@ -9,6 +9,8 @@ contract BaseAdvertisementStorage is Whitelist {
 
     mapping (bytes32 => CampaignLibrary.Campaign) campaigns;
 
+    bytes32 lastBidId = 0x0;
+
     modifier onlyIfCampaignExists(string _funcName, bytes32 _bidId) {
         if(campaigns[_bidId].owner == 0x0){
             emit Error(_funcName,"Campaign does not exist");
@@ -103,8 +105,11 @@ contract BaseAdvertisementStorage is Whitelist {
 
         campaign.setOwner(owner);
 
+
+
         if(newCampaign){
             emitCampaignCreated(campaign);
+            setLastBidId(bidId);
         } else {
             emitCampaignUpdated(campaign);
         }
@@ -341,5 +346,27 @@ contract BaseAdvertisementStorage is Whitelist {
             campaign.getValidity(),
             campaign.getOwner()
         );
+    }
+
+    /**
+    @notice Internal function to set most recent bidId
+    @dev
+        This value is stored to avoid conflicts between
+        Advertisement contract upgrades.
+    @param _newBidId Newer bidId
+     */
+    function setLastBidId(bytes32 _newBidId) internal {    
+        lastBidId = _newBidId;
+    }
+
+    /**
+    @notice Returns the greatest BidId ever registered to the contract
+    @return { '_lastBidId' : 'Greatest bidId registered to the contract'}
+     */
+    function getLastBidId() 
+        external 
+        returns (bytes32 _lastBidId){
+        
+        return lastBidId;
     }
 }

@@ -11,7 +11,7 @@ to user aquisition campaigns.
 */
 contract AdvertisementFinance is BaseFinance {
 
-    constructor(address _appc) BaseFinance(_appc){
+    constructor(address _appc) public BaseFinance(_appc){
 
     }
 

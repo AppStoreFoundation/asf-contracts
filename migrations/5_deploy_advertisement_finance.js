@@ -6,13 +6,15 @@ var Advertisement = artifacts.require("./Advertisement.sol");
 
 require('dotenv').config();
 
-module.exports = function(deployer, network) {
+module.exports = async function(deployer, network) {
     switch (network) {
         case 'development':
-            AppCoins.deployed()
-            .then(function() {
-                return deployer.deploy(AdvertisementFinance,AppCoins.address);
-            })
+            try {
+                const appCoins = await AppCoins.deployed();
+                advFinance  = await deployer.deploy(AdvertisementFinance, appCoins.address);
+            } catch (e) {
+                console.log(e);
+            }
 
             break;
 
