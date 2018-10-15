@@ -61,9 +61,10 @@ module.exports = function(callback) {
             console.log(`New Extended Advertisement address ${newAdvertisementAddress} added to the storage!`);
         })
     }
-    //  TODO this need to be async
-    // addAdvertisementContractAddressToFinance(extendedAdvertisementAddress);
+
+    //  Run each script in sequence 
+    addAdvertisementContractAddressToFinance(extendedAdvertisementAddress);
     addAdvertisementStorageContractAddressToFinance(extendedAdvertisementStorageAddress);
-    // addNewAdvertisementToStorage(extendedAdvertisementAddress);
+    addNewAdvertisementToStorage(extendedAdvertisementAddress);
 
 };
