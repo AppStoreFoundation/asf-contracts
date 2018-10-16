@@ -40,7 +40,7 @@ contract('AppCoinsTimelock', function(accounts) {
         await AppCoinsTimelockInstance.allocateFunds(testAddresses[0], testAmounts[0]);
 
         const auxBalance =
-            await AppCoinsTimelockInstance.getBalanceOf(testAddresses[0]);
+            await AppCoinsTimelockInstance.getBalanceOf.call(testAddresses[0]);
 
         expect(auxBalance.toNumber())
         .to.be.equal(testAmounts[0], "The contract is not saving the correct amount");
@@ -64,7 +64,7 @@ contract('AppCoinsTimelock', function(accounts) {
 
         await AppCoinsTimelockInstance.allocateFunds(testAddresses[0], aditionalAmount);
 
-        const auxBalance = await AppCoinsTimelockInstance.getBalanceOf(testAddresses[0]);
+        const auxBalance = await AppCoinsTimelockInstance.getBalanceOf.call(testAddresses[0]);
 
         expect(auxBalance.toNumber())
         .to.be.equal(testAmounts[0] + aditionalAmount, "The contract is not saving the correct amount");
@@ -88,7 +88,7 @@ contract('AppCoinsTimelock', function(accounts) {
         await AppCoinsTimelockInstance.allocateFundsBulk(testAddresses, testAmounts);
 
         const auxBalance =
-            await AppCoinsTimelockInstance.getBalanceOf(testAddresses[0]);
+            await AppCoinsTimelockInstance.getBalanceOf.call(testAddresses[0]);
 
         expect(auxBalance.toNumber())
         .to.be.equal(testAmounts[0], "The contract is not saving the correct bulks amounts");
@@ -106,7 +106,7 @@ contract('AppCoinsTimelock', function(accounts) {
 
         await AppCoinsTimelockInstance.release(testAddresses[0], { from: accounts[0] });
 
-        const auxBalance = await AppCoinsTimelockInstance.getBalanceOf(testAddresses[0]);
+        const auxBalance = await AppCoinsTimelockInstance.getBalanceOf.call(testAddresses[0]);
 
         expect(auxBalance.toNumber())
         .to.be.equal(0, "The contract is releasing the correct amount");
