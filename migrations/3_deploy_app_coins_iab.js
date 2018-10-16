@@ -1,11 +1,14 @@
 var AppCoinsIAB = artifacts.require("./AppCoinsIAB.sol");
-
+var Shares = artifacts.require('./lib/Shares.sol');
 require('dotenv').config();
 
-module.exports = function(deployer, network) {
+module.exports = async function(deployer, network) {
     switch (network) {
         case 'development':
-            deployer.deploy(AppCoinsIAB);
+            await deployer.deploy(Shares);
+            await deployer.link(Shares, AppCoinsIAB);
+            await deployer.deploy(AppCoinsIAB);
+
             break;
 
         case 'ropsten':
