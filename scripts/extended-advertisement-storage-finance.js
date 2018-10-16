@@ -14,8 +14,8 @@ module.exports = function(callback) {
     switch (network) {
 
         case 'development':
-            extendedStorageInstance = ExtendedExtendedAdvertisementStorage.at(process.env.EXTENDED_ADVERTISEMENT_STORAGE_DEVELOPMENT_ADDRESS);
-            extendedFinanceInstance = ExtendedExtendedAdvertisementFinance.at(process.env.EXTENDED_ADVERTISEMENT_FINANCE_DEVELOPMENT_ADDRESS);
+            extendedStorageInstance = ExtendedAdvertisementStorage.at(process.env.EXTENDED_ADVERTISEMENT_STORAGE_DEVELOPMENT_ADDRESS);
+            extendedFinanceInstance = ExtendedAdvertisementFinance.at(process.env.EXTENDED_ADVERTISEMENT_FINANCE_DEVELOPMENT_ADDRESS);
             extendedAdvertisementAddress = process.env.EXTENDED_ADVERTISEMENT_DEVELOPMENT_ADDRESS;
             extendedAdvertisementStorageAddress = process.env.EXTENDED_ADVERTISEMENT_STORAGE_DEVELOPMENT_ADDRESS;
             break;
@@ -56,13 +56,13 @@ module.exports = function(callback) {
         })
     }
 
-    const addAdvertisementStorageContractAddressToFinance = function(newAdvertisementAddress) {
-        extendedFinanceInstance.setAdsStorageAddress(newAdvertisementAddress).then(function(error, success) {
-            console.log(`New Extended Advertisement address ${newAdvertisementAddress} added to the storage!`);
+    const addAdvertisementStorageContractAddressToFinance = function(newAdvertisementStorageAddress) {
+        extendedFinanceInstance.setAdsStorageAddress(newAdvertisementStorageAddress).then(function(error, success) {
+            console.log(`New Extended Storage Advertisement address ${newAdvertisementStorageAddress} added to the storage!`);
         })
     }
 
-    //  Run each script in sequence 
+    //  Run each script in sequence
     addAdvertisementContractAddressToFinance(extendedAdvertisementAddress);
     addAdvertisementStorageContractAddressToFinance(extendedAdvertisementStorageAddress);
     addNewAdvertisementToStorage(extendedAdvertisementAddress);
