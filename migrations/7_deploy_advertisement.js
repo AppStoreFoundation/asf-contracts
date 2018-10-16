@@ -11,14 +11,12 @@ module.exports = async function(deployer, network) {
         case 'development':
             AppCoins.deployed()
             .then(function() {
-                console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
                 return AdvertisementStorage.deployed()
             })
             .then(function() {
-                console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-                return AdvertisementFinance.deployed().catch(console.log)
+                return AdvertisementFinance.deployed()
             }).then( async function() {
-                console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+                await deployer.link(Shares, Advertisement);
                 return deployer.deploy(Advertisement, AppCoins.address, AdvertisementStorage.address,AdvertisementFinance.address);
             });
 
