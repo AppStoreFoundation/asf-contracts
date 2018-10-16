@@ -1,20 +1,16 @@
 var AppCoins = artifacts.require("./AppCoins.sol");
 var CampaignLibrary = artifacts.require("./lib/CampaignLibrary.sol");
-var AdvertisementStorage = artifacts.require("./AdvertisementStorage.sol");
 var AdvertisementFinance = artifacts.require("./AdvertisementFinance.sol");
-var Advertisement = artifacts.require("./Advertisement.sol");
 
 require('dotenv').config();
 
 module.exports = async function(deployer, network) {
     switch (network) {
         case 'development':
-            try {
-                const appCoins = await AppCoins.deployed();
-                advFinance  = await deployer.deploy(AdvertisementFinance, appCoins.address);
-            } catch (e) {
-                console.log(e);
-            }
+            AppCoins.deployed()
+            .then(function() {
+                return deployer.deploy(AdvertisementFinance, AppCoins.address)
+            })
 
             break;
 

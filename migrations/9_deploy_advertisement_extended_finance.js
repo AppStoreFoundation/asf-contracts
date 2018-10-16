@@ -6,12 +6,11 @@ require('dotenv').config();
 module.exports = async function(deployer, network) {
     switch (network) {
         case 'development':
-            try {
-                const appcoins = await AppCoins.deployed();
-                await deployer.deploy(ExtendedFinance,appcoins.address);
-            } catch (e) {
-                console.log(e);
-            }
+            AppCoins.deployed()
+            .then(function() {
+                return deployer.deploy(ExtendedFinance, AppCoins.address)
+            })
+
 
             break;
 
