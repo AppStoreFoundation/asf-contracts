@@ -1,22 +1,24 @@
 var AppCoins = artifacts.require("./AppCoins.sol");
-var CampaignLibrary = artifacts.require("./lib/CampaignLibrary.sol");
+var Shares = artifacts.require("./lib/Shares.sol");
 var AdvertisementStorage = artifacts.require("./AdvertisementStorage.sol");
 var AdvertisementFinance = artifacts.require("./AdvertisementFinance.sol");
 var Advertisement = artifacts.require("./Advertisement.sol");
 
 require('dotenv').config();
 
-module.exports = function(deployer, network) {
+module.exports = async function(deployer, network) {
     switch (network) {
         case 'development':
             AppCoins.deployed()
             .then(function() {
+                console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
                 return AdvertisementStorage.deployed()
             })
             .then(function() {
-                return AdvertisementFinance.deployed()
-            })
-            .then(function() {
+                console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+                return AdvertisementFinance.deployed().catch(console.log)
+            }).then( async function() {
+                console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
                 return deployer.deploy(Advertisement, AppCoins.address, AdvertisementStorage.address,AdvertisementFinance.address);
             });
 
@@ -37,10 +39,15 @@ module.exports = function(deployer, network) {
                     return AdvertisementFinance.deployed()
                 })
                 .then(function() {
+                    return Shares.deployed()
+                })
+                .then(async function() {
+                    await deployer.link(Shares, Advertisement);
                     return deployer.deploy(Advertisement, AppCoins.address, AdvertisementStorage.address,AdvertisementFinance.address);
                 });
 
             } else {
+                await deployer.link(Shares, Advertisement);
                 deployer.deploy(Advertisement, AppCoinsAddress, AdvertisementStorageAddress, AdvertisementFinanceAddress);
             }
 
@@ -61,10 +68,15 @@ module.exports = function(deployer, network) {
                     return AdvertisementFinance.deployed()
                 })
                 .then(function() {
+                    return Shares.deployed()
+                })
+                .then(async function() {
+                    await deployer.link(Shares, Advertisement);
                     return deployer.deploy(Advertisement, AppCoins.address, AdvertisementStorage.address,AdvertisementFinance.address);
                 });
 
             } else {
+                await deployer.link(Shares, Advertisement);
                 deployer.deploy(Advertisement, AppCoinsAddress, AdvertisementStorageAddress, AdvertisementFinanceAddress);
             }
 
@@ -86,11 +98,19 @@ module.exports = function(deployer, network) {
                     return AdvertisementFinance.deployed()
                 })
                 .then(function() {
+                    return Shares.deployed()
+                })
+                .then(async function() {
+                    await deployer.link(Shares, Advertisement);
                     return deployer.deploy(Advertisement, AppCoins.address, AdvertisementStorage.address,AdvertisementFinance.address);
                 });
 
             } else {
-                deployer.deploy(Advertisement, AppCoinsAddress, AdvertisementStorageAddress, AdvertisementFinanceAddress);
+                Shares.deployed()
+                .then(async function() {
+                    await deployer.link(Shares, Advertisement);
+                    deployer.deploy(Advertisement, AppCoinsAddress, AdvertisementStorageAddress, AdvertisementFinanceAddress);
+                })
             }
 
             break;

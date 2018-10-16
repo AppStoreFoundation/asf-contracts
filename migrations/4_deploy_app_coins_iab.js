@@ -5,9 +5,11 @@ require('dotenv').config();
 module.exports = async function(deployer, network) {
     switch (network) {
         case 'development':
-            await deployer.deploy(Shares);
-            await deployer.link(Shares, AppCoinsIAB);
-            await deployer.deploy(AppCoinsIAB);
+            Shares.deployed()
+            .then(async () => {
+                await deployer.link(Shares, AppCoinsIAB);
+                return deployer.deploy(AppCoinsIAB);
+            })
 
             break;
 
@@ -16,7 +18,11 @@ module.exports = async function(deployer, network) {
 
 
             if (!AppCoinsIABAddress) {
-                deployer.deploy(AppCoinsIAB);
+                Shares.deployed()
+                .then(async () => {
+                    await deployer.link(Shares, AppCoinsIAB);
+                    return deployer.deploy(AppCoinsIAB);
+                })
             }
 
             break;
@@ -25,7 +31,11 @@ module.exports = async function(deployer, network) {
             var AppCoinsIABAddress = process.env.IAB_KOVAN_ADDRESS;
 
             if (!AppCoinsAddress) {
-                deployer.deploy(AppCoinsIAB);
+                Shares.deployed()
+                .then(async () => {
+                    await deployer.link(Shares, AppCoinsIAB);
+                    return deployer.deploy(AppCoinsIAB);
+                })                
             }
 
             break;
@@ -34,7 +44,11 @@ module.exports = async function(deployer, network) {
             var AppCoinsIABAddress = process.env.IAB_MAINNET_ADDRESS;
 
             if (!AppCoinsIABAddress) {
-                deployer.deploy(AppCoinsIAB);
+                Shares.deployed()
+                .then(async () => {
+                    await deployer.link(Shares, AppCoinsIAB);
+                    return deployer.deploy(AppCoinsIAB);
+                })
             }
 
             break;
