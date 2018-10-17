@@ -184,15 +184,17 @@ contract('ExtendedFinance', function(accounts) {
         await ExtendedFinanceInstance.increaseBalance(developer, budget,{ from: allowedAddress});
         
         var initcontractBalance = await TestUtils.getBalance(ExtendedFinanceInstance.address);
-        await ExtendedFinanceInstance.pay(developer, accounts[3], budget*0.1, { from: allowedAddress});
+        await ExtendedFinanceInstance.pay(developer, accounts[3], budget*0.5, { from: allowedAddress});
 
         var finalcontractBalance = await TestUtils.getBalance(ExtendedFinanceInstance.address);
         
         expect(initcontractBalance).to.be.equal(finalcontractBalance,"Contract balance should not change after pay function");
 
-        await ExtendedFinanceInstance.withdraw(accounts[3], budget*0.1, { from: allowedAddress });
+        var rewardBalance = JSON.parse(await ExtendedFinanceInstance.getRewardsBalance.call(accounts[3],{ from: allowedAddress}));
+    
+        await ExtendedFinanceInstance.withdrawRewards(accounts[3], rewardBalance, { from: allowedAddress });
         
-        expect(await TestUtils.getBalance(accounts[3])).to.be.equal(budget*0.1);
+        expect(await TestUtils.getBalance(accounts[3])).to.be.equal(rewardBalance);
   
     });
     
@@ -254,7 +256,8 @@ contract('ExtendedFinance', function(accounts) {
         await ExtendedFinanceInstance.increaseBalance(developer, budget,{ from: allowedAddress});
         
         await ExtendedFinanceInstance.pay(developer,developer,reward,{ from: allowedAddress});
-        var internalBalance = JSON.parse(await ExtendedFinanceInstance.getRewardsBalance(developer,{ from: allowedAddress}));
+        var internalBalance = JSON.parse(await ExtendedFinanceInstance.getRewardsBalance.call(developer,{ from: allowedAddress}));
+
         await ExtendedFinanceInstance.withdrawRewards(developer,internalBalance,{ from: allowedAddress});
         expect(await TestUtils.getBalance(developer)).to.be.equal(initDevBalance + reward, 'Developer should receive his share');
     });

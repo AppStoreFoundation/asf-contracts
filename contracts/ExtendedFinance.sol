@@ -11,6 +11,8 @@ to user aquisition campaigns.
 */
 contract ExtendedFinance is BaseFinance {
 
+    mapping ( address => uint256 ) rewardedBalance;
+
     constructor(address _appc) public BaseFinance(_appc){
 
     }
@@ -22,7 +24,7 @@ contract ExtendedFinance is BaseFinance {
         require(balanceUsers[_user] >= _value);
 
         balanceUsers[_user] -= _value;
-        balanceUsers[_destination] += _value;
+        rewardedBalance[_destination] += _value;
     }
 
 
@@ -36,11 +38,14 @@ contract ExtendedFinance is BaseFinance {
     }
 
     function withdrawRewards(address _user, uint256 _value) public onlyOwnerOrAllowed {
-        withdraw(_user, _value);
+        require(rewardedBalance[_user] >= _value);
+
+        appc.transfer(_user, _value);
+        rewardedBalance[_user] += _value;
     }
 
-    function getRewardsBalance(address _user) public view onlyOwnerOrAllowed returns (uint256) {
-        return getUserBalance(_user);
+    function getRewardsBalance(address _user) public onlyOwnerOrAllowed returns (uint256) {
+        return rewardedBalance[_user];
     }
 
 }
