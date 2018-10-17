@@ -382,6 +382,19 @@ contract('ExtendedAdvertisement', function(accounts) {
 
 	})
 
+	it('should allow a whitelisted address to create a campaign in behalf of a user and still withdraw funds from rewards', async function () {
+		var bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000002");
+		var initBalance = await TestUtils.getBalance(accounts[0]);
+		
+		await addInstance.bulkRegisterPoA(bid,0x02,0x02,1);
+		await addInstance.withdraw();
+		var finalBalance = await TestUtils.getBalance(accounts[0]);
+		expect(finalBalance).to.be.equal(initBalance-campaignPrice,"Balance was not withdrawn to user account");
+		userBalanceInContract = JSON.parse(await addInstance.getBalance());
+		expect(userBalanceInContract).to.be.equal(campaignBudget,"User should still have balance in contract for camapaigns");
+		
+	});
+
 	it('should allow to withdraw a balance', async function () {
 		var bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000002");
 		var initBalance = await TestUtils.getBalance(accounts[2]);
@@ -395,9 +408,7 @@ contract('ExtendedAdvertisement', function(accounts) {
 					expect(finalContractBalance).to.equal(contractBalance-campaignPrice,"Contract balance was not updated");
 					expect(finalBalance).to.equal(initBalance+campaignPrice,"Balance was not withdrawn to user account");
 				});
-
 			});
-
 
 	});
 });
