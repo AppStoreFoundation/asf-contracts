@@ -3,13 +3,14 @@ pragma solidity ^0.4.24;
 import "./Base/StorageUser.sol";
 import "./Base/Whitelist.sol";
 import "./Base/BaseAdvertisement.sol";
+import "./Base/Signature.sol";
 import "./ExtendedAdvertisementStorage.sol";
 import "./ExtendedFinance.sol";
 
 
-contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
+contract ExtendedAdvertisement is BaseAdvertisement, Whitelist, Signature {
 
-    event BulkPoARegistered(bytes32 bidId,bytes32 rootHash,bytes32 signedrootHash,uint256 newPoAs,uint256 convertedPoAs);
+    event BulkPoARegistered(bytes32 bidId, bytes32 rootHash, bytes signedrootHash, uint256 newPoAs, uint256 convertedPoAs);
     event CampaignInformation
         (
             bytes32 bidId,
@@ -21,7 +22,7 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
             string endpoint
     );
 
-    constructor(address _addrAppc, address _addrAdverStorage, address _addrAdverFinance) public 
+    constructor(address _addrAppc, address _addrAdverStorage, address _addrAdverFinance) public
         BaseAdvertisement(_addrAppc,_addrAdverStorage,_addrAdverFinance) {
     }
 
@@ -54,11 +55,11 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
         uint startDate,
         uint endDate,
         string endPoint)
-        external 
+        external
         {
-        
+
         CampaignLibrary.Campaign memory newCampaign = _generateCampaign(packageName, countries, vercodes, price, budget, startDate, endDate);
-        
+
         _getBidIdList().push(newCampaign.bidId);
 
         ExtendedAdvertisementStorage(address(_getStorage())).setCampaign(
@@ -79,14 +80,14 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
             countries,
             vercodes,
             endPoint);
-    }   
+    }
 
     /**
     @notice Function to submit in bulk PoAs
     @dev
-        This function can only be called by whitelisted addresses and provides a cost efficient 
-        method to submit a batch of validates PoAs at once. This function emits a PoaRegistered 
-        event containing the campaign id, root hash, signed root hash, number of new hashes since 
+        This function can only be called by whitelisted addresses and provides a cost efficient
+        method to submit a batch of validates PoAs at once. This function emits a PoaRegistered
+        event containing the campaign id, root hash, signed root hash, number of new hashes since
         the last submission and the effective number of conversions.
 
     @param bidId Campaign id for which the Proof of attention root hash refferes to
@@ -94,10 +95,18 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
     @param signedRootHash Root hash signed by the signing service of the campaign
     @param newHashes Number of new proof of attention hashes since last submission
     */
-    function bulkRegisterPoA(bytes32 bidId,bytes32 rootHash,bytes32 signedRootHash, uint256 newHashes) 
-        public 
+    function bulkRegisterPoA(bytes32 bidId, bytes32 rootHash, bytes signedRootHash, uint256 newHashes)
+        public
         onlyIfWhitelisted("createCampaign",msg.sender)
         {
+
+        address addressSig = recoverSigner(rootHash, signedRootHash);
+
+        if (msg.sender != addressSig) {
+            emit Error("bulkRegisterPoA","Invalid signature");
+            return;
+        }
+
         uint price = _getStorage().getCampaignPriceById(bidId);
         uint budget = _getStorage().getCampaignBudgetById(bidId);
         address owner = _getStorage().getCampaignOwnerById(bidId);
@@ -128,12 +137,12 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
     /**
     @notice Function to withdraw PoA convertions
     @dev
-        This function is restricted to addresses allowed to submit bulk PoAs and enable those 
+        This function is restricted to addresses allowed to submit bulk PoAs and enable those
         addresses to withdraw funds previously collected by bulk PoA submissions
     */
 
-    function withdraw() 
-        public 
+    function withdraw()
+        public
         onlyIfWhitelisted("withdraw",msg.sender)
         {
         uint256 balance = _getFinance().getUserBalance(msg.sender);
@@ -141,11 +150,11 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
     }
 
     function getBalance()
-        public 
+        public
         onlyIfWhitelisted("withdraw",msg.sender)
         returns (uint256 _balance)
         {
-        return _getFinance().getUserBalance(msg.sender);    
+        return _getFinance().getUserBalance(msg.sender);
     }
 
     function getEndPointOfCampaign (bytes32 bidId) public view returns (string url){
