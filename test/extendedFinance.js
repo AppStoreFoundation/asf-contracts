@@ -241,5 +241,22 @@ contract('ExtendedFinance', function(accounts) {
         expect(await TestUtils.getBalance(developer)).to.be.equal(initDevBalance + budget, 'Developer should receive his share');
 
     })
+
+    it('should allow a user to withdraw rewards without taking funds destined to user\'s campaigns',async function(){
+        var allowedAddress = accounts[1];
+        var budget = 50000000000000000;
+        var reward = 5000000000000000;
+        var developer = accounts[4];
+        var initDevBalance =await TestUtils.getBalance(developer);
+
+        await ExtendedFinanceInstance.setAllowedAddress(allowedAddress);
+        await appcInstance.transfer(ExtendedFinanceInstance.address,budget);
+        await ExtendedFinanceInstance.increaseBalance(developer, budget,{ from: allowedAddress});
+        
+        await ExtendedFinanceInstance.pay(developer,developer,reward,{ from: allowedAddress});
+        var internalBalance = JSON.parse(await ExtendedFinanceInstance.getRewardsBalance(developer,{ from: allowedAddress}));
+        await ExtendedFinanceInstance.withdrawRewards(developer,internalBalance,{ from: allowedAddress});
+        expect(await TestUtils.getBalance(developer)).to.be.equal(initDevBalance + reward, 'Developer should receive his share');
+    });
     
 });

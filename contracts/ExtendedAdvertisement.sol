@@ -23,6 +23,7 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
 
     constructor(address _addrAppc, address _addrAdverStorage, address _addrAdverFinance) public 
         BaseAdvertisement(_addrAppc,_addrAdverStorage,_addrAdverFinance) {
+        addAddressToWhitelist(msg.sender);
     }
 
 

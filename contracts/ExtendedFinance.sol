@@ -35,4 +35,12 @@ contract ExtendedFinance is BaseFinance {
 
     }
 
+    function withdrawRewards(address _user, uint256 _value) public onlyOwnerOrAllowed {
+        withdraw(_user, _value);
+    }
+
+    function getRewardsBalance(address _user) public view onlyOwnerOrAllowed returns (uint256) {
+        return getUserBalance(_user);
+    }
+
 }
