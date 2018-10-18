@@ -32,8 +32,8 @@ contract ExtendedFinance is BaseFinance {
 
         require(balanceUsers[_user] >= _value);
 
-        appc.transfer(_user, _value);
         balanceUsers[_user] -= _value;
+        appc.transfer(_user, _value);
 
     }
 
@@ -47,8 +47,8 @@ contract ExtendedFinance is BaseFinance {
     function withdrawRewards(address _user, uint256 _value) public onlyOwnerOrAllowed {
         require(rewardedBalance[_user] >= _value);
 
-        appc.transfer(_user, _value);
         rewardedBalance[_user] -= _value;
+        appc.transfer(_user, _value);
     }
     /**
     @notice Get user's rewards balance
