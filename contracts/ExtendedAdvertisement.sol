@@ -102,8 +102,6 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist, Signature {
 
         address addressSig = recoverSigner(rootHash, signedRootHash);
 
-        /* require (msg.sender == addressSig); */
-
         if (msg.sender != addressSig) {
             emit Error("bulkRegisterPoA","Invalid signature");
             return;

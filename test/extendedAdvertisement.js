@@ -291,7 +291,22 @@ contract('ExtendedAdvertisement', function(accounts) {
 		expect(JSON.parse(eventLog.args.convertedPoAs)).to.equal(0,'No PoA should be converted');
 	});
 
-	it('should revert if PoA root hash is incorrectly signed');
+	it('should revert if PoA root hash is incorrectly signed', async () => {
+
+
+		await addInstance.cancelCampaign(examplePoA.bid);
+
+		var events = addInstance.allEvents();
+
+		await addInstance.bulkRegisterPoA(examplePoA.bid, objSign1.messageHash, objSign1.signature, 1, {from: accounts[0]});
+
+		var eventLog = await new Promise(function (resolve,reject){
+			events.watch(function(error,log){ events.stopWatching(); resolve(log); });
+		})
+
+		expect(eventLog.event).to.equal("Error","Invalid signature");
+	});
+
 
 	it('should upgrade advertisement storage and cancel all campaigns', async function() {
 		var user0Balance = await TestUtils.getBalance(accounts[0]);
