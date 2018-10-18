@@ -140,10 +140,23 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
         uint256 balance = ExtendedFinance(address(_getFinance())).getRewardsBalance(msg.sender);
         ExtendedFinance(address(_getFinance())).withdrawRewards(msg.sender,balance);
     }
-
+    /**
+    @notice Get user's balance of funds obtainded by rewards
+    @dev
+        Anyone can call this function and get the rewards balance of a certain user.
+    @param _user Address from which the balance refers to
+    @return { "_balance" : "" } */
     function getRewardsBalance(address _user) public view returns (uint256 _balance) {
         return ExtendedFinance(address(_getFinance())).getRewardsBalance(_user);
     }
+
+    /**
+    @notice Returns the signing Endpoint of a camapign
+    @dev
+        Function returning the Webservice URL responsible for validating and signing a PoA
+    @param bidId Campaign id to which the Endpoint is associated
+    @return { "url" : "Validation and signature endpoint"}
+    */
 
     function getEndPointOfCampaign (bytes32 bidId) public view returns (string url){
         return ExtendedAdvertisementStorage(address(_getStorage())).getCampaignEndPointById(bidId);
