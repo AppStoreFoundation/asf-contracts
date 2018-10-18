@@ -250,16 +250,26 @@ contract('ExtendedFinance', function(accounts) {
         var reward = 5000000000000000;
         var developer = accounts[4];
         var initDevBalance =await TestUtils.getBalance(developer);
-
+        var initDevCampaignBalance;
+        
         await ExtendedFinanceInstance.setAllowedAddress(allowedAddress);
         await appcInstance.transfer(ExtendedFinanceInstance.address,budget);
         await ExtendedFinanceInstance.increaseBalance(developer, budget,{ from: allowedAddress});
         
         await ExtendedFinanceInstance.pay(developer,developer,reward,{ from: allowedAddress});
+        
+        initDevCampaignBalance = JSON.parse(await ExtendedFinanceInstance.getUserBalance(developer,{from: allowedAddress}));
         var internalBalance = JSON.parse(await ExtendedFinanceInstance.getRewardsBalance.call(developer,{ from: allowedAddress}));
-
+        
         await ExtendedFinanceInstance.withdrawRewards(developer,internalBalance,{ from: allowedAddress});
+        
+        var internalfinalBalance = JSON.parse(await ExtendedFinanceInstance.getRewardsBalance.call(developer,{ from: allowedAddress}));
+        var finalDevCampaignBalance = JSON.parse(await ExtendedFinanceInstance.getUserBalance(developer,{from: allowedAddress}));
+        
         expect(await TestUtils.getBalance(developer)).to.be.equal(initDevBalance + reward, 'Developer should receive his share');
+        expect(internalfinalBalance).to.be.equal(0,'All rewards should have been withdrawn');
+        expect(initDevCampaignBalance).to.be.not.equal(0,'Developer\'s campaign balance should not be 0');
+        expect(initDevCampaignBalance).to.be.equal(finalDevCampaignBalance,'Developer\'s campaign balance should not be changed');
     });
     
 });
