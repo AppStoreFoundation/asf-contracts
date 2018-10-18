@@ -41,7 +41,7 @@ contract ExtendedFinance is BaseFinance {
         require(rewardedBalance[_user] >= _value);
 
         appc.transfer(_user, _value);
-        rewardedBalance[_user] += _value;
+        rewardedBalance[_user] -= _value;
     }
 
     function getRewardsBalance(address _user) public onlyOwnerOrAllowed returns (uint256) {
