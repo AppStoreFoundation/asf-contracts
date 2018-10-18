@@ -42,15 +42,23 @@ contract('ExtendedFinance', function(accounts) {
 
 
     it('should store a dev balance if it is done from a valid address', async function () {
-        var allowedAddress = accounts[1];
+        var allowedAddress = accounts[0];
         var budget = 50000000000000000;
         var developer = accounts[2];
-
+        var initBalance;
+        var finalBalance;
+        var initContractBalance = await TestUtils.getBalance(ExtendedFinanceInstance.address);
+        var finalContractBalance;
+        
         await ExtendedFinanceInstance.setAllowedAddress(allowedAddress);
-
+        initBalance = JSON.parse(await ExtendedFinanceInstance.getUserBalance.call(developer,{from: allowedAddress}));
         await appcInstance.transfer(ExtendedFinanceInstance.address, budget, { from: allowedAddress});
-
+        
         await ExtendedFinanceInstance.increaseBalance(developer, budget,{ from: allowedAddress});
+        finalContractBalance = await TestUtils.getBalance(ExtendedFinanceInstance.address);
+        finalBalance = JSON.parse(await ExtendedFinanceInstance.getUserBalance.call(developer,{from: allowedAddress}));
+        expect(finalBalance).to.be.equal(initBalance+budget,"Balance was not updated");
+        expect(finalContractBalance).to.be.equal(initContractBalance+budget,"Contract balance should have been updated");
 
     })
     it('should revert if the balance is updated by anyone other than the Advertisement Contract', async function () {
@@ -191,10 +199,12 @@ contract('ExtendedFinance', function(accounts) {
         expect(initcontractBalance).to.be.equal(finalcontractBalance,"Contract balance should not change after pay function");
 
         var rewardBalance = JSON.parse(await ExtendedFinanceInstance.getRewardsBalance.call(accounts[3],{ from: allowedAddress}));
-    
+        
         await ExtendedFinanceInstance.withdrawRewards(accounts[3], rewardBalance, { from: allowedAddress });
         
-        expect(await TestUtils.getBalance(accounts[3])).to.be.equal(rewardBalance);
+        var finalrewardBalance = JSON.parse(await ExtendedFinanceInstance.getRewardsBalance.call(accounts[3],{ from: allowedAddress}));
+        expect(finalrewardBalance).to.be.equal(0,"Reward balance not updated")
+        expect(await TestUtils.getBalance(accounts[3])).to.be.equal(rewardBalance,"Rewards were not transfered");
   
     });
     
