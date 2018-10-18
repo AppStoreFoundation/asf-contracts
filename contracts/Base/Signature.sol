@@ -26,7 +26,7 @@ contract Signature {
     }
 
     function recoverSigner(bytes32 message, bytes sig)
-        internal
+        public
         pure
         returns (address)
         {
