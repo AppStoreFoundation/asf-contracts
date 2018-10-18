@@ -137,16 +137,12 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
         public 
         onlyIfWhitelisted("withdraw",msg.sender)
         {
-        uint256 balance = _getFinance().getUserBalance(msg.sender);
-        _getFinance().withdraw(msg.sender,balance);
+        uint256 balance = ExtendedFinance(address(_getFinance())).getRewardsBalance(msg.sender);
+        ExtendedFinance(address(_getFinance())).withdrawRewards(msg.sender,balance);
     }
 
-    function getBalance()
-        public 
-        onlyIfWhitelisted("withdraw",msg.sender)
-        returns (uint256 _balance)
-        {
-        return _getFinance().getUserBalance(msg.sender);    
+    function getRewardsBalance(address _user) public view returns (uint256 _balance) {
+        return ExtendedFinance(address(_getFinance())).getRewardsBalance(_user);
     }
 
     function getEndPointOfCampaign (bytes32 bidId) public view returns (string url){
