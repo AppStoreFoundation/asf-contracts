@@ -142,30 +142,28 @@ contract BaseAdvertisement is StorageUser,Ownable {
         require(endDate >= startDate);
 
 
-
         //Transfers the budget to contract address
-        if(appc.allowance(msg.sender, address(this)) < budget){
+        if(appc.allowance(msg.sender, address(this)) >= budget){
+            appc.transferFrom(msg.sender, address(advertisementFinance), budget);
+
+            advertisementFinance.increaseBalance(msg.sender,budget);
+
+            uint newBidId = bytesToUint(lastBidId);
+            lastBidId = uintToBytes(++newBidId);
+            
+
+            CampaignLibrary.Campaign memory newCampaign;
+            newCampaign.price = price;
+            newCampaign.startDate = startDate;
+            newCampaign.endDate = endDate;
+            newCampaign.budget = budget;
+            newCampaign.owner = msg.sender;
+            newCampaign.valid = true;
+            newCampaign.bidId = lastBidId;
+        } else {
             emit Error("createCampaign","Not enough allowance");
-            return;
         }
-
-        appc.transferFrom(msg.sender, address(advertisementFinance), budget);
-
-        advertisementFinance.increaseBalance(msg.sender,budget);
-
-        uint newBidId = bytesToUint(lastBidId);
-        lastBidId = uintToBytes(++newBidId);
         
-
-        CampaignLibrary.Campaign memory newCampaign;
-        newCampaign.price = price;
-        newCampaign.startDate = startDate;
-        newCampaign.endDate = endDate;
-        newCampaign.budget = budget;
-        newCampaign.owner = msg.sender;
-        newCampaign.valid = true;
-        newCampaign.bidId = lastBidId;
-
         return newCampaign;
     }
 
