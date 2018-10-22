@@ -58,6 +58,11 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
         {
         
         CampaignLibrary.Campaign memory newCampaign = _generateCampaign(packageName, countries, vercodes, price, budget, startDate, endDate);
+
+        if(newCampaign.owner == 0x0){ 
+            // campaign was not generated correctly (revert)
+            return;
+        }
         
         _getBidIdList().push(newCampaign.bidId);
 
