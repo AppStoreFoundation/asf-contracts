@@ -1,7 +1,7 @@
 pragma solidity ^0.4.19;
 
 import "./Base/Whitelist.sol";
-
+import { Shares } from "./lib/Shares.sol";
 
 contract AppCoins {
     mapping (address => mapping (address => uint256)) public allowance;
@@ -47,10 +47,6 @@ contract AppCoinsIABInterface {
 
 
 contract AppCoinsIAB is AppCoinsIABInterface, Whitelist {
-
-    uint public dev_share = 85;
-    uint public appstore_share = 10;
-    uint public oem_share = 5;
 
     event Buy(string packageName, string _sku, uint _amount, address _from, address _dev, address _appstore, address _oem, bytes2 countryCode);
     event OffChainBuy(address _wallet, bytes32 _rootHash);
@@ -116,9 +112,9 @@ contract AppCoinsIAB is AppCoinsIABInterface, Whitelist {
         }
 
         uint[] memory amounts = new uint[](3);
-        amounts[0] = division(_amount * dev_share, 100);
-        amounts[1] = division(_amount * appstore_share, 100);
-        amounts[2] = division(_amount * oem_share, 100);
+        amounts[0] = division(_amount * Shares.getDevShare(), 100);
+        amounts[1] = division(_amount * Shares.getAppStoreShare(), 100);
+        amounts[2] = division(_amount * Shares.getOEMShare(), 100);
 
         uint remaining = _amount - (amounts[0] + amounts[1] + amounts[2]);
 
