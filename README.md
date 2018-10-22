@@ -71,7 +71,7 @@ $  npm install
 
 6. Start Ganache/TestRPC
 ```sd
-$ ganache-cli
+$ npm run ganache-cli
 ```  
 
 7. Deploy the contracts into the test network:  

@@ -11,6 +11,7 @@
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
     "dotenv": "^5.0.1",
+    "ganache-cli": "^6.1.8",
     "openzeppelin-solidity": "1.12.0",
     "pre-commit": "^1.2.2",
     "solhint": "^1.2.1",
@@ -18,7 +19,7 @@
     "truffle": "^4.1.14",
     "truffle-hdwallet-provider": "0.0.3",
     "typedarray-to-buffer": "^3.1.5",
-    "web3": "^1.0.0-beta.35"
+    "web3": "^1.0.0-beta.36"
   },
   "repository": {
     "type": "git",
@@ -35,7 +36,9 @@
     "address": "truffle exec scripts/address-proxy.js",
     "address:ropsten": "truffle exec scripts/address-proxy.js --network ropsten",
     "address:main": "truffle exec scripts/address-proxy.js --network main",
-    "lint": "./scripts/lint.sh"
+    "lint": "./scripts/lint.sh",
+    "ganache-cli": "ganache-cli --gasLimit 0xfffffffffff --account='0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501200,1000000000000000000000000' --account='0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501201,1000000000000000000000000' --account='0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501202,1000000000000000000000000' --account='0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501203,1000000000000000000000000' --account='0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501204,1000000000000000000000000' --account='0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501205,1000000000000000000000000' --account='0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501206,1000000000000000000000000' --account='0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501207,1000000000000000000000000' --account='0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501208,1000000000000000000000000' --account='0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501209,1000000000000000000000000'"
+
   },
   "keywords": [
     "asf",
