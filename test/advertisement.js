@@ -225,7 +225,38 @@ contract('Advertisement', function(accounts) {
 		expect(JSON.parse(budget)).to.be.equal(campaignBudget,"Campaign budget is incorrect");
 		expect(await TestUtils.getBalance(adFinanceInstance.address)).to.be.equal(contractBalance+campaignBudget,"AppCoins are not being stored on AdvertisementFinance.");
 		expect(await TestUtils.getBalance(addInstance.address)).to.be.equal(0,"AppCoins should not be stored on Advertisement contract.");
-  	});
+	});
+	  
+	it('should emit an error event if no approval was issued before creating a campaign', async function() {
+		var bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000003");
+  		var countryList = []
+  		var contractBalance = await TestUtils.getBalance(adFinanceInstance.address);
+
+    	countryList.push(convertCountryCodeToIndex("PT"))
+		countryList.push(convertCountryCodeToIndex("GB"))
+		countryList.push(convertCountryCodeToIndex("FR"))
+		countryList.push(convertCountryCodeToIndex("PA"))
+
+		var eventsInfo = addInstance.allEvents();
+		var packageName1 = "com.instagram.android";
+
+		await addInstance.createCampaign(packageName1,countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980);
+		var eventNumber = -1;
+		var eventInfoLog = await new Promise(
+			function(resolve, reject){
+			eventsInfo.watch(function(error, log){ 
+				eventsInfo.stopWatching();
+				if(log.logIndex > eventNumber){
+					eventNumber = log.logIndex;
+				}
+				resolve(log); 
+			});
+		});
+
+		assert.equal(eventNumber,0,"Only 1 event should be emmited");
+		assert.equal(eventInfoLog.event,"Error","Event must be a Error event");
+		assert.equal(eventInfoLog.args.message,"Not enough allowance","Error message should be 'Not enough allowance'.")
+	})
 
 	it('should cancel a campaign as contract owner', async function () {
 		var bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000002");
