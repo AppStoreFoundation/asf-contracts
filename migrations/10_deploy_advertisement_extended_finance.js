@@ -11,7 +11,6 @@ module.exports = async function(deployer, network) {
                 return deployer.deploy(ExtendedFinance, AppCoins.address)
             })
 
-
             break;
 
         case 'ropsten':
