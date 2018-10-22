@@ -11,6 +11,8 @@ to user aquisition campaigns.
 */
 contract ExtendedFinance is BaseFinance {
 
+    mapping ( address => uint256 ) rewardedBalance;
+
     constructor(address _appc) public BaseFinance(_appc){
 
     }
@@ -22,7 +24,7 @@ contract ExtendedFinance is BaseFinance {
         require(balanceUsers[_user] >= _value);
 
         balanceUsers[_user] -= _value;
-        balanceUsers[_destination] += _value;
+        rewardedBalance[_destination] += _value;
     }
 
 
@@ -30,9 +32,33 @@ contract ExtendedFinance is BaseFinance {
 
         require(balanceUsers[_user] >= _value);
 
-        appc.transfer(_user, _value);
         balanceUsers[_user] -= _value;
+        appc.transfer(_user, _value);
 
+    }
+
+    /**
+    @notice Withdraws user's rewards
+    @dev
+        Function to transfer a certain user's rewards to his address 
+    @param _user Address who's rewards will be withdrawn
+    @param _value Value of the withdraws which will be transfered to the user 
+    */
+    function withdrawRewards(address _user, uint256 _value) public onlyOwnerOrAllowed {
+        require(rewardedBalance[_user] >= _value);
+
+        rewardedBalance[_user] -= _value;
+        appc.transfer(_user, _value);
+    }
+    /**
+    @notice Get user's rewards balance
+    @dev
+        Function returning a user's rewards balance not yet withdrawn
+    @param _user Address of the user
+    @return { "_balance" : "Rewards balance of the user" }
+    */
+    function getRewardsBalance(address _user) public onlyOwnerOrAllowed returns (uint256 _balance) {
+        return rewardedBalance[_user];
     }
 
 }

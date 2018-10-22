@@ -27,8 +27,10 @@ var startDate;
 var endDate;
 var packageName;
 
+var privateKey0;
 var privateKey1;
 var privateKey2;
+var objSign0;
 var objSign1;
 var objSign2;
 
@@ -58,7 +60,7 @@ contract('ExtendedAdvertisement', function(accounts) {
   		TestUtils.setAppCoinsInstance(appcInstance);
   		TestUtils.setContractInstance(addInstance);
 
-  		campaignPrice = 50000000000000000;
+  		campaignPrice = 500000000000000000;
   		campaignBudget = 1000000000000000000;
 
   		var countryList = []
@@ -106,12 +108,13 @@ contract('ExtendedAdvertisement', function(accounts) {
   		walletName = "com.asfoundation.wallet.dev";
 
         // New custom account that will sign the hashRoot
+        privateKey0 = "0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501200";
         privateKey1 = "0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501201";
         privateKey2 = "0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501202";
 
         const msg = "Some data to be tested";
 
-
+        objSign0 = await web3.eth.accounts.sign(msg, privateKey0);
         objSign1 = await web3.eth.accounts.sign(msg, privateKey1);
         objSign2 = await web3.eth.accounts.sign(msg, privateKey2);
 
@@ -263,7 +266,7 @@ contract('ExtendedAdvertisement', function(accounts) {
 		await addInstance.addAddressToWhitelist(accounts[2]);
 		return addInstance.bulkRegisterPoA.sendTransaction(bid,objSign2.messageHash, objSign2.signature,1,{from: accounts[2]}).then( async () => {
 			var contractFinalBalance = JSON.parse(await TestUtils.getBalance(adFinanceInstance.address));
-			var userVirtualBalance = JSON.parse(await addInstance.getBalance.call({from: accounts[2]}));
+			var userVirtualBalance = JSON.parse(await addInstance.getRewardsBalance.call(accounts[2],{from: accounts[2]}));
 			var campaignFinalBudget = JSON.parse(await addInstance.getBudgetOfCampaign.call(examplePoA.bid));
 
 			expect(contractFinalBalance).to.equal(contractBalance,"No appcoins should leave the finance contract");
@@ -357,9 +360,9 @@ contract('ExtendedAdvertisement', function(accounts) {
 		await AdvertisementStorageInstance.addAddressToWhitelist(addInstance.address);
 		await addInstance.addAddressToWhitelist(accounts[2]);
 
-		var initBalance = JSON.parse(await addInstance.getBalance.call({from: accounts[2]}));
-		return addInstance.bulkRegisterPoA.sendTransaction(bid,objSign2.messageHash, objSign2.signature,1,{from: accounts[2]}).then( async instance => {
-			var balance = JSON.parse(await addInstance.getBalance.call({from: accounts[2]}));
+		var initBalance = JSON.parse(await addInstance.getRewardsBalance.call(accounts[2],{from: accounts[2]}));
+        return addInstance.bulkRegisterPoA.sendTransaction(bid,objSign2.messageHash, objSign2.signature,1,{from: accounts[2]}).then( async instance => {
+			var balance = JSON.parse(await addInstance.getRewardsBalance.call(accounts[2],{from: accounts[2]}));
 			expect(balance).to.be.equal(campaignPrice+initBalance,'Campaign price was not transfered');
 		})
 	})
@@ -414,6 +417,17 @@ contract('ExtendedAdvertisement', function(accounts) {
 
 	})
 
+	it('should allow a whitelisted address to create a campaign in behalf of a user and still withdraw funds from rewards', async function () {
+		var bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000002");
+		var initBalance = await TestUtils.getBalance(accounts[0]);
+
+		await addInstance.bulkRegisterPoA.sendTransaction(bid,objSign0.messageHash, objSign0.signature,1)
+		await addInstance.withdraw();
+		var finalBalance = await TestUtils.getBalance(accounts[0]);
+
+		expect(finalBalance).to.be.equal(initBalance+campaignPrice,"Balance was not withdrawn to user account");
+	});
+
 	it('should allow to withdraw a balance', async function () {
 		var bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000002");
 		var initBalance = await TestUtils.getBalance(accounts[2]);
@@ -427,7 +441,6 @@ contract('ExtendedAdvertisement', function(accounts) {
 					expect(finalContractBalance).to.equal(contractBalance-campaignPrice,"Contract balance was not updated");
 					expect(finalBalance).to.equal(initBalance+campaignPrice,"Balance was not withdrawn to user account");
 				});
-
 			});
 	});
 });

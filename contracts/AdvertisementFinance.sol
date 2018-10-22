@@ -20,8 +20,8 @@ contract AdvertisementFinance is BaseFinance {
 
         require(balanceUsers[_user] >= _value);
 
-        appc.transfer( _destination, _value);
         balanceUsers[_user] -= _value;
+        appc.transfer( _destination, _value);
     }
 
 
@@ -29,8 +29,8 @@ contract AdvertisementFinance is BaseFinance {
 
         require(balanceUsers[_user] >= _value);
 
-        appc.transfer(_user, _value);
         balanceUsers[_user] -= _value;
+        appc.transfer(_user, _value);
     }
 
 }
