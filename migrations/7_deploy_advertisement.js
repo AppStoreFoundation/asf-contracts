@@ -45,8 +45,11 @@ module.exports = async function(deployer, network) {
                 });
 
             } else {
-                await deployer.link(Shares, Advertisement);
-                deployer.deploy(Advertisement, AppCoinsAddress, AdvertisementStorageAddress, AdvertisementFinanceAddress);
+                Shares.deployed().then(function() {
+                    deployer.link(Shares, Advertisement).then(function() {
+                        deployer.deploy(Advertisement, AppCoinsAddress, AdvertisementStorageAddress, AdvertisementFinanceAddress);
+                    })
+                })
             }
 
             break;
@@ -104,10 +107,10 @@ module.exports = async function(deployer, network) {
                 });
 
             } else {
-                Shares.deployed()
-                .then(async function() {
-                    await deployer.link(Shares, Advertisement);
-                    deployer.deploy(Advertisement, AppCoinsAddress, AdvertisementStorageAddress, AdvertisementFinanceAddress);
+                Shares.deployed().then(function() {
+                    deployer.link(Shares, Advertisement).then(function() {
+                        deployer.deploy(Advertisement, AppCoinsAddress, AdvertisementStorageAddress, AdvertisementFinanceAddress);
+                    })
                 })
             }
 

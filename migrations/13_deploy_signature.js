@@ -1,36 +1,36 @@
-var Shares = artifacts.require('./lib/Shares.sol');
+var Signature = artifacts.require('./Base/Signature.sol');
 require('dotenv').config();
 
 module.exports = async function(deployer, network) {
     switch (network) {
         case 'development':
-            deployer.deploy(Shares);
+            deployer.deploy(Signature);
             break;
 
         case 'ropsten':
-            var SharesAddress = process.env.SHARES_ROPSTEN_ADDRESS;
+            var SignatureAddress = process.env.SIGNATURE_ROPSTEN_ADDRESS;
 
 
-            if (!SharesAddress.startsWith("0x")) {
+            if (!SignatureAddress.startsWith("0x")) {
                 deployer.deploy(Signature);
             }
 
             break;
 
         case 'kovan':
-            var SharesAddress = process.env.SHARES_KOVAN_ADDRESS;
+            var SignatureAddress = process.env.SIGNATURE_KOVAN_ADDRESS;
 
 
-            if (!SharesAddress.startsWith("0x")) {
+            if (!SignatureAddress.startsWith("0x")) {
                 deployer.deploy(Signature);
             }
-
+            
             break;
 
         case 'main':
-            var SharesAddress = process.env.SHARES_MAINNET_ADDRESS;
+            var SignatureAddress = process.env.SIGNATURE_MAINNET_ADDRESS;
 
-            if (!SharesAddress.startsWith("0x")) {
+            if (!SignatureAddress.startsWith("0x")) {
                 deployer.deploy(Signature);
             }
 

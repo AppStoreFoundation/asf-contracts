@@ -125,7 +125,7 @@ contract('ExtendedAdvertisement', function(accounts) {
   		var countryList = []
   		var contractBalance = await TestUtils.getBalance(adFinanceInstance.address);
 
-    	countryList.push(convertCountryCodeToIndex("PT"))
+		countryList.push(convertCountryCodeToIndex("PT"))
 		countryList.push(convertCountryCodeToIndex("GB"))
 		countryList.push(convertCountryCodeToIndex("FR"))
 		countryList.push(convertCountryCodeToIndex("PA"))
@@ -146,7 +146,7 @@ contract('ExtendedAdvertisement', function(accounts) {
 				function(resolve, reject){
 		        eventsInfo.watch(function(error, log){ eventsInfo.stopWatching(); resolve(log); });
 		    });
-		
+
 	    assert.equal(eventStorageLog.event,"CampaignCreated", "Event must be a CampaignCreated event");
 	    assert.equal(eventStorageLog.args.bidId,bid,"BidId on campaign create event is not correct");
 	    assert.equal(eventStorageLog.args.price,campaignPrice,"Price on campaign create event is not correct");
@@ -161,46 +161,13 @@ contract('ExtendedAdvertisement', function(accounts) {
 	    assert.equal(eventInfoLog.args.countries[0],countryList[0],"Countries 1 on campaign info event are not correct");
 	    assert.equal(eventInfoLog.args.countries[1],countryList[1],"Countries 2 on campaign info event are not correct");
 	    assert.equal(eventInfoLog.args.countries[2],countryList[2],"Countries 3 on campaign info event are not correct");
-	
+
 		var budget = await addInstance.getBudgetOfCampaign.call(bid);
 
 		expect(JSON.parse(budget)).to.be.equal(campaignBudget,"Campaign budget is incorrect");
 		expect(await TestUtils.getBalance(adFinanceInstance.address)).to.be.equal(contractBalance+campaignBudget,"AppCoins are not being stored on AdvertisementFinance.");
 		expect(await TestUtils.getBalance(addInstance.address)).to.be.equal(0,"AppCoins should not be stored on ExtendedAdvertisement. contract.");
   	});
-	
-	it('should emit an error event if no approval was issued before creating a campaign', async function() {
-		var bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000003");
-  		var countryList = []
-  		var contractBalance = await TestUtils.getBalance(adFinanceInstance.address);
-
-    	countryList.push(convertCountryCodeToIndex("PT"))
-		countryList.push(convertCountryCodeToIndex("GB"))
-		countryList.push(convertCountryCodeToIndex("FR"))
-		countryList.push(convertCountryCodeToIndex("PA"))
-
-		var eventsInfo = addInstance.allEvents();
-		var packageName1 = "com.instagram.android";
-
-		await addInstance.createCampaign(packageName1,countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980, "appcoins.io");
-		
-		var eventNumber = -1;
-		var eventInfoLog = await new Promise(
-			function(resolve, reject){
-			eventsInfo.watch(function(error, log){ 
-				eventsInfo.stopWatching(); 
-				if(log.logIndex > eventNumber){
-					eventNumber = log.logIndex;
-				}
-				resolve(log); 
-			});
-		});
-
-		assert.equal(eventNumber,0,"Only 1 event should be emmited");
-		assert.equal(eventInfoLog.event,"Error","Event must be a Error event");
-		assert.equal(eventInfoLog.args.message,"Not enough allowance","Error message should be 'Not enough allowance'.")
-
-	})
 
 	it('should cancel a campaign as contract owner', async function () {
 		var bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000002");
