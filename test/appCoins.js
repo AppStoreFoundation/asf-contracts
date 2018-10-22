@@ -7,7 +7,6 @@ contract('Appcoins', (accounts) => {
             return instance.totalSupply({from: accounts[0]});
         })
         .then(result => {
-            //console.log(result);
             assert.true();
         })
         .catch(error => {
@@ -50,7 +49,6 @@ contract('Appcoins', (accounts) => {
             assert.fail();
         })
         .catch(error => {
-            //console.log(error.message);
             assert.equal(error.message, "VM Exception while processing transaction: revert", "Got a different error that what was expected");
         });
     });

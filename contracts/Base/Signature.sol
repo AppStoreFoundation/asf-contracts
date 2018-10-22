@@ -1,7 +1,24 @@
 pragma solidity ^0.4.24;
 
+/**
+@title AppCoinsTimelock
+@author App Store Foundation
+@dev Signature contract
+*
+*/
 contract Signature {
 
+    /**
+    @notice splitSignature
+    @dev
+        Based on a signature Sig (bytes32), returns the r, s, v
+    @param sig Signature
+    @return {
+        "uint8" : "recover Id",
+        "bytes32" : "Output of the ECDSA signature",
+        "bytes32" : "Output of the ECDSA signature",
+    }
+    */
     function splitSignature(bytes sig)
         internal
         pure
@@ -25,6 +42,16 @@ contract Signature {
         return (v, r, s);
     }
 
+    /**
+    @notice recoverSigner
+    @dev
+        Based on a message and signature returns the address
+    @param message Message
+    @param sig Signature
+    @return {
+        "address" : "Address of the private key that signed",
+    }
+    */
     function recoverSigner(bytes32 message, bytes sig)
         public
         pure
