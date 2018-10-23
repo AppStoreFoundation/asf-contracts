@@ -12,7 +12,7 @@ module.exports = async function(deployer, network) {
 
 
             if (!SharesAddress.startsWith("0x")) {
-                deployer.deploy(Signature);
+                deployer.deploy(Shares);
             }
 
             break;
@@ -22,7 +22,7 @@ module.exports = async function(deployer, network) {
 
 
             if (!SharesAddress.startsWith("0x")) {
-                deployer.deploy(Signature);
+                deployer.deploy(Shares);
             }
 
             break;
@@ -31,7 +31,7 @@ module.exports = async function(deployer, network) {
             var SharesAddress = process.env.SHARES_MAINNET_ADDRESS;
 
             if (!SharesAddress.startsWith("0x")) {
-                deployer.deploy(Signature);
+                deployer.deploy(Shares);
             }
 
             break;
