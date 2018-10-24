@@ -11,7 +11,7 @@ module.exports = async function(deployer, network) {
             var SharesAddress = process.env.SHARES_ROPSTEN_ADDRESS;
 
 
-            if (!SharesAddress) {
+            if (!SharesAddress.startsWith("0x")) {
                 deployer.deploy(Shares);
             }
 
@@ -21,21 +21,21 @@ module.exports = async function(deployer, network) {
             var SharesAddress = process.env.SHARES_KOVAN_ADDRESS;
 
 
-            if (!SharesAddress) {
+            if (!SharesAddress.startsWith("0x")) {
                 deployer.deploy(Shares);
             }
 
             break;
-     
+
         case 'main':
             var SharesAddress = process.env.SHARES_MAINNET_ADDRESS;
 
-            if (!SharesAddress) {
+            if (!SharesAddress.startsWith("0x")) {
                 deployer.deploy(Shares);
             }
 
             break;
-            
+
 
         default:
             throw `Unknown network "${network}". See your Truffle configuration file for available networks.` ;
