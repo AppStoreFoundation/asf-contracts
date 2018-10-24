@@ -24,7 +24,7 @@ contract('Signature', function(accounts) {
 
         const objSign = await web3.eth.accounts.sign(msg, privateKey);
 
-        const expectedAddress = await signatureInstance.recoverSigner(objSign.messageHash, objSign.signature);
+        const expectedAddress = await signatureInstance.recoverSigner.call(objSign.messageHash, objSign.signature);
 
         expect(address).to.be.equal(expectedAddress, "The addresses do not match");
 
