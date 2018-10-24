@@ -30,7 +30,7 @@ module.exports = {
             },
             network_id: "1",
             gasPrice: 20000000000, // Be careful, this is in Shannon
-            gas: 4000000
+            gas: 6000000 // Gas limit used for deploys
         }
     }
 };
