@@ -2,16 +2,21 @@ pragma solidity ^0.4.21;
 
 
 import  { CampaignLibrary } from "./lib/CampaignLibrary.sol";
+import "./Base/ErrorThrower.sol";
+import "./Base/StorageUser.sol";
 import "./AdvertisementStorage.sol";
 import "./AdvertisementFinance.sol";
+import "./Base/BaseFinance.sol";
+import "./Base/BaseAdvertisement.sol";
 import "./AppCoins.sol";
 
 /**
- * The Advertisement contract collects campaigns registered by developers
- * and executes payments to users using campaign registered applications
- * after proof of Attention.
+@title Advertisement contract
+@author App Store Foundation
+@dev The Advertisement contract collects campaigns registered by developers and executes payments
+to users using campaign registered applications after proof of Attention.
  */
-contract Advertisement {
+contract Advertisement is BaseAdvertisement {
 
     struct ValidationRules {
         bool vercode;
@@ -24,21 +29,8 @@ contract Advertisement {
     uint constant expectedPoALength = 12;
 
     ValidationRules public rules;
-    bytes32[] bidIdList;
-    AppCoins appc;
-    AdvertisementStorage advertisementStorage;
-    AdvertisementFinance advertisementFinance;
-    address public owner;
-    mapping (address => mapping (bytes32 => bool)) userAttributions;
-
-    modifier onlyOwner() {
-        require(msg.sender == owner);
-        _;
-    }
-
 
     event PoARegistered(bytes32 bidId, string packageName,uint64[] timestampList,uint64[] nonceList,string walletName, bytes2 countryCode);
-    event Error(string func, string message);
     event CampaignInformation
         (
             bytes32 bidId,
@@ -49,85 +41,30 @@ contract Advertisement {
             uint[] vercodes
     );
 
-    /**
-    * Constructor function
-    *
-    * Initializes contract with default validation rules
-    */
-    function Advertisement (address _addrAppc, address _addrAdverStorage, address _addrAdverFinance) public {
+   
+    function Advertisement (address _addrAppc, address _addrAdverStorage, address _addrAdverFinance) public 
+        BaseAdvertisement(_addrAppc,_addrAdverStorage,_addrAdverFinance) {
         rules = ValidationRules(false, true, true, 2, 1);
-        owner = msg.sender;
-        appc = AppCoins(_addrAppc);
-        advertisementStorage = AdvertisementStorage(_addrAdverStorage);
-        advertisementFinance = AdvertisementFinance(_addrAdverFinance);
-    }
-
-    struct Map {
-        mapping (address => uint256) balance;
-        address[] devs;
-    }
-
-    function upgradeFinance (address addrAdverFinance) public onlyOwner {
-        AdvertisementFinance newAdvFinance = AdvertisementFinance(addrAdverFinance);
-        Map storage devBalance;    
-
-        for(uint i = 0; i < bidIdList.length; i++) {
-            address dev = advertisementStorage.getCampaignOwnerById(bidIdList[i]);
-            
-            if(devBalance.balance[dev] == 0){
-                devBalance.devs.push(dev);
-            }
-            
-            devBalance.balance[dev] += advertisementStorage.getCampaignBudgetById(bidIdList[i]);
-        }        
-
-        for(i = 0; i < devBalance.devs.length; i++) {
-            advertisementFinance.pay(devBalance.devs[i],address(newAdvFinance),devBalance.balance[devBalance.devs[i]]);
-            newAdvFinance.increaseBalance(devBalance.devs[i],devBalance.balance[devBalance.devs[i]]);
-        }
-
-        uint256 oldBalance = appc.balances(address(advertisementFinance));
-
-        require(oldBalance == 0);
-
-        advertisementFinance = newAdvFinance;
-    }
-
-    /**
-    * Upgrade storage function
-    *
-    * Upgrades AdvertisementStorage contract addres with no need to redeploy
-    * Advertisement contract however every campaign in the old contract will
-    * be canceled
-    */
-
-    function upgradeStorage (address addrAdverStorage) public onlyOwner {
-        for(uint i = 0; i < bidIdList.length; i++) {
-            cancelCampaign(bidIdList[i]);
-        }
-        delete bidIdList;
-        advertisementFinance.reset();
-        advertisementFinance.setAdsStorageAddress(addrAdverStorage);
-        advertisementStorage = AdvertisementStorage(addrAdverStorage);
-    }
-
-    /**
-    * Get AdvertisementStorageAddress
-    *
-    * Is required to upgrade Advertisement contract address on
-    * Advertisement Finance contract
-    */
-
-    function getAdvertisementStorageAddress() public view returns(address _contract) {
-        require (msg.sender == address(advertisementFinance));
-
-        return address(advertisementStorage);
     }
 
 
     /**
-    * Creates a campaign for a certain package name with
-    * a defined price and budget
+    @notice Creates a campaign
+    @dev
+        Method to create a campaign of user aquisition for a certain application.
+        This method will emit a Campaign Information event with every information
+        provided in the arguments of this method.
+    @param packageName Package name of the appication subject to the user aquisition campaign
+    @param countries Encoded list of 3 integers intended to include every
+    county where this campaign will be avaliable.
+    For more detain on this encoding refer to wiki documentation.
+    @param vercodes List of version codes to which the user aquisition campaign is applied.
+    @param price Value (in wei) the campaign owner pays for each proof-of-attention.
+    @param budget Total budget (in wei) the campaign owner will deposit
+    to pay for the proof-of-attention.
+    @param startDate Date (in miliseconds) on which the campaign will start to be
+    avaliable to users.
+    @param endDate Date (in miliseconds) on which the campaign will no longer be avaliable to users.
     */
 
     function createCampaign (
@@ -139,31 +76,24 @@ contract Advertisement {
         uint startDate,
         uint endDate)
         external {
+            
+        CampaignLibrary.Campaign memory newCampaign = _generateCampaign(packageName, countries, vercodes, price, budget, startDate, endDate);
 
-        require(budget >= price);
-        require(endDate >= startDate);
-
-        CampaignLibrary.Campaign memory newCampaign;
-
-        newCampaign.price = price;
-        newCampaign.startDate = startDate;
-        newCampaign.endDate = endDate;
-
-        //Transfers the budget to contract address
-        if(appc.allowance(msg.sender, address(this)) < budget){
-            emit Error("createCampaign","Not enough allowance");
+        if(newCampaign.owner == 0x0){ 
+            // campaign was not generated correctly (revert)
             return;
         }
 
-        appc.transferFrom(msg.sender, address(advertisementFinance), budget);
+        _getBidIdList().push(newCampaign.bidId);
 
-        advertisementFinance.increaseBalance(msg.sender,budget);
-
-        newCampaign.budget = budget;
-        newCampaign.owner = msg.sender;
-        newCampaign.valid = true;
-        newCampaign.bidId = uintToBytes(bidIdList.length);
-        addCampaign(newCampaign);
+        AdvertisementStorage(address(_getStorage())).setCampaign(
+            newCampaign.bidId,
+            newCampaign.price,
+            newCampaign.budget,
+            newCampaign.startDate,
+            newCampaign.endDate,
+            newCampaign.valid,
+            newCampaign.owner);
 
         emit CampaignInformation(
             newCampaign.bidId,
@@ -174,23 +104,29 @@ contract Advertisement {
             vercodes);
     }
 
-    function addCampaign(CampaignLibrary.Campaign campaign) internal {
+    /**
+    @notice Register a proof of attention
+    @dev
+        This function verifies the campaign avaliability as well as the validity of
+        the proof of attention submited. In case any of the verifications fails, the function will
+        be stopped and an Error event will be emitted with further error information.
+        A PoARegistered event with the same information submited as arguments of this function will
+        be emmited if the proof of attention is processed correctly.
+        For more information on the proof of attention design refer to the wiki documentation or to
+        Appcoins Protocol Whitepaper.
 
-		//Add to bidIdList
-        bidIdList.push(campaign.bidId);
-
-		//Add to campaign map
-        advertisementStorage.setCampaign(
-            campaign.bidId,
-            campaign.price,
-            campaign.budget,
-            campaign.startDate,
-            campaign.endDate,
-            campaign.valid,
-            campaign.owner
-        );
-
-    }
+    @param packageName Package name of the application from which the proof of attention refers to.
+    @param bidId Campaign id of the campaign to which the proof of attention is submitted
+    @param timestampList List of 12 timestamps generated 10 seconds apart from each other,
+    as part of the proof of attention. The timestamp list should be arranged in ascending order
+    @param nonces List of 12 nonces generated during the proof of attention. The index of each
+    nounce should be acording to the corresponding timestamp index on the timestamp list submitted
+    @param appstore Address of the Appstore receiving part of the proof of attention reward
+    @param oem Address of the OEM receiving part of the proof of attention reward
+    @param walletName Package name of the wallet submitting the proof of attention
+    @param countryCode String with the 2 character identifying the country from which the
+    proof of attention was processed
+    */
 
     function registerPoA (
         string packageName, bytes32 bidId,
@@ -229,100 +165,75 @@ contract Advertisement {
                 "registerPoA","Incorrect nounces for submited proof of attention");
             return;
         } */
-
-        if(userAttributions[msg.sender][bidId]){
+        
+        // using the same variable as to the for loop to avoid stack too deep error
+        i = getUserAttribution(bidId,msg.sender);
+        
+        if(i>0){
             emit Error(
                 "registerPoA","User already registered a proof of attention for this campaign");
             return;
         }
-        //atribute
-        userAttributions[msg.sender][bidId] = true;
 
-        payFromCampaign(bidId, appstore, oem);
+        _setUserAttribution(bidId, msg.sender, ++i);
+
+        payFromCampaign(bidId, msg.sender, appstore, oem);
 
         emit PoARegistered(bidId, packageName, timestampList, nonces, walletName, countryCode);
     }
 
-    function cancelCampaign (bytes32 bidId) public {
-        address campaignOwner = getOwnerOfCampaign(bidId);
-
-		// Only contract owner or campaign owner can cancel a campaign
-        require(owner == msg.sender || campaignOwner == msg.sender);
-        uint budget = getBudgetOfCampaign(bidId);
-
-        advertisementFinance.withdraw(campaignOwner, budget);
-
-        advertisementStorage.setCampaignBudgetById(bidId, 0);
-        advertisementStorage.setCampaignValidById(bidId, false);
-    }
-
-    function getCampaignValidity(bytes32 bidId) public view returns(bool){
-        return advertisementStorage.getCampaignValidById(bidId);
-    }
-
-    function getPriceOfCampaign (bytes32 bidId) public view returns(uint) {
-        return advertisementStorage.getCampaignPriceById(bidId);
-    }
-
-    function getStartDateOfCampaign (bytes32 bidId) public view returns(uint) {
-        return advertisementStorage.getCampaignStartDateById(bidId);
-    }
-
-    function getEndDateOfCampaign (bytes32 bidId) public view returns(uint) {
-        return advertisementStorage.getCampaignEndDateById(bidId);
-    }
-
-    function getBudgetOfCampaign (bytes32 bidId) public view returns(uint) {
-        return advertisementStorage.getCampaignBudgetById(bidId);
-    }
-
-    function getOwnerOfCampaign (bytes32 bidId) public view returns(address) {
-        return advertisementStorage.getCampaignOwnerById(bidId);
-    }
-
-    function getBidIdList() public view returns(bytes32[]) {
-        return bidIdList;
-    }
-
-    function isCampaignValid(bytes32 bidId) public view returns(bool) {
-        uint startDate = advertisementStorage.getCampaignStartDateById(bidId);
-        uint endDate = advertisementStorage.getCampaignEndDateById(bidId);
-        bool valid = advertisementStorage.getCampaignValidById(bidId);
-
-        uint nowInMilliseconds = now * 1000;
-        return valid && startDate < nowInMilliseconds && endDate > nowInMilliseconds;
-    }
-
-    function payFromCampaign (bytes32 bidId, address appstore, address oem) internal {
+    
+    /**
+    @notice Internal function to distribute payouts
+    @dev
+        Distributes the value defined in the campaign for a Proof-of-attention to the user,
+        Appstore and OEM ajusted to their respective shares.
+    @param bidId Campaign id from which a payment will be made
+    @param appstore Address of the Appstore receiving it's share
+    @param oem Address of the OEM receiving it's share
+    */
+    function payFromCampaign (bytes32 bidId, address user, address appstore, address oem) internal {
         uint devShare = 85;
         uint appstoreShare = 10;
         uint oemShare = 5;
 
         //Search bid price
-        uint price = advertisementStorage.getCampaignPriceById(bidId);
-        uint budget = advertisementStorage.getCampaignBudgetById(bidId);
-        address campaignOwner = advertisementStorage.getCampaignOwnerById(bidId);
+        uint price = _getStorage().getCampaignPriceById(bidId);
+        uint budget = _getStorage().getCampaignBudgetById(bidId);
+        address campaignOwner = _getStorage().getCampaignOwnerById(bidId);
 
         require(budget > 0);
         require(budget >= price);
 
         //transfer to user, appstore and oem
-        advertisementFinance.pay(campaignOwner,msg.sender,division(price * devShare, 100));
-        advertisementFinance.pay(campaignOwner,appstore,division(price * appstoreShare, 100));
-        advertisementFinance.pay(campaignOwner,oem,division(price * oemShare, 100));
+        _getFinance().pay(campaignOwner,user,division(price * devShare, 100));
+        _getFinance().pay(campaignOwner,appstore,division(price * appstoreShare, 100));
+        _getFinance().pay(campaignOwner,oem,division(price * oemShare, 100));
 
         //subtract from campaign
         uint newBudget = budget - price;
 
-        advertisementStorage.setCampaignBudgetById(bidId, newBudget);
+        _getStorage().setCampaignBudgetById(bidId, newBudget);
 
 
         if (newBudget < price) {
-            advertisementStorage.setCampaignValidById(bidId, false);
+            _getStorage().setCampaignValidById(bidId, false);
         }
     }
 
-    function areNoncesValid (bytes packageName,uint64[] timestampList, uint64[] nonces) internal returns(bool) {
+    /**
+    @notice Checks if a given list of nonces is valid for a certain proof-of-attention
+    @dev
+        Internal function that checks if the submitted nonces are valid
+        It's part of the proof-of-attention validation process on the blockchain
+    @param packageName Package name to which the proof-of-attention refers to
+    @param timestampList List of timestamps used to compute the proof-of-attention
+    @param nonces List of nonces generated based on the packageName and timestamp list
+    @return { "valid" : "Returns True if all nonces are valid else it returns False"}
+
+    */
+    function areNoncesValid (bytes packageName,uint64[] timestampList, uint64[] nonces)
+        internal returns(bool valid) {
 
         for(uint i = 0; i < nonces.length; i++){
             bytes8 timestamp = bytes8(timestampList[i]);
@@ -365,15 +276,4 @@ contract Advertisement {
         }
         return true;
     }
-
-
-    function division(uint numerator, uint denominator) public view returns (uint) {
-        uint _quotient = numerator / denominator;
-        return _quotient;
-    }
-
-    function uintToBytes (uint256 i) public view returns(bytes32 b) {
-        b = bytes32(i);
-    }
-
 }

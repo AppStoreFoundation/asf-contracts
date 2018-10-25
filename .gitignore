@@ -1,8 +1,8 @@
 # Solidity contracts - Truffle
 build/
 node_modules/
-package-lock.json
 .env
 test.js
 coverage.json
 coverage/
+doxity/node_modules/

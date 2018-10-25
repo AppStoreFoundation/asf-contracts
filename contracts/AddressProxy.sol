@@ -1,7 +1,15 @@
 pragma solidity ^0.4.19;
 
+import "./Base/Ownable.sol";
 
-contract AddressProxy {
+/**
+@title AddressProxy contract
+@author App Store Foundation
+@dev This contract works as part of a set of mechanisms in order to maintain tracking of the latest
+version's contracts deployed to the network.
+ */
+
+contract AddressProxy is Ownable {
 
     struct ContractAddress {
         bytes32 id;
@@ -11,30 +19,32 @@ contract AddressProxy {
         uint updatedTime;
     }
 
-    address public owner;
     mapping(bytes32 => ContractAddress) private contractsAddress;
     bytes32[] public availableIds;
-
-    modifier onlyOwner() {
-        require(msg.sender == owner);
-        _;
-    }
 
     event AddressCreated(bytes32 id, string name, address at, uint createdTime, uint updatedTime);
     event AddressUpdated(bytes32 id, string name, address at, uint createdTime, uint updatedTime);
 
     function AddressProxy() public {
-        owner = msg.sender;
     }
 
-    function getAvailableIds() public view returns (bytes32[]) {
+
+    /**
+    @notice Get all avaliable ids registered on the contract
+    @dev Just shows the list of ids registerd on the contract
+    @return { "IdList" : "List of registered ids" }
+     */
+    function getAvailableIds() public view returns (bytes32[] IdList) {
         return availableIds;
     }
 
-    //  Adds or updates an address
-    //  @params {string} name - the name of the contract Address
-    //  @params {address} newAddress
-    function addAddress(string name, address newAddress) public onlyOwner {
+    /** 
+    @notice  Adds or updates an address
+    @dev Used when a new address needs to be updated to a currently registered id or to a new id.
+    @param name Name of the contract
+    @param newAddress Address of the contract
+    */
+    function addAddress(string name, address newAddress) public onlyOwner("addAddress") {
         bytes32 contAddId = stringToBytes32(name);
 
         uint nowInMilliseconds = now * 1000;
@@ -59,24 +69,50 @@ contract AddressProxy {
         }
     }
 
-    function getContractNameById(bytes32 id) public view returns(string) {
+    /**
+    @notice Get the contract name associated to a certain id
+    @param id Id of the registry
+    @return { 'name' : 'Name of the contract associated to the given id' }
+     */
+    function getContractNameById(bytes32 id) public view returns(string name) {
         return contractsAddress[id].name;
     }
 
-    function getContractAddressById(bytes32 id) public view returns(address) {
+
+    /**
+    @notice Get the contract address associated to a certain id
+    @param id Id of the registry
+    @return { 'contractAddr' : 'Address of the contract associated to the given id' }
+     */
+    function getContractAddressById(bytes32 id) public view returns(address contractAddr) {
         return contractsAddress[id].at;
     }
 
-    function getContractCreatedTimeById(bytes32 id) public view returns(uint) {
+    /**
+    @notice Get the specific date on which the contract address was firstly registered 
+    to a certain id
+    @param id Id of the registry
+    @return { 'time' : 'Time in miliseconds of the first time the given id was registered' }
+     */
+    function getContractCreatedTimeById(bytes32 id) public view returns(uint time) {
         return contractsAddress[id].createdTime;
     }
 
-    function getContractUpdatedTimeById(bytes32 id) public view returns(uint) {
+    /**
+    @notice Get the specific date on which the contract address was lastly updated to a certain id
+    @param id Id of the registry
+    @return { 'time' : 'Time in miliseconds of the last time the given id was updated' }
+     */
+    function getContractUpdatedTimeById(bytes32 id) public view returns(uint time) {
         return contractsAddress[id].updatedTime;
     }
 
-    //  @params {string} source
-    //  @return {bytes32}
+    /**
+    @notice Converts a string type variable into a byte32 type variable
+    @dev This function is internal and uses inline assembly instructions.
+    @param source string to be converted to a byte32 type
+    @return { 'result' : 'Initial string content converted to a byte32 type' }
+     */
     function stringToBytes32(string source) internal pure returns (bytes32 result) {
         bytes memory tempEmptyStringTest = bytes(source);
         if (tempEmptyStringTest.length == 0) {

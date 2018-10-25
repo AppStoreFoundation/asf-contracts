@@ -15,6 +15,12 @@ module.exports = function(callback) {
             advertisementAddress = process.env.ADVERTISEMENT_DEVELOPMENT_ADDRESS;
             advertisementFinanceAddress = process.env.ADVERTISEMENT_FINANCE_DEVELOPMENT_ADDRESS;
             advertisementStorageAddress = process.env.ADVERTISEMENT_STORAGE_DEVELOPMENT_ADDRESS;
+            appCoinsTimelockAddress = process.env.APPCOINS_TIMELOCK_DEVELOPMENT_ADDRESS;
+
+            extendedAdvertisementAddress = process.env.EXTENDED_ADVERTISEMENT_DEVELOPMENT_ADDRESS;
+            extendedAdvertisementFinanceAddress = process.env.EXTENDED_ADVERTISEMENT_FINANCE_DEVELOPMENT_ADDRESS;
+            extendedAdvertisementStorageAddress = process.env.EXTENDED_ADVERTISEMENT_STORAGE_DEVELOPMENT_ADDRESS;
+
             break;
 
         case 'ropsten':
@@ -24,6 +30,12 @@ module.exports = function(callback) {
             advertisementAddress = process.env.ADVERTISEMENT_ROPSTEN_ADDRESS;
             advertisementFinanceAddress = process.env.ADVERTISEMENT_FINANCE_ROPSTEN_ADDRESS;
             advertisementStorageAddress = process.env.ADVERTISEMENT_STORAGE_ROPSTEN_ADDRESS;
+            appCoinsTimelockAddress = process.env.APPCOINS_TIMELOCK_ROPSTEN_ADDRESS;
+
+            extendedAdvertisementAddress = process.env.EXTENDED_ADVERTISEMENT_ROPSTEN_ADDRESS;
+            extendedAdvertisementFinanceAddress = process.env.EXTENDED_ADVERTISEMENT_FINANCE_ROPSTEN_ADDRESS;
+            extendedAdvertisementStorageAddress = process.env.EXTENDED_ADVERTISEMENT_STORAGE_ROPSTEN_ADDRESS;
+
             break;
 
         case 'main':
@@ -33,6 +45,12 @@ module.exports = function(callback) {
             advertisementAddress = process.env.ADVERTISEMENT_MAINNET_ADDRESS;
             advertisementFinanceAddress = process.env.ADVERTISEMENT_FINANCE_MAINNET_ADDRESS;
             advertisementStorageAddress = process.env.ADVERTISEMENT_STORAGE_MAINNET_ADDRESS;
+            appCoinsTimelockAddress = process.env.APPCOINS_TIMELOCK_MAINNET_ADDRESS;
+
+            extendedAdvertisementAddress = process.env.EXTENDED_ADVERTISEMENT_MAINNET_ADDRESS;
+            extendedAdvertisementFinanceAddress = process.env.EXTENDED_ADVERTISEMENT_FINANCE_MAINNET_ADDRESS;
+            extendedAdvertisementStorageAddress = process.env.EXTENDED_ADVERTISEMENT_STORAGE_MAINNET_ADDRESS;
+
             break;
 
         default:
@@ -55,6 +73,10 @@ module.exports = function(callback) {
     addAddress(process.env.ADVERTISEMENT_CONTRACT_NAME, advertisementAddress);
     addAddress(process.env.ADVERTISEMENT_FINANCE_CONTRACT_NAME, advertisementFinanceAddress);
     addAddress(process.env.ADVERTISEMENT_STORAGE_CONTRACT_NAME, advertisementStorageAddress);
+    addAddress(process.env.APPCOINS_TIMELOCK_CONTRACT_NAME, appCoinsTimelockAddress);
+    addAddress(process.env.EXTENDED_ADVERTISEMENT_CONTRACT_NAME, extendedAdvertisementAddress);
+    addAddress(process.env.EXTENDED_ADVERTISEMENT_FINANCE_CONTRACT_NAME, extendedAdvertisementFinanceAddress);
+    addAddress(process.env.EXTENDED_ADVERTISEMENT_STORAGE_CONTRACT_NAME, extendedAdvertisementStorageAddress);
 
 
 };
