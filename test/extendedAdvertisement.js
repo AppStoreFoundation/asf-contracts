@@ -269,7 +269,7 @@ contract('ExtendedAdvertisement', function(accounts) {
 
 	});
 
-	it('should emit an event when PoA is received', async function () {
+	it('should emit an event when bulk PoA is received', async function () {
 		var bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000002");
 		await TestUtils.expectEventTest('BulkPoARegistered',() => {
 			return addInstance.bulkRegisterPoA.sendTransaction(bid,objSign1.messageHash, objSign1.signature,1,{from: accounts[1]});
@@ -304,7 +304,7 @@ contract('ExtendedAdvertisement', function(accounts) {
 
 	});
 
-	it('should revert registerPoA and emit an error event when the campaing is invalid', async () => {
+	it('should revert bulkRegisterPoA and emit an error event when the campaing is invalid', async () => {
 
 
 		await addInstance.cancelCampaign(examplePoA.bid);
@@ -317,11 +317,11 @@ contract('ExtendedAdvertisement', function(accounts) {
 			events.watch(function(error,log){ events.stopWatching(); resolve(log); });
 		})
 
-		expect(eventLog.event).to.equal("BulkPoARegistered","Event should be a BulkRegisterPoA");
+		expect(eventLog.event).to.equal("BulkPoARegistered","Event should be a BulkPoARegistered");
 		expect(JSON.parse(eventLog.args.convertedPoAs)).to.equal(0,'No PoA should be converted');
 	});
 
-	it('should revert if PoA root hash is incorrectly signed', async () => {
+	it('should revert if bulk PoA root hash is incorrectly signed', async () => {
 
 
 		await addInstance.cancelCampaign(examplePoA.bid);
@@ -337,6 +337,45 @@ contract('ExtendedAdvertisement', function(accounts) {
 		expect(eventLog.event).to.equal("Error","Invalid signature");
 	});
 
+	it('should emit an event when a single PoA is received', async function() {
+		var bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000001");
+		var timestamp = Date.now()
+		var hash = bid;
+		var msg = hash+timestamp;
+		var signature = await web3.eth.accounts.sign(msg, privateKey0); 
+		var bdsAccount = accounts[0]
+		var initialRewardBalance = await addInstance.getRewardsBalance.call(bdsAccount);
+		var events = addInstance.allEvents();
+		
+		await addInstance.registerPoA.sendTransaction(bid,timestamp,hash,signature, {from: accounts[2]});
+
+		var finalRewardBalance = await addInstance.getRewardsBalance.call(bdsAccount);
+		
+		var eventLog = await new Promise(function (resolve,reject){
+			events.watch(function(error,log){ events.stopWatching(); resolve(log); });
+		})
+
+		expect(eventLog.event).to.equal("PoARegistered","Event should be a PoARegistered");
+		expect(finalRewardBalance).to.equal(initialRewardBalance+campaignPrice,"BDS rewards balance should be updated");
+	
+	})
+
+	it('should revert if a single PoA registration is incorrectly signed', async function () {
+		var bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000001");
+		var timestamp = Date.now()
+		var hash = bid;
+		var msg = hash+timestamp;
+		var signature = await web3.eth.accounts.sign(msg, privateKey1);
+		
+		var bdsAccount = accounts[0]
+		var initialRewardBalance = await addInstance.getRewardsBalance.call(bdsAccount);
+		var events = addInstance.allEvents();
+		
+		await TestUtils.expectErrorMessageTest('Invalid signature', async () => {
+			await addInstance.registerPoA.sendTransaction(bid,timestamp,hash,signature, {from: accounts[2]});
+		})
+
+	})
 
 	it('should upgrade advertisement storage and cancel all campaigns', async function() {
 		var user0Balance = await TestUtils.getBalance(accounts[0]);
