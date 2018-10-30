@@ -30,6 +30,7 @@ var packageName;
 var privateKey0;
 var privateKey1;
 var privateKey2;
+var privateKey8;
 var objSign0;
 var objSign1;
 var objSign2;
@@ -77,7 +78,7 @@ contract('ExtendedAdvertisement', function(accounts) {
 
   		await appcInstance.approve(addInstance.address,campaignBudget);
 
-  		await addInstance.createCampaign(packageName,countryList,[1,2],campaignPrice,campaignPrice,startDate,endDate, "appcoins.io");
+  		await addInstance.createCampaign(packageName,countryList,[1,2],campaignPrice,campaignPrice,startDate,endDate, accounts[8],"appcoins.io");
 
   		await appcInstance.transfer(accounts[1],campaignBudget);
   		countryList.push(convertCountryCodeToIndex("PT"))
@@ -85,7 +86,7 @@ contract('ExtendedAdvertisement', function(accounts) {
   		countryList.push(convertCountryCodeToIndex("FR"))
   		countryList.push(convertCountryCodeToIndex("PA"))
   		await appcInstance.approve(addInstance.address,campaignBudget, { from: accounts[1]});
-  		await addInstance.createCampaign(packageName,countryList,[1,2],campaignPrice,campaignBudget,startDate,endDate , "appcoins.io",  { from : accounts[1]});
+  		await addInstance.createCampaign(packageName,countryList,[1,2],campaignPrice,campaignBudget,startDate,endDate, accounts[8], "appcoins.io",  { from : accounts[1]});
 
 
   		examplePoA = new Object();
@@ -110,7 +111,8 @@ contract('ExtendedAdvertisement', function(accounts) {
         // New custom account that will sign the hashRoot
         privateKey0 = "0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501200";
         privateKey1 = "0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501201";
-        privateKey2 = "0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501202";
+		privateKey2 = "0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501202";
+		privateKey8 = "0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501208";
 
         const msg = "Some data to be tested";
 
@@ -136,7 +138,7 @@ contract('ExtendedAdvertisement', function(accounts) {
 		var eventsInfo = addInstance.allEvents();
 		var packageName1 = "com.instagram.android";
 
-		await addInstance.createCampaign(packageName1,countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980, "appcoins.io");
+		await addInstance.createCampaign(packageName1,countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980, accounts[8], "appcoins.io");
 
 		var eventStorageLog = await new Promise(
 				function(resolve, reject){
@@ -179,7 +181,7 @@ contract('ExtendedAdvertisement', function(accounts) {
 		countryList.push(convertCountryCodeToIndex("PA"))
  		var eventsInfo = addInstance.allEvents();
 		var packageName1 = "com.instagram.android";
- 		await addInstance.createCampaign(packageName1,countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980, "appcoins.io");
+ 		await addInstance.createCampaign(packageName1,countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980, accounts[8], "appcoins.io");
 
 		var eventNumber = -1;
 		var eventInfoLog = await new Promise(
@@ -260,7 +262,7 @@ contract('ExtendedAdvertisement', function(accounts) {
 			var countryList = [];
 			countryList.push(convertCountryCodeToIndex("GB"));
 			countryList.push(convertCountryCodeToIndex("FR"));
-			await addInstance.createCampaign.sendTransaction("org.telegram.messenger",countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980, "appcoins.io");
+			await addInstance.createCampaign.sendTransaction("org.telegram.messenger",countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980, accounts[8], "appcoins.io");
 		})
 
 		var newUserBalance = await TestUtils.getBalance(accounts[0]);
@@ -339,16 +341,26 @@ contract('ExtendedAdvertisement', function(accounts) {
 
 	it('should emit an event when a single PoA is received', async function() {
 		var bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000001");
-		var timestamp = Date.now()
+		var timestamp = Date.now();
 		var hash = bid;
-		var msg = hash+timestamp;
-		var signature = await web3.eth.accounts.sign(msg, privateKey0); 
+//		var msgList = [Buffer.from(hash,'utf-8'),TestUtils.numberToBuffer(timestamp)];
+		var buf = new Buffer(4);
+		buf.writeUInt8(0x1, 3);
+		console.log(buf.toString('hex'));
+		console.log(TestUtils.numberToBuffer(timestamp).length);
+		var msgList = [Buffer.alloc(26),TestUtils.numberToBuffer(timestamp),Buffer.alloc(28),buf];
+		var msg = Buffer.concat(msgList);
+	
+		var signatureObj = await web3.eth.accounts.sign(msg.toString('hex'), privateKey8); 
+		console.log(msg);
+		console.log(signatureObj.signature);
+		console.log(signatureObj.messageHash);
+		console.log(timestamp);
 		var bdsAccount = accounts[0]
 		var initialRewardBalance = await addInstance.getRewardsBalance.call(bdsAccount);
 		var events = addInstance.allEvents();
 		
-		await addInstance.registerPoA.sendTransaction(bid,timestamp,hash,signature, {from: accounts[2]});
-
+		await addInstance.registerPoA.sendTransaction(bid, timestamp,hash, signatureObj.signature, {from: accounts[2]});
 		var finalRewardBalance = await addInstance.getRewardsBalance.call(bdsAccount);
 		
 		var eventLog = await new Promise(function (resolve,reject){
@@ -365,14 +377,14 @@ contract('ExtendedAdvertisement', function(accounts) {
 		var timestamp = Date.now()
 		var hash = bid;
 		var msg = hash+timestamp;
-		var signature = await web3.eth.accounts.sign(msg, privateKey1);
+		var signatureObj = await web3.eth.accounts.sign(msg, privateKey1);
 		
 		var bdsAccount = accounts[0]
 		var initialRewardBalance = await addInstance.getRewardsBalance.call(bdsAccount);
 		var events = addInstance.allEvents();
 		
 		await TestUtils.expectErrorMessageTest('Invalid signature', async () => {
-			await addInstance.registerPoA.sendTransaction(bid,timestamp,hash,signature, {from: accounts[2]});
+			await addInstance.registerPoA.sendTransaction(bid, timestamp,hash, signatureObj.signature, {from: accounts[2]});
 		})
 
 	})
@@ -404,7 +416,7 @@ contract('ExtendedAdvertisement', function(accounts) {
 
 		await appcInstance.approve(addInstance.address,campaignBudget, {from: accounts[1]});
 
-		await addInstance.createCampaign(packageName,countryList,[1,2],campaignPrice,campaignBudget,startDate,endDate, "appcoins.io", { from : accounts[1]});
+		await addInstance.createCampaign(packageName,countryList,[1,2],campaignPrice,campaignBudget,startDate,endDate, accounts[8], "appcoins.io", { from : accounts[1]});
 		var newBid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000003");
 		var bidIdList = await addInstance.getBidIdList.call();
 
