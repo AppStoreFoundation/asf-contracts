@@ -33,6 +33,7 @@ var privateKey2;
 var objSign0;
 var objSign1;
 var objSign2;
+var msg;
 
 function convertCountryCodeToIndex(countryCode) {
 	var begin = new Buffer("AA");
@@ -112,7 +113,7 @@ contract('ExtendedAdvertisement', function(accounts) {
         privateKey1 = "0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501201";
         privateKey2 = "0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501202";
 
-        const msg = "Some data to be tested";
+        msg = "Hello world";
 
         objSign0 = await web3.eth.accounts.sign(msg, privateKey0);
         objSign1 = await web3.eth.accounts.sign(msg, privateKey1);
@@ -196,7 +197,7 @@ contract('ExtendedAdvertisement', function(accounts) {
 		assert.equal(eventInfoLog.event,"Error","Event must be a Error event");
 		assert.equal(eventInfoLog.args.message,"Not enough allowance","Error message should be 'Not enough allowance'.")
  	})
-    
+
 	it('should cancel a campaign as contract owner', async function () {
 		var bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000002");
 
@@ -469,5 +470,13 @@ contract('ExtendedAdvertisement', function(accounts) {
 					expect(finalBalance).to.equal(initBalance+campaignPrice,"Balance was not withdrawn to user account");
 				});
 			});
+	});
+
+	it('Check that the send is the one that validated the message', async function () {
+		var message = msg;
+		var signature = objSign0.signature;
+		var signingAddress = web3.utils.toChecksumAddress(accounts[0]);
+		var expectedSigningAddress = web3.utils.toChecksumAddress(web3.eth.accounts.recover(message, signature));
+		expect(expectedSigningAddress).to.equal(signingAddress,"Contract balance was not updated");
 	});
 });
