@@ -471,12 +471,4 @@ contract('ExtendedAdvertisement', function(accounts) {
 				});
 			});
 	});
-
-	it('Check that the send is the one that validated the message', async function () {
-		var message = msg;
-		var signature = objSign0.signature;
-		var signingAddress = web3.utils.toChecksumAddress(accounts[0]);
-		var expectedSigningAddress = web3.utils.toChecksumAddress(web3.eth.accounts.recover(message, signature));
-		expect(expectedSigningAddress).to.equal(signingAddress,"Contract balance was not updated");
-	});
 });

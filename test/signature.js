@@ -30,4 +30,18 @@ contract('Signature', function(accounts) {
 
 	})
 
+	it('Check that the send is the one that validated the message', async function () {
+
+		const privateKey = "0x6b04c8e3bb9969f1455d1ee0d0d22617b84a47d85d0e0fb29498b6e8daa776e6";
+		dafaultAccount = web3.eth.accounts.privateKeyToAccount(privateKey);
+		const address = web3.utils.toChecksumAddress("0x33ea3bffd72996a38dd75696383131bbcaa9a975");
+		const message = "Hello world";
+
+		const objSign = await web3.eth.accounts.sign(message, privateKey);
+		var signature = objSign.signature;
+
+		var expectedSigningAddress = web3.utils.toChecksumAddress(web3.eth.accounts.recover(message, signature));
+		expect(expectedSigningAddress).to.equal(address, "The signing address match");
+	});
+
 })
