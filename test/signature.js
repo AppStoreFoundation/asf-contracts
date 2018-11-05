@@ -30,7 +30,7 @@ contract('Signature', function(accounts) {
 
 	})
 
-	it('Check that the send is the one that validated the message', async function () {
+	it('Check that the sender is the one that validated the message', async function () {
 
 		const privateKey = "0x6b04c8e3bb9969f1455d1ee0d0d22617b84a47d85d0e0fb29498b6e8daa776e6";
 		dafaultAccount = web3.eth.accounts.privateKeyToAccount(privateKey);
