@@ -38,9 +38,9 @@ contract('Signature', function(accounts) {
 		const message = "Hello world";
 
 		const objSign = await web3.eth.accounts.sign(message, privateKey);
-		var signature = objSign.signature;
+		const signature = objSign.signature;
 
-		var expectedSigningAddress = web3.utils.toChecksumAddress(web3.eth.accounts.recover(message, signature));
+		const expectedSigningAddress = web3.utils.toChecksumAddress(web3.eth.accounts.recover(message, signature));
 		expect(expectedSigningAddress).to.equal(address, "The signing address match");
 	});
 
