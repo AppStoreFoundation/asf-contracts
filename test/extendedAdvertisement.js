@@ -341,50 +341,47 @@ contract('ExtendedAdvertisement', function(accounts) {
 
 	it('should emit an event when a single PoA is received', async function() {
 		var bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000001");
-		var timestamp = Date.now();
 		var hash = bid;
-//		var msgList = [Buffer.from(hash,'utf-8'),TestUtils.numberToBuffer(timestamp)];
 		var buf = new Buffer(4);
 		buf.writeUInt8(0x1, 3);
-		console.log(buf.toString('hex'));
-		console.log(TestUtils.numberToBuffer(timestamp).length);
-		var msgList = [Buffer.alloc(26),TestUtils.numberToBuffer(timestamp),Buffer.alloc(28),buf];
+		var msgList = [Buffer.alloc(26),Buffer.from(hash),Buffer.alloc(28),buf];
 		var msg = Buffer.concat(msgList);
-	
-		var signatureObj = await web3.eth.accounts.sign(msg.toString('hex'), privateKey8); 
-		console.log(msg);
-		console.log(signatureObj.signature);
-		console.log(signatureObj.messageHash);
-		console.log(timestamp);
-		var bdsAccount = accounts[0]
-		var initialRewardBalance = await addInstance.getRewardsBalance.call(bdsAccount);
-		var events = addInstance.allEvents();
 		
-		await addInstance.registerPoA.sendTransaction(bid, timestamp,hash, signatureObj.signature, {from: accounts[2]});
-		var finalRewardBalance = await addInstance.getRewardsBalance.call(bdsAccount);
+		var signatureObj = await web3.eth.accounts.sign(msg.toString(), privateKey8); 
+
+		var bdsAccount = accounts[8]
+		var initialRewardBalance = JSON.parse(await addInstance.getRewardsBalance.call(bdsAccount));
+		var events = addInstance.allEvents();
+
+		await addInstance.registerPoA.sendTransaction(bid, msg.toString(),signatureObj.signature, {from: accounts[2]});
+		var finalRewardBalance = JSON.parse(await addInstance.getRewardsBalance.call(bdsAccount));
 		
 		var eventLog = await new Promise(function (resolve,reject){
 			events.watch(function(error,log){ events.stopWatching(); resolve(log); });
-		})
-
-		expect(eventLog.event).to.equal("PoARegistered","Event should be a PoARegistered");
+		});
+		
+		expect(eventLog.event).to.equal("SinglePoARegistered","Event should be a PoARegistered");
 		expect(finalRewardBalance).to.equal(initialRewardBalance+campaignPrice,"BDS rewards balance should be updated");
 	
 	})
 
 	it('should revert if a single PoA registration is incorrectly signed', async function () {
 		var bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000001");
-		var timestamp = Date.now()
+		var timestamp = Date.now();
 		var hash = bid;
-		var msg = hash+timestamp;
-		var signatureObj = await web3.eth.accounts.sign(msg, privateKey1);
+		var buf = new Buffer(4);
+		buf.writeUInt8(0x1, 3);
+		var msgList = [Buffer.alloc(26),Buffer.from(hash),Buffer.alloc(28),buf];
+		var msg = Buffer.concat(msgList);
+		
+		var signatureObj = await web3.eth.accounts.sign(msg.toString(), privateKey1); 
 		
 		var bdsAccount = accounts[0]
-		var initialRewardBalance = await addInstance.getRewardsBalance.call(bdsAccount);
+		var initialRewardBalance = JSON.parse(await addInstance.getRewardsBalance.call(bdsAccount));
 		var events = addInstance.allEvents();
 		
 		await TestUtils.expectErrorMessageTest('Invalid signature', async () => {
-			await addInstance.registerPoA.sendTransaction(bid, timestamp,hash, signatureObj.signature, {from: accounts[2]});
+			await addInstance.registerPoA.sendTransaction(bid, msg.toString(), signatureObj.signature, {from: accounts[2]});
 		})
 
 	})
