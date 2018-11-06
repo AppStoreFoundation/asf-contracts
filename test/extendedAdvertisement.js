@@ -27,6 +27,7 @@ var startDate;
 var endDate;
 var packageName;
 
+var msg;
 var privateKey0;
 var privateKey1;
 var privateKey2;
@@ -114,7 +115,7 @@ contract('ExtendedAdvertisement', function(accounts) {
 		privateKey2 = "0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501202";
 		privateKey8 = "0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501208";
 
-        const msg = "Some data to be tested";
+        msg = Buffer.from(Web3.utils.utf8ToHex("Hello Word")).toString();
 
         objSign0 = await web3.eth.accounts.sign(msg, privateKey0);
         objSign1 = await web3.eth.accounts.sign(msg, privateKey1);
@@ -198,7 +199,7 @@ contract('ExtendedAdvertisement', function(accounts) {
 		assert.equal(eventInfoLog.event,"Error","Event must be a Error event");
 		assert.equal(eventInfoLog.args.message,"Not enough allowance","Error message should be 'Not enough allowance'.")
  	})
-    
+
 	it('should cancel a campaign as contract owner', async function () {
 		var bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000002");
 
@@ -274,13 +275,13 @@ contract('ExtendedAdvertisement', function(accounts) {
 	it('should emit an event when bulk PoA is received', async function () {
 		var bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000002");
 		await TestUtils.expectEventTest('BulkPoARegistered',() => {
-			return addInstance.bulkRegisterPoA.sendTransaction(bid,objSign1.messageHash, objSign1.signature,1,{from: accounts[1]});
+			return addInstance.bulkRegisterPoA.sendTransaction(bid, msg, objSign1.signature, 1, {from: accounts[1]});
 		})
 	});
 
 	it('should set the Campaign validity to false when the remaining budget is smaller than the price', function () {
 		var bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000001");
-		return addInstance.bulkRegisterPoA.sendTransaction(bid,objSign1.messageHash, objSign1.signature,1,{from: accounts[1]}).then( instance => {
+		return addInstance.bulkRegisterPoA.sendTransaction(bid, msg, objSign1.signature, 1, { from: accounts[1] }).then( instance => {
 			return addInstance.getCampaignValidity.call(bid).then( valid => {
 
 				expect(valid).to.be.equal(false);
@@ -293,7 +294,7 @@ contract('ExtendedAdvertisement', function(accounts) {
 		var contractBalance = await TestUtils.getBalance(adFinanceInstance.address);
 		var campaignBudget = JSON.parse(await addInstance.getBudgetOfCampaign.call(examplePoA.bid));
 		await addInstance.addAddressToWhitelist(accounts[2]);
-		return addInstance.bulkRegisterPoA.sendTransaction(bid,objSign2.messageHash, objSign2.signature,1,{from: accounts[2]}).then( async () => {
+		return addInstance.bulkRegisterPoA.sendTransaction(bid, msg, objSign2.signature, 1, {from: accounts[2]}).then( async () => {
 			var contractFinalBalance = JSON.parse(await TestUtils.getBalance(adFinanceInstance.address));
 			var userVirtualBalance = JSON.parse(await addInstance.getRewardsBalance.call(accounts[2],{from: accounts[2]}));
 			var campaignFinalBudget = JSON.parse(await addInstance.getBudgetOfCampaign.call(examplePoA.bid));
@@ -313,14 +314,14 @@ contract('ExtendedAdvertisement', function(accounts) {
 
 		var events = addInstance.allEvents();
 
-		await addInstance.bulkRegisterPoA(examplePoA.bid,objSign1.messageHash, objSign1.signature,1,{from: accounts[1]});
+		await addInstance.bulkRegisterPoA(examplePoA.bid, msg, objSign1.signature, 1, { from: accounts[1] });
 
 		var eventLog = await new Promise(function (resolve,reject){
 			events.watch(function(error,log){ events.stopWatching(); resolve(log); });
 		})
 
 		expect(eventLog.event).to.equal("BulkPoARegistered","Event should be a BulkPoARegistered");
-		expect(JSON.parse(eventLog.args.convertedPoAs)).to.equal(0,'No PoA should be converted');
+		expect(JSON.parse(eventLog.args._effectiveConversions)).to.equal(0,'No PoA should be converted');
 	});
 
 	it('should revert if bulk PoA root hash is incorrectly signed', async () => {
@@ -330,7 +331,7 @@ contract('ExtendedAdvertisement', function(accounts) {
 
 		var events = addInstance.allEvents();
 
-		await addInstance.bulkRegisterPoA(examplePoA.bid, objSign1.messageHash, objSign1.signature, 1, {from: accounts[0]});
+		await addInstance.bulkRegisterPoA(examplePoA.bid, msg, objSign1.signature, 1, {from: accounts[0]});
 
 		var eventLog = await new Promise(function (resolve,reject){
 			events.watch(function(error,log){ events.stopWatching(); resolve(log); });
@@ -346,8 +347,8 @@ contract('ExtendedAdvertisement', function(accounts) {
 		buf.writeUInt8(0x1, 3);
 		var msgList = [Buffer.alloc(26),Buffer.from(hash),Buffer.alloc(28),buf];
 		var msg = Buffer.concat(msgList);
-		
-		var signatureObj = await web3.eth.accounts.sign(msg.toString(), privateKey8); 
+
+		var signatureObj = await web3.eth.accounts.sign(msg.toString(), privateKey8);
 
 		var bdsAccount = accounts[8]
 		var initialRewardBalance = JSON.parse(await addInstance.getRewardsBalance.call(bdsAccount));
@@ -355,14 +356,14 @@ contract('ExtendedAdvertisement', function(accounts) {
 
 		await addInstance.registerPoA.sendTransaction(bid, msg.toString(),signatureObj.signature, {from: accounts[2]});
 		var finalRewardBalance = JSON.parse(await addInstance.getRewardsBalance.call(bdsAccount));
-		
+
 		var eventLog = await new Promise(function (resolve,reject){
 			events.watch(function(error,log){ events.stopWatching(); resolve(log); });
 		});
-		
+
 		expect(eventLog.event).to.equal("SinglePoARegistered","Event should be a PoARegistered");
 		expect(finalRewardBalance).to.equal(initialRewardBalance+campaignPrice,"BDS rewards balance should be updated");
-	
+
 	})
 
 	it('should revert if a single PoA registration is incorrectly signed', async function () {
@@ -373,13 +374,13 @@ contract('ExtendedAdvertisement', function(accounts) {
 		buf.writeUInt8(0x1, 3);
 		var msgList = [Buffer.alloc(26),Buffer.from(hash),Buffer.alloc(28),buf];
 		var msg = Buffer.concat(msgList);
-		
-		var signatureObj = await web3.eth.accounts.sign(msg.toString(), privateKey1); 
-		
+
+		var signatureObj = await web3.eth.accounts.sign(msg.toString(), privateKey1);
+
 		var bdsAccount = accounts[0]
 		var initialRewardBalance = JSON.parse(await addInstance.getRewardsBalance.call(bdsAccount));
 		var events = addInstance.allEvents();
-		
+
 		await TestUtils.expectErrorMessageTest('Invalid signature', async () => {
 			await addInstance.registerPoA.sendTransaction(bid, msg.toString(), signatureObj.signature, {from: accounts[2]});
 		})
@@ -436,7 +437,7 @@ contract('ExtendedAdvertisement', function(accounts) {
 		await addInstance.addAddressToWhitelist(accounts[2]);
 
 		var initBalance = JSON.parse(await addInstance.getRewardsBalance.call(accounts[2],{from: accounts[2]}));
-        return addInstance.bulkRegisterPoA.sendTransaction(bid,objSign2.messageHash, objSign2.signature,1,{from: accounts[2]}).then( async instance => {
+        return addInstance.bulkRegisterPoA.sendTransaction(bid,msg, objSign2.signature,1,{from: accounts[2]}).then( async instance => {
 			var balance = JSON.parse(await addInstance.getRewardsBalance.call(accounts[2],{from: accounts[2]}));
 			expect(balance).to.be.equal(campaignPrice+initBalance,'Campaign price was not transfered');
 		})
@@ -496,7 +497,7 @@ contract('ExtendedAdvertisement', function(accounts) {
 		var bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000002");
 		var initBalance = await TestUtils.getBalance(accounts[0]);
 
-		await addInstance.bulkRegisterPoA.sendTransaction(bid,objSign0.messageHash, objSign0.signature,1)
+		await addInstance.bulkRegisterPoA.sendTransaction(bid, msg, objSign0.signature, 1, {from: accounts[0]})
 		await addInstance.withdraw();
 		var finalBalance = await TestUtils.getBalance(accounts[0]);
 
@@ -507,7 +508,7 @@ contract('ExtendedAdvertisement', function(accounts) {
 		var bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000002");
 		var initBalance = await TestUtils.getBalance(accounts[2]);
 		await addInstance.addAddressToWhitelist(accounts[2]);
-		return addInstance.bulkRegisterPoA.sendTransaction(bid,objSign2.messageHash, objSign2.signature,1,{from: accounts[2]})
+		return addInstance.bulkRegisterPoA.sendTransaction(bid,msg, objSign2.signature,1,{from: accounts[2]})
 			.then(async () => {
 				var contractBalance = await TestUtils.getBalance(adFinanceInstance.address);
 				return addInstance.withdraw.sendTransaction({from: accounts[2]}).then( async () => {

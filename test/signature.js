@@ -32,20 +32,21 @@ contract('Signature', function(accounts) {
 	})
 
         it('should get the address with a message and a signature',async function () {
-                privateKey8 = "0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501208";
-                const signatureInstance = await Signature.new();
-                var bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000001");
-		var timestamp = Date.now();
-		var hash = bid;
-		var buf = new Buffer(4);
-		buf.writeUInt8(0x1, 3);
-		var msgList = [Buffer.alloc(26),Buffer.from(hash),Buffer.alloc(28),buf];
-		var msg = Buffer.concat(msgList);
-		
-		var signatureObj = await web3.eth.accounts.sign(msg.toString(), privateKey8); 
 
-                const expectedHash = await signatureInstance.hashPersonalMessage(msg.toString());
+            const privateKey8 = "0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501208";
+            const signatureInstance = await Signature.new();
+            const bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000001");
+    		const timestamp = Date.now();
+    		const hash = bid;
+    		const buf = new Buffer(4);
+    		buf.writeUInt8(0x1, 3);
+    		const msgList = [Buffer.alloc(26),Buffer.from(hash),Buffer.alloc(28),buf];
+    		const msg = Buffer.concat(msgList);
 
-                expect(expectedHash).to.be.equal(signatureObj.messageHash, "The addresses do not match");
+    		const signatureObj = await web3.eth.accounts.sign(msg.toString(), privateKey8);
+
+            const expectedHash = await signatureInstance.hashPersonalMessage(msg.toString());
+
+            expect(expectedHash).to.be.equal(signatureObj.messageHash, "The addresses do not match");
         })
 })
