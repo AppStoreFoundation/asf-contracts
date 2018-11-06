@@ -56,7 +56,7 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist, Signature {
     avaliable to users.
     @param endDate Date (in miliseconds) on which the campaign will no longer be avaliable to users.
     @param endPoint URL of the signing serivce
-    @param rewardManager Entity receiving rewards considerin a single register PoA submission
+    @param rewardManager Entity receiving rewards considering a single register PoA submission
     */
     function createCampaign (
         string packageName,
@@ -155,14 +155,14 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist, Signature {
     }
 
     /**
-    
+
     */
-    function registerPoA(bytes32 _bidId,bytes _timestampAndHash,bytes _signature) 
-        public 
+    function registerPoA(bytes32 _bidId,bytes _timestampAndHash,bytes _signature)
+        public
         {
-        
+
         bool valid = _getStorage().getCampaignValidById(_bidId);
-        
+
         if(!valid){
             emit Error("registerPoA","Campaign is not valid");
             return;
@@ -183,10 +183,10 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist, Signature {
         uint budget = _getStorage().getCampaignBudgetById(_bidId);
         uint newBudget = budget - price;
         address owner = _getStorage().getCampaignOwnerById(_bidId);
-       
+
         _getFinance().pay(owner,rewardManager,price);
         _getStorage().setCampaignBudgetById(_bidId,newBudget);
-        
+
         if(newBudget < price){
             _getStorage().setCampaignValidById(_bidId,false);
         }
