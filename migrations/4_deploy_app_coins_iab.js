@@ -4,6 +4,7 @@ require('dotenv').config();
 
 module.exports = async function(deployer, network) {
     switch (network) {
+        case 'coverage':
         case 'development':
             Shares.deployed()
             .then(async () => {

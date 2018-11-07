@@ -61,7 +61,7 @@ contract('ExtendedAdvertisement', function(accounts) {
   		TestUtils.setAppCoinsInstance(appcInstance);
   		TestUtils.setContractInstance(addInstance);
 
-  		campaignPrice = 500000000000000000;
+  		campaignPrice =  500000000000000000;
   		campaignBudget = 1000000000000000000;
 
   		var countryList = []

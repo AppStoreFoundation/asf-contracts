@@ -9,6 +9,7 @@ require('dotenv').config();
 
 module.exports = function(deployer, network) {
     switch (network) {
+        case 'coverage':
         case 'development':
             deployer.deploy(AddressProxy);
             break;
