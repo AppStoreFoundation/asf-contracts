@@ -28,10 +28,6 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist, Signature {
             string endPoint
     );
 
-    event AddressBroadcast(address _address);
-    event NewHash(bytes cenas);
-    event NewHash2(bytes32 cenas,uint256 length);
-
     constructor(address _addrAppc, address _addrAdverStorage, address _addrAdverFinance) public
         BaseAdvertisement(_addrAppc,_addrAdverStorage,_addrAdverFinance) {
         addAddressToWhitelist(msg.sender);
@@ -155,7 +151,14 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist, Signature {
     }
 
     /**
-
+    @notice Function for single PoA submission
+    @dev
+        This function can be called by anyone and provides a mean for a user to submit a signed PoA.
+        This function emits a SinglePoARegistered event. The reward's funds are transfered to a
+        reward manager address, owned by the entity responsible for managing rewards.
+    @param _bidId Id of the Campaign
+    @param _timestampAndHash byte array containing the timestamp of the  signature and the hash of the PoA
+    @param _signature signature of the timestamp and Hash bytearray
     */
     function registerPoA(bytes32 _bidId,bytes _timestampAndHash,bytes _signature)
         public
@@ -174,8 +177,6 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist, Signature {
 
         if (rewardManager != addressSig) {
             emit Error("registerPoA","Invalid signature");
-            emit AddressBroadcast(rewardManager);
-            emit AddressBroadcast(addressSig);
             return;
         }
 

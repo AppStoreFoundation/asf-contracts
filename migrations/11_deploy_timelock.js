@@ -6,6 +6,7 @@ require('dotenv').config();
 module.exports = function(deployer, network) {
     var releaseTime = (new Date("2019-10-01")).getTime();
     switch (network) {
+        case 'coverage':
         case 'development':
             AppCoins.deployed()
             .then(function() {

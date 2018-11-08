@@ -8,6 +8,7 @@ require('dotenv').config();
 
 module.exports = async function(deployer, network) {
     switch (network) {
+        case 'coverage':
         case 'development':
             AppCoins.deployed()
             .then(function() {
