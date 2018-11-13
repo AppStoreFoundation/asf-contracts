@@ -52,7 +52,7 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist, Signature {
     avaliable to users.
     @param endDate Date (in miliseconds) on which the campaign will no longer be avaliable to users.
     @param endPoint URL of the signing serivce
-    @param rewardManager Entity receiving rewards considerin a single register PoA submission
+    @param rewardManager Entity receiving rewards considering a single register PoA submission
     */
     function createCampaign (
         string packageName,
