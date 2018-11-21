@@ -41,8 +41,8 @@ contract Advertisement is BaseAdvertisement {
             uint[] vercodes
     );
 
-   
-    function Advertisement (address _addrAppc, address _addrAdverStorage, address _addrAdverFinance) public 
+
+    function Advertisement (address _addrAppc, address _addrAdverStorage, address _addrAdverFinance) public
         BaseAdvertisement(_addrAppc,_addrAdverStorage,_addrAdverFinance) {
         rules = ValidationRules(false, true, true, 2, 1);
     }
@@ -67,7 +67,7 @@ contract Advertisement is BaseAdvertisement {
     @param endDate Date (in miliseconds) on which the campaign will no longer be avaliable to users.
     */
 
-    function createCampaign (
+    function gn (
         string packageName,
         uint[3] countries,
         uint[] vercodes,
@@ -76,10 +76,10 @@ contract Advertisement is BaseAdvertisement {
         uint startDate,
         uint endDate)
         external {
-            
+
         CampaignLibrary.Campaign memory newCampaign = _generateCampaign(packageName, countries, vercodes, price, budget, startDate, endDate);
 
-        if(newCampaign.owner == 0x0){ 
+        if(newCampaign.owner == 0x0){
             // campaign was not generated correctly (revert)
             return;
         }
@@ -165,10 +165,10 @@ contract Advertisement is BaseAdvertisement {
                 "registerPoA","Incorrect nounces for submited proof of attention");
             return;
         } */
-        
+
         // using the same variable as to the for loop to avoid stack too deep error
         i = getUserAttribution(bidId,msg.sender);
-        
+
         if(i>0){
             emit Error(
                 "registerPoA","User already registered a proof of attention for this campaign");
@@ -182,7 +182,7 @@ contract Advertisement is BaseAdvertisement {
         emit PoARegistered(bidId, packageName, timestampList, nonces, walletName, countryCode);
     }
 
-    
+
     /**
     @notice Internal function to distribute payouts
     @dev
