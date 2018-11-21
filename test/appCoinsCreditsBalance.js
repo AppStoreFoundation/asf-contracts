@@ -1,5 +1,5 @@
 const AppCoins = artifacts.require("./AppCoins.sol");
-const AppCoinsCredits = artifacts.require("./AppCoinsCredits.sol");
+const AppCoinsCreditsBalance = artifacts.require("./AppCoinsCreditsBalance.sol");
 const chai = require('chai');
 const web3 = require('web3');
 const TestUtils = require('./TestUtils.js');
@@ -10,19 +10,29 @@ chai.use(chaiAsPromissed);
 const expectRevert = RegExp('revert');
 
 let appcInstance;
-let AppCoinsCreditsInstance;
+let appCoinsCreditsBalanceInstance;
 
 contract('AppCoinsCredits', function(accounts) {
     beforeEach('Setting Advertisement test...',async () => {
         appcInstance = await AppCoins.new();
         TestUtils.setAppCoinsInstance(appcInstance);
+
+        appCoinsCreditsBalanceInstance = await AppCoinsCreditsBalance.new(appcInstance.address);
+        TestUtils.setContractInstance(appCoinsCreditsBalanceInstance);
+        await AdvertisementStorageInstance.addAddressToWhitelist(accounts[0]);
+
     });
 
-    it('receives a wallet and merkle tree root hash and dispatch an event', async function () {
-
+    it('event is send after a register balance proof', async function () {
+        appCoinsCreditsBalanceInstance
     })
 
     it('should recieve APPC correctly', async function () {
+        const amount = 10;
+        await appcInstance.approve(AppCoinsTimelockInstance.address, amount, { from: accounts[0] });
+
+        await AppCoinsTimelockInstance.depositFunds(amount);
+
 
     })
 
