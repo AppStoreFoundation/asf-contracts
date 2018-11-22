@@ -12,8 +12,8 @@ const expectRevert = RegExp('revert');
 let appcInstance;
 let appCoinsCreditsBalanceInstance;
 
-contract('AppCoinsCredits', function(accounts) {
-    beforeEach('Setting Advertisement test...',async () => {
+contract('AppCoinsCreditsBalance', function(accounts) {
+    beforeEach('Setting AppCoinsCreditsBalance test...',async () => {
         appcInstance = await AppCoins.new();
         TestUtils.setAppCoinsInstance(appcInstance);
 
