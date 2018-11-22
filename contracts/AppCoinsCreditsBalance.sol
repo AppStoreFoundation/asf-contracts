@@ -26,6 +26,27 @@ contract AppCoinsCreditsBalance is Whitelist {
         appc = AppCoins(_addrAppc);
     }
 
+    /**
+    *@notice Get the balance
+    *@dev
+    *    returns the balance
+    *@return {"balance" : "balance"}
+    */
+    function getBalance() public view returns(uint256) {
+        return balance;
+    }
+
+    /**
+    *@notice Get the balance proof
+    *@dev
+    *    returns the balance proof
+    *@return {"balanceProof" : "balance proof"}
+    */
+    function getBbalanceProof() public view returns(bytes) {
+        return balanceProof;
+    }
+
+
 
     function registerBalanceProof(bytes _merkleTreeHash)
         public
