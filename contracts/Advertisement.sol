@@ -67,7 +67,7 @@ contract Advertisement is BaseAdvertisement {
     @param endDate Date (in miliseconds) on which the campaign will no longer be avaliable to users.
     */
 
-    function gn (
+    function createCampaign (
         string packageName,
         uint[3] countries,
         uint[] vercodes,
