@@ -49,7 +49,6 @@ contract AppCoinsCreditsBalance is Whitelist {
     /**
     @notice Register balance proof
     @param _merkleTreeHash (bytes) the merkle tree root hash
-    @return {"balanceProof" : "balance proof"}
     */
     function registerBalanceProof(bytes _merkleTreeHash)
         internal{
