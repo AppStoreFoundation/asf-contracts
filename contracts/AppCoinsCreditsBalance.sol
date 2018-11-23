@@ -63,7 +63,6 @@ contract AppCoinsCreditsBalance is Whitelist {
     @notice Register balance proof
     @param _amount (unit) amount to be deposited
     @param _merkleTreeHash (bytes) the merkle tree root hash
-    @return {"balanceProof" : "balance proof"}
     */
     function depositFunds(uint _amount, bytes _merkleTreeHash)
         public
@@ -79,7 +78,6 @@ contract AppCoinsCreditsBalance is Whitelist {
     @notice Withdraw funds
     @param _amount (unit) amount to be withdraw
     @param _merkleTreeHash (bytes) the merkle tree root hash
-    @return {"balanceProof" : "balance proof"}
     */
     function withdrawFunds(uint _amount, bytes _merkleTreeHash)
         public
