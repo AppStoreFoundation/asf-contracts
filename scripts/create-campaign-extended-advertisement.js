@@ -53,7 +53,6 @@ module.exports = function(callback) {
         })
     }
 
-    console.log("yoo");
     createCampaign();
 
 };
