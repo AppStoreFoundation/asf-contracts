@@ -31,12 +31,12 @@ contract('AppCoinsCreditsBalance', function(accounts) {
         await TestUtils.expectEventTest('BalanceProof', async () => {
                var expectedBalanceProof = await appCoinsCreditsBalanceInstance.getBbalanceProof.call();
                expect(balanceProof)
-                .to.be.equal(expectedBalanceProof, "Contrat do not send event BalanceProof");
+                .to.be.equal(expectedBalanceProof, "Contrat is not sending the event BalanceProof");
             });
 
         const auxBalanceProof = await appCoinsCreditsBalanceInstance.getBbalanceProof.call();
 
-        expect(auxBalanceProof).to.be.equal(balanceProof, "balanceProof not stored in the contract");
+        expect(auxBalanceProof).to.be.equal(balanceProof, "balanceProof is not stored in the contract");
 
 
     })
@@ -51,7 +51,7 @@ contract('AppCoinsCreditsBalance', function(accounts) {
         let auxBalance =
             await appCoinsCreditsBalanceInstance.getBalance.call();
 
-        expect(auxBalance.toNumber()).to.be.equal(amount, "The contract is saving the first deposit");
+        expect(auxBalance.toNumber()).to.be.equal(amount, "The contract is saving incorrectly the first deposit");
 
         await appcInstance.approve(appCoinsCreditsBalanceInstance.address, amount, { from: accounts[0] });
 
@@ -59,7 +59,7 @@ contract('AppCoinsCreditsBalance', function(accounts) {
 
         auxBalance = await appCoinsCreditsBalanceInstance.getBalance.call();
 
-        expect(auxBalance.toNumber()).to.be.equal(amount * 2, "The contract is saving heh second deposit");
+        expect(auxBalance.toNumber()).to.be.equal(amount * 2, "The contract is saving incorrectly the second deposit");
 
     })
 
@@ -74,13 +74,13 @@ contract('AppCoinsCreditsBalance', function(accounts) {
         let auxBalance =
             await appCoinsCreditsBalanceInstance.getBalance.call();
 
-        expect(auxBalance.toNumber()).to.be.equal(amountToDeposit, "The contract is saving the first deposit");
+        expect(auxBalance.toNumber()).to.be.equal(amountToDeposit, "The contract is saving incorrectly the deposit");
 
         await appCoinsCreditsBalanceInstance.withdrawFunds(amountToWithdraw);
 
         auxBalance =
             await appCoinsCreditsBalanceInstance.getBalance.call();
 
-        expect(auxBalance.toNumber()).to.be.equal(amountToDeposit - amountToWithdraw, "The contract is saving the first deposit");
+        expect(auxBalance.toNumber()).to.be.equal(amountToDeposit - amountToWithdraw, "The contract is not correctly deducting the withdraw amount");
     })
 });
