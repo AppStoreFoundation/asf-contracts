@@ -23,30 +23,24 @@ contract('AppCoinsCreditsBalance', function(accounts) {
 
     });
 
-    it('Should correctly send an event after registering a proof of balance', async function () {
-        const balanceProof = Buffer.from(Web3.utils.utf8ToHex("balanceProof")).toString();
-
-        await appCoinsCreditsBalanceInstance.registerBalanceProof(balanceProof);
-
-        await TestUtils.expectEventTest('BalanceProof', async () => {
-               var expectedBalanceProof = await appCoinsCreditsBalanceInstance.getBbalanceProof.call();
-               expect(balanceProof)
-                .to.be.equal(expectedBalanceProof, "Contrat is not sending the event BalanceProof");
-            });
-
-        const auxBalanceProof = await appCoinsCreditsBalanceInstance.getBbalanceProof.call();
-
-        expect(auxBalanceProof).to.be.equal(balanceProof, "balanceProof is not stored in the contract");
-
-
-    })
-
     it('Should correctly deposit an amount', async function () {
         const amount = 10;
+        const firstBalanceProof = Buffer.from(Web3.utils.utf8ToHex("balanceProof")).toString(); //   the balance proof of the first depoit
+        const secondBalanceProof = Buffer.from(Web3.utils.utf8ToHex("balanceProof")).toString(); //   the balance proof of the first depoit
 
         await appcInstance.approve(appCoinsCreditsBalanceInstance.address, amount, { from: accounts[0] });
 
-        await appCoinsCreditsBalanceInstance.depositFunds(amount);
+        await appCoinsCreditsBalanceInstance.depositFunds(amount, firstBalanceProof);
+
+        await TestUtils.expectEventTest('BalanceProof', async () => {
+               let expectedBalanceProof = await appCoinsCreditsBalanceInstance.getBalanceProof.call();
+               expect(firstBalanceProof)
+                .to.be.equal(expectedBalanceProof, "Contrat is not sending the event BalanceProof");
+            });
+
+        let auxBalanceProof = await appCoinsCreditsBalanceInstance.getBalanceProof.call();
+
+        expect(auxBalanceProof).to.be.equal(firstBalanceProof, "balanceProof is not stored in the contract");
 
         let auxBalance =
             await appCoinsCreditsBalanceInstance.getBalance.call();
@@ -55,7 +49,17 @@ contract('AppCoinsCreditsBalance', function(accounts) {
 
         await appcInstance.approve(appCoinsCreditsBalanceInstance.address, amount, { from: accounts[0] });
 
-        await appCoinsCreditsBalanceInstance.depositFunds(amount);
+        await appCoinsCreditsBalanceInstance.depositFunds(amount, secondBalanceProof);
+
+        await TestUtils.expectEventTest('BalanceProof', async () => {
+               let expectedBalanceProof = await appCoinsCreditsBalanceInstance.getBalanceProof.call();
+               expect(secondBalanceProof)
+                .to.be.equal(expectedBalanceProof, "Contrat is not sending the event BalanceProof");
+            });
+
+        auxBalanceProof = await appCoinsCreditsBalanceInstance.getBalanceProof.call();
+
+        expect(auxBalanceProof).to.be.equal(secondBalanceProof, "balanceProof is not stored in the contract");
 
         auxBalance = await appCoinsCreditsBalanceInstance.getBalance.call();
 
@@ -65,18 +69,32 @@ contract('AppCoinsCreditsBalance', function(accounts) {
 
     it('Should correctly withdraw an amount', async function () {
         const amountToDeposit = 10;
+        const depositBalanceProof = Buffer.from(Web3.utils.utf8ToHex("depositBalanceProof")).toString();
         const amountToWithdraw = 5;
+        const withdrawBalanceProof = Buffer.from(Web3.utils.utf8ToHex("withdrawBalanceProof")).toString();
 
         await appcInstance.approve(appCoinsCreditsBalanceInstance.address, amountToDeposit, { from: accounts[0] });
 
-        await appCoinsCreditsBalanceInstance.depositFunds(amountToDeposit);
+        await appCoinsCreditsBalanceInstance.depositFunds(amountToDeposit, depositBalanceProof);
+
+        await TestUtils.expectEventTest('BalanceProof', async () => {
+               var expectedBalanceProof = await appCoinsCreditsBalanceInstance.getBalanceProof.call();
+               expect(depositBalanceProof)
+                .to.be.equal(expectedBalanceProof, "Contrat is not sending the event BalanceProof");
+            });
 
         let auxBalance =
             await appCoinsCreditsBalanceInstance.getBalance.call();
 
         expect(auxBalance.toNumber()).to.be.equal(amountToDeposit, "The contract is saving incorrectly the deposit");
 
-        await appCoinsCreditsBalanceInstance.withdrawFunds(amountToWithdraw);
+        await appCoinsCreditsBalanceInstance.withdrawFunds(amountToWithdraw, withdrawBalanceProof);
+
+        await TestUtils.expectEventTest('BalanceProof', async () => {
+               var expectedBalanceProof = await appCoinsCreditsBalanceInstance.getBalanceProof.call();
+               expect(withdrawBalanceProof)
+                .to.be.equal(expectedBalanceProof, "Contrat is not sending the event BalanceProof");
+            });
 
         auxBalance =
             await appCoinsCreditsBalanceInstance.getBalance.call();

@@ -9,10 +9,10 @@ contract AppCoinsCreditsBalance is Whitelist {
     AppCoins private appc;
 
     // balance proof
-    bytes balanceProof;
+    bytes private balanceProof;
 
     // balance
-    uint balance;
+    uint private balance;
 
     event BalanceProof(bytes _merkleTreeHash);
     event Deposit(uint _amount);
@@ -27,49 +27,65 @@ contract AppCoinsCreditsBalance is Whitelist {
     }
 
     /**
-    *@notice Get the balance
-    *@dev
-    *    returns the balance
-    *@return {"balance" : "balance"}
+    @notice Get the balance
+    @dev
+         returns the balance
+    @return {"balance" : "balance"}
     */
     function getBalance() public view returns(uint256) {
         return balance;
     }
 
     /**
-    *@notice Get the balance proof
-    *@dev
-    *    returns the balance proof
-    *@return {"balanceProof" : "balance proof"}
+    @notice Get the balance proof
+    @dev
+        returns the balance proof
+    @return {"balanceProof" : "balance proof"}
     */
-    function getBbalanceProof() public view returns(bytes) {
+    function getBalanceProof() public view returns(bytes) {
         return balanceProof;
     }
 
-
-
+    /**
+    @notice Register balance proof
+    @param _merkleTreeHash (bytes) the merkle tree root hash
+    @return {"balanceProof" : "balance proof"}
+    */
     function registerBalanceProof(bytes _merkleTreeHash)
-        public
-        onlyIfWhitelisted("registerBalanceProof",msg.sender){
+        internal{
 
         balanceProof = _merkleTreeHash;
 
         emit BalanceProof(_merkleTreeHash);
     }
 
-    function depositFunds(uint _amount)
+    /**
+    @notice Register balance proof
+    @param _amount (unit) amount to be deposited
+    @param _merkleTreeHash (bytes) the merkle tree root hash
+    @return {"balanceProof" : "balance proof"}
+    */
+    function depositFunds(uint _amount, bytes _merkleTreeHash)
         public
         onlyIfWhitelisted("depositFunds", msg.sender){
         require(appc.allowance(msg.sender, address(this)) >= _amount);
+        registerBalanceProof(_merkleTreeHash);
         appc.transferFrom(msg.sender, address(this), _amount);
         balance = balance + _amount;
         emit Deposit(_amount);
     }
 
-    function withdrawFunds(uint _amount)
+    /**
+    @notice Withdraw funds
+    @param _amount (unit) amount to be withdraw
+    @param _merkleTreeHash (bytes) the merkle tree root hash
+    @return {"balanceProof" : "balance proof"}
+    */
+    function withdrawFunds(uint _amount, bytes _merkleTreeHash)
         public
         onlyIfWhitelisted("withdrawFunds",msg.sender){
         require(balance >= _amount);
+        registerBalanceProof(_merkleTreeHash);
         appc.transfer(msg.sender, _amount);
         balance = balance - _amount;
         emit Withdraw(_amount);
