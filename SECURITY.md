@@ -99,10 +99,10 @@ The only smart contracts out of the scope of this bugbounty is the AppCoins toke
 - Denial of service attacks against Ethereum network are strctly out of scope of this program
 - AppCoins token contract (ERC-20 token contract) is out of scope of this program
 
-####Qualifying Vulnerabilities
+#### Qualifying Vulnerabilities
  - Any vulnerability related to AppCoins team maintained smart contracts
 
-####NON-Qualifying Vulnerabilities
+#### NON-Qualifying Vulnerabilities
  - Any vulnerability against AppStore Foundation servers
  - Any hypothetical flaw or best practices without exploitable POC
  - Any physical attempts against AppStore Foundation (ASF) or Aptoide offices or data centers
@@ -112,7 +112,7 @@ The only smart contracts out of the scope of this bugbounty is the AppCoins toke
  - Vulnerabilities related to Solidity compiler or language design
 
 
-Safe Harbor
+###Safe Harbor
 
 Any activities conducted in a manner consistent with this policy will be considered authorized conduct and we will not initiate legal action against you. If legal action is initiated by a third party against you in connection with activities conducted under this policy, we will take steps to make it known that your actions were conducted in compliance with this policy.
 
