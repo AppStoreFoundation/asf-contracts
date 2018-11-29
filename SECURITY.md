@@ -77,7 +77,7 @@ Considering the risk assigned by the AppCoins team, the possible rewards are def
 </table>
 
 
-### Eligibiliy and Responsible Disclosure
+### Eligibility and Responsible Disclosure
 
 We thank everyone submitting valid reports. In order for a report to be eligible for a monetary rewards, the following conditions need to be respected:
  - You must be the first reporter of a vulnerabiliby
