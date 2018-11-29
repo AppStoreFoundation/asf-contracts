@@ -4,6 +4,18 @@ const web3 = require('web3');
 
 require('dotenv').config();
 
+let instance;
+let appCoinsAddress;
+let appCoinsIABAddress;
+let advertisementAddress;
+let advertisementFinanceAddress;
+let advertisementStorageAddress;
+let appCoinsTimelockAddress;
+let appCoinsCreditsBalanceAddress;
+let extendedAdvertisementAddress;
+let extendedAdvertisementFinanceAddress;
+let extendedAdvertisementStorageAddress;
+
 module.exports = function(callback) {
     let instance;
     switch (network) {
@@ -16,6 +28,7 @@ module.exports = function(callback) {
             advertisementFinanceAddress = process.env.ADVERTISEMENT_FINANCE_DEVELOPMENT_ADDRESS;
             advertisementStorageAddress = process.env.ADVERTISEMENT_STORAGE_DEVELOPMENT_ADDRESS;
             appCoinsTimelockAddress = process.env.APPCOINS_TIMELOCK_DEVELOPMENT_ADDRESS;
+            appCoinsCreditsBalanceAddress = process.env.APPCOINS_CREDITS_BALANCE_DEVELOPMENT_ADDRESS;
 
             extendedAdvertisementAddress = process.env.EXTENDED_ADVERTISEMENT_DEVELOPMENT_ADDRESS;
             extendedAdvertisementFinanceAddress = process.env.EXTENDED_ADVERTISEMENT_FINANCE_DEVELOPMENT_ADDRESS;
@@ -31,6 +44,7 @@ module.exports = function(callback) {
             advertisementFinanceAddress = process.env.ADVERTISEMENT_FINANCE_ROPSTEN_ADDRESS;
             advertisementStorageAddress = process.env.ADVERTISEMENT_STORAGE_ROPSTEN_ADDRESS;
             appCoinsTimelockAddress = process.env.APPCOINS_TIMELOCK_ROPSTEN_ADDRESS;
+            appCoinsCreditsBalanceAddress = process.env.APPCOINS_CREDITS_BALANCE_ROPSTEN_ADDRESS;
 
             extendedAdvertisementAddress = process.env.EXTENDED_ADVERTISEMENT_ROPSTEN_ADDRESS;
             extendedAdvertisementFinanceAddress = process.env.EXTENDED_ADVERTISEMENT_FINANCE_ROPSTEN_ADDRESS;
@@ -46,6 +60,7 @@ module.exports = function(callback) {
             advertisementFinanceAddress = process.env.ADVERTISEMENT_FINANCE_MAINNET_ADDRESS;
             advertisementStorageAddress = process.env.ADVERTISEMENT_STORAGE_MAINNET_ADDRESS;
             appCoinsTimelockAddress = process.env.APPCOINS_TIMELOCK_MAINNET_ADDRESS;
+            appCoinsCreditsBalanceAddress = process.env.APPCOINS_CREDITS_BALANCE_MAINNET_ADDRESS;
 
             extendedAdvertisementAddress = process.env.EXTENDED_ADVERTISEMENT_MAINNET_ADDRESS;
             extendedAdvertisementFinanceAddress = process.env.EXTENDED_ADVERTISEMENT_FINANCE_MAINNET_ADDRESS;
@@ -74,6 +89,7 @@ module.exports = function(callback) {
     addAddress(process.env.ADVERTISEMENT_FINANCE_CONTRACT_NAME, advertisementFinanceAddress);
     addAddress(process.env.ADVERTISEMENT_STORAGE_CONTRACT_NAME, advertisementStorageAddress);
     addAddress(process.env.APPCOINS_TIMELOCK_CONTRACT_NAME, appCoinsTimelockAddress);
+    addAddress(process.env.APPCOINS_CREDITS_BALANCE_CONTRACT_NAME, appCoinsCreditsBalanceAddress);
     addAddress(process.env.EXTENDED_ADVERTISEMENT_CONTRACT_NAME, extendedAdvertisementAddress);
     addAddress(process.env.EXTENDED_ADVERTISEMENT_FINANCE_CONTRACT_NAME, extendedAdvertisementFinanceAddress);
     addAddress(process.env.EXTENDED_ADVERTISEMENT_STORAGE_CONTRACT_NAME, extendedAdvertisementStorageAddress);
