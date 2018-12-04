@@ -36,7 +36,6 @@ module.exports = function(callback) {
         })
     }
 
-    // const campaignId = '0x000000000000000000000000000000000000000000000000000000000000002';
     const campaignId = process.argv[7];
 
     cancelCampaign(campaignId);
