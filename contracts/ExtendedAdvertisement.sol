@@ -106,12 +106,12 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist, Signature {
         onlyIfWhitelisted("createCampaign",msg.sender)
         {
 
-        address addressSig = recoverSigner(rootHash, signedRootHash);
+        /* address addressSig = recoverSigner(rootHash, signedRootHash); */
 
-        if (msg.sender != addressSig) {
+        /* if (msg.sender != addressSig) {
             emit Error("bulkRegisterPoA","Invalid signature");
             return;
-        }
+        } */
 
         uint price = _getStorage().getCampaignPriceById(bidId);
         uint budget = _getStorage().getCampaignBudgetById(bidId);
