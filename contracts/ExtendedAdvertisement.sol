@@ -3,12 +3,11 @@ pragma solidity ^0.4.24;
 import "./Base/StorageUser.sol";
 import "./Base/Whitelist.sol";
 import "./Base/BaseAdvertisement.sol";
-import "./Base/Signature.sol";
 import "./ExtendedAdvertisementStorage.sol";
 import "./ExtendedFinance.sol";
 
 
-contract ExtendedAdvertisement is BaseAdvertisement, Whitelist, Signature {
+contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
 
     event BulkPoARegistered(bytes32 bidId, bytes32 rootHash, bytes signedrootHash, uint256 newPoAs, uint256 convertedPoAs);
     event CampaignInformation

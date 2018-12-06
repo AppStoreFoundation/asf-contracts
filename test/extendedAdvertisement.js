@@ -196,7 +196,7 @@ contract('ExtendedAdvertisement', function(accounts) {
 		assert.equal(eventInfoLog.event,"Error","Event must be a Error event");
 		assert.equal(eventInfoLog.args.message,"Not enough allowance","Error message should be 'Not enough allowance'.")
  	})
-    
+
 	it('should cancel a campaign as contract owner', async function () {
 		var bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000002");
 
@@ -321,21 +321,21 @@ contract('ExtendedAdvertisement', function(accounts) {
 		expect(JSON.parse(eventLog.args.convertedPoAs)).to.equal(0,'No PoA should be converted');
 	});
 
-	it('should revert if PoA root hash is incorrectly signed', async () => {
-
-
-		await addInstance.cancelCampaign(examplePoA.bid);
-
-		var events = addInstance.allEvents();
-
-		await addInstance.bulkRegisterPoA(examplePoA.bid, objSign1.messageHash, objSign1.signature, 1, {from: accounts[0]});
-
-		var eventLog = await new Promise(function (resolve,reject){
-			events.watch(function(error,log){ events.stopWatching(); resolve(log); });
-		})
-
-		expect(eventLog.event).to.equal("Error","Invalid signature");
-	});
+	// it('should revert if PoA root hash is incorrectly signed', async () => {
+    //
+    //
+	// 	await addInstance.cancelCampaign(examplePoA.bid);
+    //
+	// 	var events = addInstance.allEvents();
+    //
+	// 	await addInstance.bulkRegisterPoA(examplePoA.bid, objSign1.messageHash, objSign1.signature, 1, {from: accounts[0]});
+    //
+	// 	var eventLog = await new Promise(function (resolve,reject){
+	// 		events.watch(function(error,log){ events.stopWatching(); resolve(log); });
+	// 	})
+    //
+	// 	expect(eventLog.event).to.equal("Error","Invalid signature");
+	// });
 
 
 	it('should upgrade advertisement storage and cancel all campaigns', async function() {
