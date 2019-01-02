@@ -9,7 +9,8 @@ import "./ExtendedFinance.sol";
 
 contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
 
-    event BulkPoARegistered(bytes32 bidId, bytes32 rootHash, bytes signedrootHash, uint256 newPoAs, uint256 convertedPoAs);
+    event BulkPoARegistered(bytes32 _bidId, bytes _rootHash, bytes _signature, uint256 _newHashes, uint256 _effectiveConversions);
+    event SinglePoARegistered(bytes32 _bidId, bytes _timestampAndHash, bytes _signature);
     event CampaignInformation
         (
             bytes32 bidId,
@@ -17,8 +18,13 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
             string ipValidator,
             string packageName,
             uint[3] countries,
-            uint[] vercodes,
-            string endpoint
+            uint[] vercodes
+    );
+    event ExtendedCampaignInfo
+        (
+            bytes32 bidId,
+            address rewardManager,
+            string endPoint
     );
 
     constructor(address _addrAppc, address _addrAdverStorage, address _addrAdverFinance) public
@@ -45,6 +51,7 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
     avaliable to users.
     @param endDate Date (in miliseconds) on which the campaign will no longer be avaliable to users.
     @param endPoint URL of the signing serivce
+    @param rewardManager Entity receiving rewards considering a single register PoA submission
     */
     function createCampaign (
         string packageName,
@@ -54,6 +61,7 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
         uint budget,
         uint startDate,
         uint endDate,
+        address rewardManager,
         string endPoint)
         external
         {
@@ -75,6 +83,7 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
             newCampaign.endDate,
             newCampaign.valid,
             newCampaign.owner,
+            rewardManager,
             endPoint);
 
         emit CampaignInformation(
@@ -83,8 +92,9 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
             "", // ipValidator field
             packageName,
             countries,
-            vercodes,
-            endPoint);
+            vercodes);
+
+        emit ExtendedCampaignInfo(newCampaign.bidId, rewardManager, endPoint);
     }
 
     /**
@@ -95,14 +105,14 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
         event containing the campaign id, root hash, signed root hash, number of new hashes since
         the last submission and the effective number of conversions.
 
-    @param bidId Campaign id for which the Proof of attention root hash refferes to
-    @param rootHash Root hash of all submitted proof of attention to a given campaign
-    @param signedRootHash Root hash signed by the signing service of the campaign
-    @param newHashes Number of new proof of attention hashes since last submission
+    @param _bidId Campaign id for which the Proof of attention root hash refferes to
+    @param _rootHash Root hash of all submitted proof of attention to a given campaign
+    @param _signature Root hash signed by the signing service of the campaign
+    @param _newHashes Number of new proof of attention hashes since last submission
     */
-    function bulkRegisterPoA(bytes32 bidId, bytes32 rootHash, bytes signedRootHash, uint256 newHashes)
+    function bulkRegisterPoA(bytes32 _bidId, bytes _rootHash, bytes _signature, uint256 _newHashes)
         public
-        onlyIfWhitelisted("createCampaign",msg.sender)
+        onlyIfWhitelisted("createCampaign", msg.sender)
         {
 
         /* address addressSig = recoverSigner(rootHash, signedRootHash); */
@@ -112,16 +122,16 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
             return;
         } */
 
-        uint price = _getStorage().getCampaignPriceById(bidId);
-        uint budget = _getStorage().getCampaignBudgetById(bidId);
-        address owner = _getStorage().getCampaignOwnerById(bidId);
+        uint price = _getStorage().getCampaignPriceById(_bidId);
+        uint budget = _getStorage().getCampaignBudgetById(_bidId);
+        address owner = _getStorage().getCampaignOwnerById(_bidId);
         uint maxConversions = division(budget,price);
         uint effectiveConversions;
         uint totalPay;
         uint newBudget;
 
-        if (maxConversions >= newHashes){
-            effectiveConversions = newHashes;
+        if (maxConversions >= _newHashes){
+            effectiveConversions = _newHashes;
         } else {
             effectiveConversions = maxConversions;
         }
@@ -129,14 +139,59 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
         totalPay = price*effectiveConversions;
         newBudget = budget - totalPay;
 
-        _getFinance().pay(owner,msg.sender,totalPay);
-        _getStorage().setCampaignBudgetById(bidId,newBudget);
+        _getFinance().pay(owner, msg.sender, totalPay);
+        _getStorage().setCampaignBudgetById(_bidId, newBudget);
 
         if(newBudget < price){
-            _getStorage().setCampaignValidById(bidId,false);
+            _getStorage().setCampaignValidById(_bidId, false);
         }
 
-        emit BulkPoARegistered(bidId,rootHash,signedRootHash,newHashes,effectiveConversions);
+        emit BulkPoARegistered(_bidId, _rootHash, _signature, _newHashes, effectiveConversions);
+    }
+
+    /**
+    @notice Function for single PoA submission
+    @dev
+        This function can be called by anyone and provides a mean for a user to submit a signed PoA.
+        This function emits a SinglePoARegistered event. The reward's funds are transfered to a
+        reward manager address, owned by the entity responsible for managing rewards.
+    @param _bidId Id of the Campaign
+    @param _timestampAndHash byte array containing the timestamp of the  signature and the hash of the PoA
+    @param _signature signature of the timestamp and Hash bytearray
+    */
+    function registerPoA(bytes32 _bidId,bytes _timestampAndHash,bytes _signature)
+        public
+        {
+
+        bool valid = _getStorage().getCampaignValidById(_bidId);
+
+        if(!valid){
+            emit Error("registerPoA","Campaign is not valid");
+            return;
+        }
+
+        address addressSig = recoverSigner(hashPersonalMessage(_timestampAndHash), _signature);
+
+        address rewardManager = ExtendedAdvertisementStorage(address(_getStorage())).getRewardManagerById(_bidId);
+
+        if (rewardManager != addressSig) {
+            emit Error("registerPoA","Invalid signature");
+            return;
+        }
+
+        uint price = _getStorage().getCampaignPriceById(_bidId);
+        uint budget = _getStorage().getCampaignBudgetById(_bidId);
+        uint newBudget = budget - price;
+        address owner = _getStorage().getCampaignOwnerById(_bidId);
+
+        _getFinance().pay(owner,rewardManager,price);
+        _getStorage().setCampaignBudgetById(_bidId,newBudget);
+
+        if(newBudget < price){
+            _getStorage().setCampaignValidById(_bidId,false);
+        }
+
+        emit SinglePoARegistered(_bidId, _timestampAndHash, _signature);
     }
 
     /**
