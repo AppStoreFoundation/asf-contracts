@@ -37,6 +37,8 @@ var objSign1;
 var objSign2;
 var msg;
 
+var endPoint = "appcoins.io";
+
 function convertCountryCodeToIndex(countryCode) {
 	var begin = new Buffer("AA");
 	var one = new Buffer("A");
@@ -80,7 +82,7 @@ contract('ExtendedAdvertisement', function(accounts) {
 
   		await appcInstance.approve(addInstance.address,campaignBudget);
 
-  		await addInstance.createCampaign(packageName,countryList,[1,2],campaignPrice,campaignPrice,startDate,endDate, accounts[8],"appcoins.io");
+  		await addInstance.createCampaign(packageName,countryList,[1,2],campaignPrice,campaignPrice,startDate,endDate, accounts[8], endPoint);
 
   		await appcInstance.transfer(accounts[1],campaignBudget);
   		countryList.push(convertCountryCodeToIndex("PT"))
@@ -88,7 +90,7 @@ contract('ExtendedAdvertisement', function(accounts) {
   		countryList.push(convertCountryCodeToIndex("FR"))
   		countryList.push(convertCountryCodeToIndex("PA"))
   		await appcInstance.approve(addInstance.address,campaignBudget, { from: accounts[1]});
-  		await addInstance.createCampaign(packageName,countryList,[1,2],campaignPrice,campaignBudget,startDate,endDate, accounts[8], "appcoins.io",  { from : accounts[1]});
+  		await addInstance.createCampaign(packageName,countryList,[1,2],campaignPrice,campaignBudget,startDate,endDate, accounts[8], endPoint,  { from : accounts[1]});
 
 
   		examplePoA = new Object();
@@ -140,7 +142,7 @@ contract('ExtendedAdvertisement', function(accounts) {
 		var eventsInfo = addInstance.allEvents();
 		var packageName1 = "com.instagram.android";
 
-		await addInstance.createCampaign(packageName1,countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980, accounts[8], "appcoins.io");
+		await addInstance.createCampaign(packageName1,countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980, accounts[8], endPoint);
 
 		var eventStorageLog = await new Promise(
 				function(resolve, reject){
@@ -183,7 +185,7 @@ contract('ExtendedAdvertisement', function(accounts) {
 		countryList.push(convertCountryCodeToIndex("PA"))
  		var eventsInfo = addInstance.allEvents();
 		var packageName1 = "com.instagram.android";
- 		await addInstance.createCampaign(packageName1,countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980, accounts[8], "appcoins.io");
+ 		await addInstance.createCampaign(packageName1,countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980, accounts[8], endPoint);
 
 		var eventNumber = -1;
 		var eventInfoLog = await new Promise(
@@ -264,7 +266,7 @@ contract('ExtendedAdvertisement', function(accounts) {
 			var countryList = [];
 			countryList.push(convertCountryCodeToIndex("GB"));
 			countryList.push(convertCountryCodeToIndex("FR"));
-			await addInstance.createCampaign.sendTransaction("org.telegram.messenger",countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980, accounts[8], "appcoins.io");
+			await addInstance.createCampaign.sendTransaction("org.telegram.messenger",countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980, accounts[8], endPoint);
 		})
 
 		var newUserBalance = await TestUtils.getBalance(accounts[0]);
@@ -353,7 +355,7 @@ contract('ExtendedAdvertisement', function(accounts) {
 
 		await appcInstance.approve(addInstance.address,campaignBudget, {from: accounts[1]});
 
-		await addInstance.createCampaign(packageName,countryList,[1,2],campaignPrice,campaignBudget,startDate,endDate, accounts[8], "appcoins.io", { from : accounts[1]});
+		await addInstance.createCampaign(packageName,countryList,[1,2],campaignPrice,campaignBudget,startDate,endDate, accounts[8], endPoint, { from : accounts[1]});
 		var newBid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000003");
 		var bidIdList = await addInstance.getBidIdList.call();
 
