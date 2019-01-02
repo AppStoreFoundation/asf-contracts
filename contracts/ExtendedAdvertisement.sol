@@ -115,13 +115,6 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
         onlyIfWhitelisted("createCampaign", msg.sender)
         {
 
-        /* address addressSig = recoverSigner(rootHash, signedRootHash); */
-
-        /* if (msg.sender != addressSig) {
-            emit Error("bulkRegisterPoA","Invalid signature");
-            return;
-        } */
-
         uint price = _getStorage().getCampaignPriceById(_bidId);
         uint budget = _getStorage().getCampaignBudgetById(_bidId);
         address owner = _getStorage().getCampaignOwnerById(_bidId);
@@ -159,7 +152,7 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
     @param _timestampAndHash byte array containing the timestamp of the  signature and the hash of the PoA
     @param _signature signature of the timestamp and Hash bytearray
     */
-    function registerPoA(bytes32 _bidId,bytes _timestampAndHash,bytes _signature)
+    function registerPoA(bytes32 _bidId,bytes _timestampAndHash, bytes _signature)
         public
         {
 
@@ -170,14 +163,7 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
             return;
         }
 
-        address addressSig = recoverSigner(hashPersonalMessage(_timestampAndHash), _signature);
-
         address rewardManager = ExtendedAdvertisementStorage(address(_getStorage())).getRewardManagerById(_bidId);
-
-        if (rewardManager != addressSig) {
-            emit Error("registerPoA","Invalid signature");
-            return;
-        }
 
         uint price = _getStorage().getCampaignPriceById(_bidId);
         uint budget = _getStorage().getCampaignBudgetById(_bidId);
