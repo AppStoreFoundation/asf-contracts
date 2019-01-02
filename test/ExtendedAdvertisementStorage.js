@@ -24,7 +24,7 @@ var bidIdCreation = 1234;
 
 contract('ExtendedAdvertisementStorage', function(accounts) {
     beforeEach('Setting Advertisement test...',async () => {
-        
+
         extendedAdvertisementStorageInstance = await ExtendedAdvertisementStorage.new();
         TestUtils.setContractInstance(extendedAdvertisementStorageInstance);
 
@@ -49,7 +49,7 @@ contract('ExtendedAdvertisementStorage', function(accounts) {
 
         //Add to campaign map
         await extendedAdvertisementStorageInstance.setCampaign.sendTransaction(
-            bidIdCreation,
+            testCampaign.bidId,
             testCampaign.price,
             testCampaign.budget,
             testCampaign.startDate,
@@ -61,7 +61,7 @@ contract('ExtendedAdvertisementStorage', function(accounts) {
             { from: allowedAddress }
         );
 
-        var advertStartDate = 
+        var advertStartDate =
             await extendedAdvertisementStorageInstance.getCampaignStartDateById.call(testCampaign.bidId);
 
         expect(JSON.parse(advertStartDate))
@@ -93,8 +93,8 @@ contract('ExtendedAdvertisementStorage', function(accounts) {
 
     it('should emit an Error if store a campaign from a invalid address', async function () {
         var invalidAddress = accounts[2];
-        
-            
+
+
         await TestUtils.expectErrorMessageTest(
             'Operation can only be performed by Whitelisted Addresses',
             async () => {
@@ -127,13 +127,13 @@ contract('ExtendedAdvertisementStorage', function(accounts) {
 
     it('should revert if a campaign price is set to a campaign that does not exist', async () => {
         await TestUtils.expectErrorMessageTest("Campaign does not exist", () => {
-            
+
             return extendedAdvertisementStorageInstance.setCampaignPriceById(
                 bidIdCreation,
                 testCampaign.price);
         });
     });
-   
+
 
     it('should update a campaign budget of an existing campaign', async () => {
 
@@ -145,22 +145,22 @@ contract('ExtendedAdvertisementStorage', function(accounts) {
                 .to.be.equal(10000, "Campaign was not updated");
         });
     });
-        
+
     it('should revert if a campaign budget is set to a campaign that does not exist', async () => {
         await TestUtils.expectErrorMessageTest("Campaign does not exist", () => {
-            
+
             return extendedAdvertisementStorageInstance.setCampaignBudgetById(
                 bidIdCreation,
                 testCampaign.budget);
             });
     });
-            
+
     it('should update a campaign start date of an existing campaign', async () => {
 
         await TestUtils.expectEventTest('CampaignUpdated', async () => {
             await extendedAdvertisementStorageInstance
                 .setCampaignStartDateById.sendTransaction(testCampaign.bidId,1234438600);
-            var startDate = 
+            var startDate =
                 await extendedAdvertisementStorageInstance.getCampaignStartDateById.call(testCampaign.bidId);
             expect(JSON.parse(startDate))
                 .to.be.equal(1234438600, "Campaign was not updated");
@@ -169,7 +169,7 @@ contract('ExtendedAdvertisementStorage', function(accounts) {
 
     it('should revert if a campaign start date is set to a campaign that does not exist', async () => {
         await TestUtils.expectErrorMessageTest("Campaign does not exist", () => {
-            
+
             return extendedAdvertisementStorageInstance.setCampaignStartDateById(
                 bidIdCreation,
                 testCampaign.startDate);
@@ -181,7 +181,7 @@ contract('ExtendedAdvertisementStorage', function(accounts) {
         await TestUtils.expectEventTest('CampaignUpdated', async () => {
             await extendedAdvertisementStorageInstance
                 .setCampaignEndDateById.sendTransaction(testCampaign.bidId,1234438600);
-            var endDate = 
+            var endDate =
                 await extendedAdvertisementStorageInstance.getCampaignEndDateById.call(testCampaign.bidId);
             expect(JSON.parse(endDate))
                 .to.be.equal(1234438600, "Campaign was not updated");
@@ -202,7 +202,7 @@ contract('ExtendedAdvertisementStorage', function(accounts) {
 
     it('should revert if a campaign end date is set to a campaign that does not exist', async () => {
         await TestUtils.expectErrorMessageTest("Campaign does not exist", () => {
-            
+
             return extendedAdvertisementStorageInstance.setCampaignEndDateById(
                 bidIdCreation,
                 testCampaign.endDate);
@@ -214,7 +214,7 @@ contract('ExtendedAdvertisementStorage', function(accounts) {
         await TestUtils.expectEventTest('CampaignUpdated', async () => {
             await extendedAdvertisementStorageInstance
                 .setCampaignValidById.sendTransaction(testCampaign.bidId,false);
-            var validity = 
+            var validity =
                 await extendedAdvertisementStorageInstance.getCampaignValidById.call(testCampaign.bidId);
             expect(JSON.parse(validity))
                 .to.be.equal(false, "Campaign was not updated");
@@ -223,20 +223,20 @@ contract('ExtendedAdvertisementStorage', function(accounts) {
 
     it('should revert if a campaign validity is set to a campaign that does not exist', async () => {
         await TestUtils.expectErrorMessageTest("Campaign does not exist", () => {
-            
+
             return extendedAdvertisementStorageInstance.setCampaignValidById(
                 bidIdCreation,
                 false);
         });
     });
-    
+
     it('should update a campaign owner of an existing campaign', async () => {
 
         await TestUtils.expectEventTest('CampaignUpdated', async () => {
             var newOwner = web3.utils.toHex("0x0000000000000000000000000000000000099338");
             await extendedAdvertisementStorageInstance
                 .setCampaignOwnerById.sendTransaction(testCampaign.bidId,newOwner);
-            var owner = 
+            var owner =
                 await extendedAdvertisementStorageInstance.getCampaignOwnerById.call(testCampaign.bidId);
             expect(owner)
                 .to.be.equal(newOwner, "Campaign was not updated");
@@ -245,7 +245,7 @@ contract('ExtendedAdvertisementStorage', function(accounts) {
 
     it('should revert if a campaign owner is set to a campaign that does not exist', async () => {
         await TestUtils.expectErrorMessageTest("Campaign does not exist", () => {
-            
+
             return extendedAdvertisementStorageInstance.setCampaignOwnerById(
                 bidIdCreation,
                 testCampaign.owner);

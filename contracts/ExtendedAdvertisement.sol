@@ -143,44 +143,6 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
     }
 
     /**
-    @notice Function for single PoA submission
-    @dev
-        This function can be called by anyone and provides a mean for a user to submit a signed PoA.
-        This function emits a SinglePoARegistered event. The reward's funds are transfered to a
-        reward manager address, owned by the entity responsible for managing rewards.
-    @param _bidId Id of the Campaign
-    @param _timestampAndHash byte array containing the timestamp of the  signature and the hash of the PoA
-    @param _signature signature of the timestamp and Hash bytearray
-    */
-    function registerPoA(bytes32 _bidId,bytes _timestampAndHash, bytes _signature)
-        public
-        {
-
-        bool valid = _getStorage().getCampaignValidById(_bidId);
-
-        if(!valid){
-            emit Error("registerPoA","Campaign is not valid");
-            return;
-        }
-
-        address rewardManager = ExtendedAdvertisementStorage(address(_getStorage())).getRewardManagerById(_bidId);
-
-        uint price = _getStorage().getCampaignPriceById(_bidId);
-        uint budget = _getStorage().getCampaignBudgetById(_bidId);
-        uint newBudget = budget - price;
-        address owner = _getStorage().getCampaignOwnerById(_bidId);
-
-        _getFinance().pay(owner,rewardManager,price);
-        _getStorage().setCampaignBudgetById(_bidId,newBudget);
-
-        if(newBudget < price){
-            _getStorage().setCampaignValidById(_bidId,false);
-        }
-
-        emit SinglePoARegistered(_bidId, _timestampAndHash, _signature);
-    }
-
-    /**
     @notice Function to withdraw PoA convertions
     @dev
         This function is restricted to addresses allowed to submit bulk PoAs and enable those

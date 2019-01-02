@@ -326,32 +326,6 @@ contract('ExtendedAdvertisement', function(accounts) {
 	});
 
 
-	it('should emit an event when a single PoA is received', async function() {
-		var bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000001");
-		var hash = bid;
-		var buf = new Buffer(4);
-		buf.writeUInt8(0x1, 3);
-		var msgList = [Buffer.alloc(26),Buffer.from(hash),Buffer.alloc(28),buf];
-		var msg = Buffer.concat(msgList);
-
-		var signatureObj = await web3.eth.accounts.sign(msg.toString(), privateKey8);
-
-		var bdsAccount = accounts[8]
-		var initialRewardBalance = JSON.parse(await addInstance.getRewardsBalance.call(bdsAccount));
-		var events = addInstance.allEvents();
-
-		await addInstance.registerPoA.sendTransaction(bid, msg.toString(),signatureObj.signature, {from: accounts[2]});
-		var finalRewardBalance = JSON.parse(await addInstance.getRewardsBalance.call(bdsAccount));
-
-		var eventLog = await new Promise(function (resolve,reject){
-			events.watch(function(error,log){ events.stopWatching(); resolve(log); });
-		});
-
-		expect(eventLog.event).to.equal("SinglePoARegistered","Event should be a PoARegistered");
-		expect(finalRewardBalance).to.equal(initialRewardBalance+campaignPrice,"BDS rewards balance should be updated");
-
-	})
-
 	it('should upgrade advertisement storage and cancel all campaigns', async function() {
 		var user0Balance = await TestUtils.getBalance(accounts[0]);
 		var user1Balance = await TestUtils.getBalance(accounts[1]);
