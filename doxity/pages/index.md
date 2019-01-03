@@ -1,91 +1,52 @@
-<p align="center">
-  <img width="300" height="300" src="https://www.appstorefoundation.org/img/image-appcoinsLogo.svg">
-  <h1 align="center">AppCoins Project</h1>
-</p>
+# Doxity - Simpleton Version
 
-# Contracts
-Repo containing the smart contracts of the AppCoins protocol
+### Documentation Generator for Solidity Contracts
+##### Powered by [Gatsby](https://github.com/gatsbyjs/gatsby)
+This project is an attempt to create a working version of the [@digix/doxity project](https://github.com/DigixGlobal/doxity).
 
-1. [Getting started with docker](#getting-started-with-docker)
-2. [Getting started](#getting-started)
-3. [How to test](#how-to-test)
+Additional assistance in this fix was gleaned from [ProjectWyvern](https://github.com/ProjectWyvern/wyvern-ethereum)
 
+## Getting Started
 
-## Getting started with docker:
+edit the following files to your desired parameters
+- .doxityrc
+- package.json
 
-1. Install [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/)
+## Load contracts
+copy solidity contracts to the contracts folder
 
-2. Clone this repo:
-```sh
-$ git clone git@github.com:AppStoreFoundation/asf-contracts.git
-```
+## Build the docs
 
-3. Move to the appropriate directory:
-```sh
-$ cd asf-contracts
-```
-
-4. Run docker compose build (optional):
-```sh
-$ docker-compose build
-```
-
-5. Deploy the docker container:
-```sh
-$ docker-compose up
+```bash
+# clone this repo
+git clone https://www.github.com/ryanhendricks/doxity-simpleton.git
+# install doxity dependencies
+cd doxity-simpleton/doxity
+yarn
+# return to root dir
+cd ..
+# install project dependencies from root folder
+yarn
+# build the docs
+doxity build
 ```
 
 
-6. On a new terminal attach to the new docker container:
-```sh
-$ docker exec -it AppCoinsDev  bash
+## Upload Docs to Github Pages
+
+
+
+```
+"author": "Ryan Hendricks",
+"main": "docs/index.html",
+"repository": {
+    "type": "git",
+    "url": "git+https://github.com/username/repo.git"
+  },
+"homepage": "https://tokenbnk.github.io/protocol/",
 ```
 
+For a more in depth look at how this works and for additional commands please see: [Original Readme](https://github.com/DigixGlobal/doxity/blob/master/README.md)
 
 
-## Getting started:
-
-1. This project has a few pre-installation dependencies.
-- [Node](https://nodejs.org/en/)
-- [npm](https://www.npmjs.com/)
-- [Truffle](https://github.com/trufflesuite/truffle)
-- [Ganache-cli](https://github.com/trufflesuite/ganache-cli)
-
-2. Clone this repo using git clone git@github.com:AppStoreFoundation/asf-contracts.git
-
-3. Move to the appropriate directory:
-```sh
-$ cd asf-contracts
-```
-
-4. Create the file .env from .env.example and configure it:  
-```sd
-$  cp .env.example .env
-```
-
-
-5. Install the dependencies:  
-```sd
-$  npm install
-```
-
-6. Start Ganache/TestRPC
-```sd
-$ ganache-cli
-```  
-
-7. Deploy the contracts into the test network:  
-```sd
-$  truffle deploy --reset
-```
-
-Now you are ready to start using the contracts.
-
-## How to test:
-
-1. Configure the project [see getting started](https://github.com/AppStoreFoundation/asf-contracts#getting-started).
-
-2. Use the command:  
-```sd
-$ truffle test
-```  
+[Demo Site](https://hitchcott.github.io/doxity-demo/docs/MetaCoin/)
