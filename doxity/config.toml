@@ -1,13 +1,12 @@
 linkPrefix = "/doxity-simpleton"
-name = "doxity-simpleton"
+name = "asf-contracts"
 version = "1.0.0"
-description = "Solidity Documentation"
-buildTime = 2017-12-01T22:54:04.573Z
+description = "Contracts for the AppStore Fundation"
+buildTime = 2018-08-30T08:34:12.060Z
 target = "doxity"
 src = "contracts/*"
 dir = "pages/docs"
 out = "docs"
-author = "Ryan Hendricks"
-homepage = "https://ryanhendricks.github.io/doxity-simpleton/"
+homepage = "https://AppStoreFoundation.github.io"
 
 [interaction]
