@@ -1,6 +1,6 @@
 pragma solidity ^0.4.19;
 
-import "./Base/Ownable.sol";
+import "./Base/Whitelist.sol";
 
 /**
 @title AddressProxy contract
@@ -9,7 +9,7 @@ import "./Base/Ownable.sol";
 version's contracts deployed to the network.
  */
 
-contract AddressProxy is Ownable {
+contract AddressProxy is Whitelist {
 
     struct ContractAddress {
         bytes32 id;
@@ -38,7 +38,7 @@ contract AddressProxy is Ownable {
         return availableIds;
     }
 
-    /** 
+    /**
     @notice  Adds or updates an address
     @dev Used when a new address needs to be updated to a currently registered id or to a new id.
     @param name Name of the contract
@@ -89,7 +89,7 @@ contract AddressProxy is Ownable {
     }
 
     /**
-    @notice Get the specific date on which the contract address was firstly registered 
+    @notice Get the specific date on which the contract address was firstly registered
     to a certain id
     @param id Id of the registry
     @return { 'time' : 'Time in miliseconds of the first time the given id was registered' }
