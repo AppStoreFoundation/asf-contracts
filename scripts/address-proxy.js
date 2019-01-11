@@ -21,7 +21,7 @@ module.exports = function(callback) {
     switch (network) {
 
         case 'development':
-            instance = AddressProxy.at(process.env.ADDRESSPROXY_DEVELOPMENT_ADDRESS);
+            instance = AddressProxy.at(process.env.ADDRESS_PROXY_DEVELOPMENT_ADDRESS);
             appCoinsAddress = process.env.APPCOINS_DEVELOPMENT_ADDRESS;
             appCoinsIABAddress = process.env.IAB_DEVELOPMENT_ADDRESS;
             advertisementAddress = process.env.ADVERTISEMENT_DEVELOPMENT_ADDRESS;
@@ -37,7 +37,7 @@ module.exports = function(callback) {
             break;
 
         case 'ropsten':
-            instance = AddressProxy.at(process.env.ADDRESSPROXY_ROPSTEN_ADDRESS);
+            instance = AddressProxy.at(process.env.ADDRESS_PROXY_ROPSTEN_ADDRESS);
             appCoinsAddress = process.env.APPCOINS_ROPSTEN_ADDRESS;
             appCoinsIABAddress = process.env.IAB_ROPSTEN_ADDRESS;
             advertisementAddress = process.env.ADVERTISEMENT_ROPSTEN_ADDRESS;
@@ -53,7 +53,7 @@ module.exports = function(callback) {
             break;
 
         case 'main':
-            instance = AddressProxy.at(process.env.ADDRESSPROXY_MAINNET_ADDRESS);
+            instance = AddressProxy.at(process.env.ADDRESS_PROXY_MAINNET_ADDRESS);
             appCoinsAddress = process.env.APPCOINS_MAINNET_ADDRESS;
             appCoinsIABAddress = process.env.IAB_MAINNET_ADDRESS;
             advertisementAddress = process.env.ADVERTISEMENT_MAINNET_ADDRESS;
