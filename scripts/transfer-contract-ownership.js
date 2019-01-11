@@ -60,16 +60,30 @@ module.exports = function(callback) {
         throw 'Missing environment variables';
     }
 
-    const transferOwnership = function(name, address) {
-        addressProxyInstance.addAddress(name, address).then(function(error, success) {
-            console.log(`contract ${name} -> ${address}`);
+    const address = process.argv[7];
+
+    const transferOwnership = function(newAddress) {
+        addressProxyInstance.transferOwnership(newAddress.then(function(error, success) {
+            console.log(`contract Address Proxy new owner ${newAddress}`);
+        })
+
+        appCoinsCreditsBalanceInstance.transferOwnership(newAddress.then(function(error, success) {
+            console.log(`contract AppCoins Credits Balance new owner ${newAddress}`);
+        })
+
+        extendedAdvertisementInstance.transferOwnership(newAddress.then(function(error, success) {
+            console.log(`contract Extended Advertisement new owner ${newAddress}`);
+        })
+
+        extendedAdvertisementFinanceInstance.transferOwnership(newAddress.then(function(error, success) {
+            console.log(`contract Extended Advertisement Finance new owner ${newAddress}`);
+        })
+
+        extendedAdvertisementStorageInstance.transferOwnership(newAddress.then(function(error, success) {
+            console.log(`contract Extended Advertisement Storage new owner ${newAddress}`);
         })
     }
 
-    transferOwnership(process.env.APPCOINSIAB_CONTRACT_NAME, appCoinsIABAddress);
-    transferOwnership(process.env.ADVERTISEMENT_CONTRACT_NAME, advertisementAddress);
-    transferOwnership(process.env.ADVERTISEMENT_FINANCE_CONTRACT_NAME, advertisementFinanceAddress);
-    transferOwnership(process.env.ADVERTISEMENT_STORAGE_CONTRACT_NAME, advertisementStorageAddress);
-    transferOwnership(process.env.ADVERTISEMENT_STORAGE_CONTRACT_NAME, advertisementStorageAddress);
+    transferOwnership(address);
 
 };
