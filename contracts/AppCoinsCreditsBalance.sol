@@ -80,7 +80,7 @@ contract AppCoinsCreditsBalance is Whitelist {
     */
     function withdrawFunds(uint _amount, bytes _merkleTreeHash)
         public
-        onlyIfWhitelisted("withdrawFunds",msg.sender){
+        onlyOwner("withdrawFunds"){
         require(balance >= _amount);
         registerBalanceProof(_merkleTreeHash);
         appc.transfer(msg.sender, _amount);
