@@ -20,7 +20,7 @@ module.exports = function(callback) {
 
         case 'development':
             addressProxyInstance = AddressProxy.at(process.env.ADDRESS_PROXY_DEVELOPMENT_ADDRESS);
-            appCoinsCreditsBalanceInstance = AddressProxy.at(process.env.APPCOINS_CREDITS_BALANCE_DEVELOPMENT_ADDRESS);
+            appCoinsCreditsBalanceInstance = appCoinsCreditsBalance.at(process.env.APPCOINS_CREDITS_BALANCE_DEVELOPMENT_ADDRESS);
             extendedAdvertisementInstance = ExtendedAdvertisement.at(process.env.EXTENDED_ADVERTISEMENT_DEVELOPMENT_ADDRESS);
             extendedAdvertisementFinanceInstance = ExtendedAdvertisementFinance.at(process.env.EXTENDED_ADVERTISEMENT_FINANCE_DEVELOPMENT_ADDRESS);
             extendedAdvertisementStorageInstance = ExtendedAdvertisementStorage.at(process.env.EXTENDED_ADVERTISEMENT_STORAGE_DEVELOPMENT_ADDRESS);
@@ -29,7 +29,7 @@ module.exports = function(callback) {
 
         case 'ropsten':
             addressProxyInstance = AddressProxy.at(process.env.ADDRESS_PROXY_ROPSTEN_ADDRESS);
-            appCoinsCreditsBalanceInstance = AddressProxy.at(process.env.APPCOINS_CREDITS_BALANCE_ROPSTEN_ADDRESS);
+            appCoinsCreditsBalanceInstance = appCoinsCreditsBalance.at(process.env.APPCOINS_CREDITS_BALANCE_ROPSTEN_ADDRESS);
             extendedAdvertisementInstance = ExtendedAdvertisement.at(process.env.EXTENDED_ADVERTISEMENT_ROPSTEN_ADDRESS);
             extendedAdvertisementFinanceInstance = ExtendedAdvertisementFinance.at(process.env.EXTENDED_ADVERTISEMENT_FINANCE_ROPSTEN_ADDRESS);
             extendedAdvertisementStorageInstance = ExtendedAdvertisementStorage.at(process.env.EXTENDED_ADVERTISEMENT_STORAGE_ROPSTEN_ADDRESS);
@@ -38,7 +38,7 @@ module.exports = function(callback) {
 
         case 'main':
             addressProxyInstance = AddressProxy.at(process.env.ADDRESS_PROXY_MAINNET_ADDRESS);
-            appCoinsCreditsBalanceInstance = AddressProxy.at(process.env.APPCOINS_CREDITS_BALANCE_MAINNET_ADDRESS);
+            appCoinsCreditsBalanceInstance = appCoinsCreditsBalance.at(process.env.APPCOINS_CREDITS_BALANCE_MAINNET_ADDRESS);
             extendedAdvertisementInstance = ExtendedAdvertisement.at(process.env.EXTENDED_ADVERTISEMENT_MAINNET_ADDRESS);
             extendedAdvertisementFinanceInstance = ExtendedAdvertisementFinance.at(process.env.EXTENDED_ADVERTISEMENT_MAINNET_ADDRESS);
             extendedAdvertisementStorageInstance = ExtendedAdvertisementStorage.at(process.env.EXTENDED_ADVERTISEMENT_MAINNET_ADDRESS);
