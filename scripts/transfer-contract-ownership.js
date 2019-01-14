@@ -1,5 +1,5 @@
 const AddressProxy = artifacts.require("./AddressProxy.sol");
-const appCoinsCreditsBalanceInstance = artifacts.require("./AppCoinsCreditsBalance.sol")
+const appCoinsCreditsBalance = artifacts.require("./AppCoinsCreditsBalance.sol")
 const ExtendedAdvertisement = artifacts.require("./ExtendedAdvertisement.sol");
 const ExtendedAdvertisementStorage = artifacts.require("./ExtendedAdvertisementStorage.sol");
 const ExtendedAdvertisementFinance = artifacts.require("./ExtendedFinance.sol");
