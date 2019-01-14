@@ -62,24 +62,25 @@ module.exports = function(callback) {
 
     const address = process.argv[7];
 
+    console.log(address);
     const transferOwnership = function(newAddress) {
-        addressProxyInstance.transferOwnership(newAddress.then(function(error, success) {
+        addressProxyInstance.transferOwnership(newAddress).then(function(error, success) {
             console.log(`contract Address Proxy new owner ${newAddress}`);
         })
 
-        appCoinsCreditsBalanceInstance.transferOwnership(newAddress.then(function(error, success) {
+        appCoinsCreditsBalanceInstance.transferOwnership(newAddress).then(function(error, success) {
             console.log(`contract AppCoins Credits Balance new owner ${newAddress}`);
         })
 
-        extendedAdvertisementInstance.transferOwnership(newAddress.then(function(error, success) {
+        extendedAdvertisementInstance.transferOwnership(newAddress).then(function(error, success) {
             console.log(`contract Extended Advertisement new owner ${newAddress}`);
         })
 
-        extendedAdvertisementFinanceInstance.transferOwnership(newAddress.then(function(error, success) {
+        extendedAdvertisementFinanceInstance.transferOwnership(newAddress).then(function(error, success) {
             console.log(`contract Extended Advertisement Finance new owner ${newAddress}`);
         })
 
-        extendedAdvertisementStorageInstance.transferOwnership(newAddress.then(function(error, success) {
+        extendedAdvertisementStorageInstance.transferOwnership(newAddress).then(function(error, success) {
             console.log(`contract Extended Advertisement Storage new owner ${newAddress}`);
         })
     }
