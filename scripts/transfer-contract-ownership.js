@@ -62,7 +62,6 @@ module.exports = function(callback) {
 
     const address = process.argv[7];
 
-    console.log(address);
     const transferOwnership = function(newAddress) {
         addressProxyInstance.transferOwnership(newAddress).then(function(error, success) {
             console.log(`contract Address Proxy new owner ${newAddress}`);
