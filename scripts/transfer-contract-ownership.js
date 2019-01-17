@@ -71,11 +71,6 @@ module.exports = function(callback) {
         addressProxyInstance.transferOwnership(newAddress).then(function(error, success) {
             console.log(`contract Address Proxy new owner ${newAddress}`);
         })
-
-        appCoinsIABInstance.transferOwnership(newAddress).then(function(error, success) {
-            console.log(`contract App Coins IAB new owner ${newAddress}`);
-        })
-
         appCoinsCreditsBalanceInstance.transferOwnership(newAddress).then(function(error, success) {
             console.log(`contract AppCoins Credits Balance new owner ${newAddress}`);
         })
