@@ -1,3 +1,4 @@
+const AppCoinsIAB = artifacts.require("./AppCoinsIAB.sol");
 const AddressProxy = artifacts.require("./AddressProxy.sol");
 const AppCoinsCreditsBalance = artifacts.require("./AppCoinsCreditsBalance.sol")
 const ExtendedAdvertisement = artifacts.require("./ExtendedAdvertisement.sol");
@@ -10,6 +11,7 @@ const web3 = require('web3');
 require('dotenv').config();
 
 let addressProxyInstance;
+let appCoinsIABInstance;
 let appCoinsCreditsBalanceInstance;
 let extendedAdvertisementInstance;
 let extendedAdvertisementFinanceInstance;
@@ -20,6 +22,7 @@ module.exports = function(callback) {
 
         case 'development':
             addressProxyInstance = AddressProxy.at(process.env.ADDRESS_PROXY_DEVELOPMENT_ADDRESS);
+            appCoinsIABInstance = AppCoinsIAB.at(process.env.IAB_DEVELOPMENT_ADDRESS);
             appCoinsCreditsBalanceInstance = AppCoinsCreditsBalance.at(process.env.APPCOINS_CREDITS_BALANCE_DEVELOPMENT_ADDRESS);
             extendedAdvertisementInstance = ExtendedAdvertisement.at(process.env.EXTENDED_ADVERTISEMENT_DEVELOPMENT_ADDRESS);
             extendedAdvertisementFinanceInstance = ExtendedAdvertisementFinance.at(process.env.EXTENDED_ADVERTISEMENT_FINANCE_DEVELOPMENT_ADDRESS);
@@ -29,6 +32,7 @@ module.exports = function(callback) {
 
         case 'ropsten':
             addressProxyInstance = AddressProxy.at(process.env.ADDRESS_PROXY_ROPSTEN_ADDRESS);
+            appCoinsIABInstance = AppCoinsIAB.at(process.env.IAB_ROPSTEN_ADDRESS);
             appCoinsCreditsBalanceInstance = AppCoinsCreditsBalance.at(process.env.APPCOINS_CREDITS_BALANCE_ROPSTEN_ADDRESS);
             extendedAdvertisementInstance = ExtendedAdvertisement.at(process.env.EXTENDED_ADVERTISEMENT_ROPSTEN_ADDRESS);
             extendedAdvertisementFinanceInstance = ExtendedAdvertisementFinance.at(process.env.EXTENDED_ADVERTISEMENT_FINANCE_ROPSTEN_ADDRESS);
@@ -38,6 +42,7 @@ module.exports = function(callback) {
 
         case 'main':
             addressProxyInstance = AddressProxy.at(process.env.ADDRESS_PROXY_MAINNET_ADDRESS);
+            appCoinsIABInstance = AppCoinsIAB.at(process.env.IAB_MAINNET_ADDRESS);
             appCoinsCreditsBalanceInstance = AppCoinsCreditsBalance.at(process.env.APPCOINS_CREDITS_BALANCE_MAINNET_ADDRESS);
             extendedAdvertisementInstance = ExtendedAdvertisement.at(process.env.EXTENDED_ADVERTISEMENT_MAINNET_ADDRESS);
             extendedAdvertisementFinanceInstance = ExtendedAdvertisementFinance.at(process.env.EXTENDED_ADVERTISEMENT_MAINNET_ADDRESS);
@@ -65,6 +70,10 @@ module.exports = function(callback) {
     const transferOwnership = function(newAddress) {
         addressProxyInstance.transferOwnership(newAddress).then(function(error, success) {
             console.log(`contract Address Proxy new owner ${newAddress}`);
+        })
+
+        appCoinsIABInstance.transferOwnership(newAddress).then(function(error, success) {
+            console.log(`contract App Coins IAB new owner ${newAddress}`);
         })
 
         appCoinsCreditsBalanceInstance.transferOwnership(newAddress).then(function(error, success) {
