@@ -9,6 +9,7 @@ import "./AdvertisementFinance.sol";
 import "./Base/BaseFinance.sol";
 import "./Base/BaseAdvertisement.sol";
 import "./AppCoins.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 /**
 @title Advertisement contract
@@ -206,9 +207,9 @@ contract Advertisement is BaseAdvertisement {
         require(budget >= price);
 
         //transfer to user, appstore and oem
-        _getFinance().pay(campaignOwner,user,division(price * devShare, 100));
-        _getFinance().pay(campaignOwner,appstore,division(price * appstoreShare, 100));
-        _getFinance().pay(campaignOwner,oem,division(price * oemShare, 100));
+        _getFinance().pay(campaignOwner,user,SafeMath.div(price * devShare, 100));
+        _getFinance().pay(campaignOwner,appstore,SafeMath.div(price * appstoreShare, 100));
+        _getFinance().pay(campaignOwner,oem,SafeMath.div(price * oemShare, 100));
 
         //subtract from campaign
         uint newBudget = budget - price;
