@@ -7,9 +7,9 @@ import  { CampaignLibrary } from "../lib/CampaignLibrary.sol";
 contract BaseAdvertisementStorage is Whitelist {
     using CampaignLibrary for CampaignLibrary.Campaign;
 
-    mapping (bytes32 => CampaignLibrary.Campaign) campaigns;
+    mapping (bytes32 => CampaignLibrary.Campaign) public campaigns;
 
-    bytes32 lastBidId = 0x0;
+    bytes32 public lastBidId = 0x0;
 
     modifier onlyIfCampaignExists(string _funcName, bytes32 _bidId) {
         if(campaigns[_bidId].owner == 0x0){

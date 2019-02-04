@@ -6,7 +6,7 @@ import { ExtendedCampaignLibrary } from "./lib/ExtendedCampaign.sol";
 contract ExtendedAdvertisementStorage is BaseAdvertisementStorage {
     using ExtendedCampaignLibrary for ExtendedCampaignLibrary.ExtendedInfo;
 
-    mapping (bytes32 => ExtendedCampaignLibrary.ExtendedInfo) extendedCampaignInfo;
+    mapping (bytes32 => ExtendedCampaignLibrary.ExtendedInfo) public extendedCampaignInfo;
     
     event ExtendedCampaignCreated(
         bytes32 bidId,

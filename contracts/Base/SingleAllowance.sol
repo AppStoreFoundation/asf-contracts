@@ -4,7 +4,7 @@ import "./Ownable.sol";
 
 contract SingleAllowance is Ownable {
 
-    address allowedAddress;
+    address public allowedAddress;
 
     modifier onlyAllowed() {
         require(allowedAddress == msg.sender);
