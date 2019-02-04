@@ -68,9 +68,11 @@ contract AppCoinsTimelock {
     @param _amount uint of the amount to be stored
     */
     function allocateFunds(address _address, uint256 _amount) public {
+        balances[_address] = balances[_address] + _amount;
+
         require(appc.allowance(msg.sender, address(this)) >= _amount);
         appc.transferFrom(msg.sender, address(this), _amount);
-        balances[_address] = balances[_address] + _amount;
+        
         emit NewFundsAllocated(_address, balances[_address]);
     }
 
