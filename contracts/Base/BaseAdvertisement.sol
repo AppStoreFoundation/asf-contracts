@@ -304,19 +304,6 @@ contract BaseAdvertisement is StorageUser,Ownable {
         return validity && startDate < nowInMilliseconds && endDate > nowInMilliseconds;
     }
 
-     /**
-    @notice Returns the division of two numbers
-    @dev
-        Function used for division operations inside the smartcontract
-    @param numerator Numerator part of the division
-    @param denominator Denominator part of the division
-    @return { "result" : "Result of the division"}
-    */
-    function division(uint numerator, uint denominator) public view returns (uint result) {
-        uint _quotient = numerator / denominator;
-        return _quotient;
-    }
-
     /**
     @notice Converts a uint256 type variable to a byte32 type variable
     @dev

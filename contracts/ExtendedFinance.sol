@@ -2,6 +2,7 @@ pragma solidity ^0.4.24;
 
 
 import "./Base/BaseFinance.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 /**
 @title Advertisement Finance contract
 @author App Store Foundation
@@ -23,8 +24,8 @@ contract ExtendedFinance is BaseFinance {
 
         require(balanceUsers[_user] >= _value);
 
-        balanceUsers[_user] -= _value;
-        rewardedBalance[_destination] += _value;
+        balanceUsers[_user] = SafeMath.sub(balanceUsers[_user], _value);
+        rewardedBalance[_destination] = SafeMath.add(rewardedBalance[_destination],_value);
     }
 
 
@@ -32,7 +33,7 @@ contract ExtendedFinance is BaseFinance {
 
         require(balanceUsers[_user] >= _value);
 
-        balanceUsers[_user] -= _value;
+        balanceUsers[_user] = SafeMath.sub(balanceUsers[_user], _value);
         appc.transfer(_user, _value);
 
     }
@@ -47,7 +48,7 @@ contract ExtendedFinance is BaseFinance {
     function withdrawRewards(address _user, uint256 _value) public onlyOwnerOrAllowed {
         require(rewardedBalance[_user] >= _value);
 
-        rewardedBalance[_user] -= _value;
+        rewardedBalance[_user] = SafeMath.sub(rewardedBalance[_user],_value);
         appc.transfer(_user, _value);
     }
     /**

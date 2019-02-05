@@ -5,6 +5,7 @@ import "../AppCoins.sol";
 import "../Advertisement.sol";
 import "./StorageUser.sol";
 import "./SingleAllowance.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 contract BaseFinance is SingleAllowance {
 
@@ -87,7 +88,7 @@ contract BaseFinance is SingleAllowance {
             userExists[_user] = true;
         }
 
-        balanceUsers[_user] += _value;
+        balanceUsers[_user] = SafeMath.add(balanceUsers[_user], _value);
     }
 
      /**

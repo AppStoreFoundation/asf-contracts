@@ -1,6 +1,7 @@
 pragma solidity ^0.4.24;
 
 import "./AppCoins.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 /**
 @title AppCoinsTimelock
@@ -69,8 +70,10 @@ contract AppCoinsTimelock {
     */
     function allocateFunds(address _address, uint256 _amount) public {
         require(appc.allowance(msg.sender, address(this)) >= _amount);
+        
         appc.transferFrom(msg.sender, address(this), _amount);
-        balances[_address] = balances[_address] + _amount;
+        balances[_address] = SafeMath.add(balances[_address], _amount);
+
         emit NewFundsAllocated(_address, balances[_address]);
     }
 
