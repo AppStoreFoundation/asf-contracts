@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity 0.4.24;
 
 import "./Base/StorageUser.sol";
 import "./Base/Whitelist.sol";
