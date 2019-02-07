@@ -161,12 +161,6 @@ contract Advertisement is BaseAdvertisement {
             }
         }
 
-        /* if(!areNoncesValid(bytes(packageName), timestampList, nonces)){
-            emit Error(
-                "registerPoA","Incorrect nounces for submited proof of attention");
-            return;
-        } */
-
         // using the same variable as to the for loop to avoid stack too deep error
         i = getUserAttribution(bidId,msg.sender);
 
