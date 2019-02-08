@@ -40,6 +40,30 @@ contract BaseAdvertisement is StorageUser,Ownable {
     }
 
 
+
+    /**
+    @notice Import existing bidIds
+    @dev
+        Method to import existing BidId list from an existing BaseAdvertisement contract
+        Be careful, this function does not chcek for duplicates.
+    @param _addrAdvert Address of the existing Advertisement contract from which the bidIds
+     will be imported  
+    */
+
+    function importBidIds(address _addrAdvert) public onlyOwner("importBidIds") {
+
+        bytes32[] memory _bidIdsToImport = BaseAdvertisement(_addrAdvert).getBidIdList();
+        bytes32 _lastStorageBidId = advertisementStorage.getLastBidId();
+
+        for (uint i = 0; i < _bidIdsToImport.length; i++) {
+            bidIdList.push(_bidIdsToImport[i]);
+        }
+        
+        if(lastBidId < _lastStorageBidId) {
+            lastBidId = _lastStorageBidId;
+        }
+    }
+
     /**
     @notice Upgrade finance contract used by this contract
     @dev
