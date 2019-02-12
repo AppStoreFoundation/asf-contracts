@@ -15,7 +15,7 @@ contract AppCoinsTimelock {
     AppCoins private appc;
 
     // beneficiary of tokens
-    mapping (address => uint) balances;
+    mapping (address => uint) public balances;
 
     // timestamp when token release is enabled
     uint private releaseTime;

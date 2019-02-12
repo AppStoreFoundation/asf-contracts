@@ -9,14 +9,14 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 contract BaseFinance is SingleAllowance {
 
-    mapping (address => uint256) balanceUsers;
-    mapping (address => bool) userExists;
+    mapping (address => uint256) public balanceUsers;
+    mapping (address => bool) public userExists;
 
-    address[] users;
+    address[] public users;
 
-    address advStorageContract;
+    address public advStorageContract;
 
-    AppCoins appc;
+    AppCoins public appc;
 
     /**
     @notice Constructor function

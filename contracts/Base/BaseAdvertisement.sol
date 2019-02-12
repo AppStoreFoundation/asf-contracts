@@ -13,14 +13,14 @@ import "./Ownable.sol";
  */
 contract BaseAdvertisement is StorageUser,Ownable {
     
-    AppCoins appc;
-    BaseFinance advertisementFinance;
-    BaseAdvertisementStorage advertisementStorage;
+    AppCoins public appc;
+    BaseFinance public advertisementFinance;
+    BaseAdvertisementStorage public advertisementStorage;
 
-    mapping( bytes32 => mapping(address => uint256)) userAttributions;
+    mapping( bytes32 => mapping(address => uint256)) public userAttributions;
 
-    bytes32[] bidIdList;
-    bytes32 lastBidId = 0x0;
+    bytes32[] public bidIdList;
+    bytes32 public lastBidId = 0x0;
 
 
     /**

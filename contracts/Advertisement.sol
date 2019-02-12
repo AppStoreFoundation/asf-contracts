@@ -27,7 +27,7 @@ contract Advertisement is BaseAdvertisement {
         uint walletDailyConversions;
     }
 
-    uint constant expectedPoALength = 12;
+    uint public constant expectedPoALength = 12;
 
     ValidationRules public rules;
 

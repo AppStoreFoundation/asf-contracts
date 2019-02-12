@@ -12,7 +12,7 @@ to user aquisition campaigns.
 */
 contract ExtendedFinance is BaseFinance {
 
-    mapping ( address => uint256 ) rewardedBalance;
+    mapping ( address => uint256 ) public rewardedBalance;
 
     constructor(address _appc) public BaseFinance(_appc){
 
