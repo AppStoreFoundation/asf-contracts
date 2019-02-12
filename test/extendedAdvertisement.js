@@ -384,6 +384,36 @@ contract('ExtendedAdvertisement', function(accounts) {
 		})
 	})
 
+	it('should upgrade advertisement contract with no change on storage nor finance and maintaining an updated bidId list on the new advertisement contract',async function () {
+		var bid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000002");
+		var oldAdvertisement = addInstance;
+		addInstance = await	ExtendedAdvertisement.new(appcInstance.address, AdvertisementStorageInstance.address,adFinanceInstance.address);
+		
+		await addInstance.importBidIds.sendTransaction(oldAdvertisement.address);
+
+		await appcInstance.transfer(accounts[1],campaignBudget);
+		await adFinanceInstance.setAllowedAddress(addInstance.address);
+
+		var budget = await addInstance.getBudgetOfCampaign.call(examplePoA.bid);
+
+		var oldBidIdList = await oldAdvertisement.getBidIdList.call();
+		var newBidList = await addInstance.getBidIdList.call();
+
+		//Comparing arrays with deep equal
+		expect(newBidList).to.be.eql(oldBidIdList,"New bid list does not match the old list");
+
+		expect(JSON.parse(budget)).to.be.equal(campaignPrice,"Campaign budget is incorrect");
+
+		await AdvertisementStorageInstance.addAddressToWhitelist(addInstance.address);
+		await addInstance.addAddressToWhitelist(accounts[2]);
+
+		var initBalance = JSON.parse(await addInstance.getRewardsBalance.call(accounts[2],{from: accounts[2]}));
+        return addInstance.bulkRegisterPoA.sendTransaction(bid,msg, objSign2.signature,1,{from: accounts[2]}).then( async instance => {
+			var balance = JSON.parse(await addInstance.getRewardsBalance.call(accounts[2],{from: accounts[2]}));
+			expect(balance).to.be.equal(campaignPrice+initBalance,'Campaign price was not transfered');
+		})
+	})
+
 	it('should upgrade advertisement finance and transfer campaign money to the new contract', async function () {
 		var addsBalance = await TestUtils.getBalance(AdvertisementStorageInstance.address);
 		var oldFinanceInitBalance = await TestUtils.getBalance(adFinanceInstance.address);
