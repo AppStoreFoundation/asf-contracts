@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity 0.4.24;
 
 library Shares {
     uint256 private constant dev_share = 85;

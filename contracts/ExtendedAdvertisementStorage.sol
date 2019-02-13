@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity 0.4.24;
 
 import "./Base/BaseAdvertisementStorage.sol";
 import { ExtendedCampaignLibrary } from "./lib/ExtendedCampaign.sol";
