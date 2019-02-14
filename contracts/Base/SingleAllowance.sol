@@ -1,10 +1,10 @@
-pragma solidity ^0.4.24;
+pragma solidity 0.4.24;
 
 import "./Ownable.sol";
 
 contract SingleAllowance is Ownable {
 
-    address allowedAddress;
+    address public allowedAddress;
 
     modifier onlyAllowed() {
         require(allowedAddress == msg.sender);

@@ -3,11 +3,10 @@ FROM node:10.5.0-alpine
 RUN apk --no-cache add bash git python make g++ \ 
     && yarn global add \
           --global-folder /usr/local/share \
-          ganache-cli@6.1.3 \
-          truffle@4.1.12 \
+          ganache-cli@6.1.8 \
+          truffle@4.1.14 \
           truffle-flattener \
-          solium \
-	  jshint 
+          solium@1.1.7 
 
 EXPOSE 3000 3001 8545
 

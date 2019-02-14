@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity 0.4.24;
 
 /**
 @title AppCoinsTimelock
@@ -7,7 +7,7 @@ pragma solidity ^0.4.24;
 *
 */
 contract Signature {
-    bytes constant PersonalMessagePrefixBytes = "\x19Ethereum Signed Message:\n";
+    bytes constant public PersonalMessagePrefixBytes = "\x19Ethereum Signed Message:\n";
 
     /**
     @notice splitSignature

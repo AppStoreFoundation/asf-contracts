@@ -1,11 +1,11 @@
-pragma solidity ^0.4.24;
+pragma solidity 0.4.24;
 
 import "./Base/StorageUser.sol";
 import "./Base/Whitelist.sol";
 import "./Base/BaseAdvertisement.sol";
 import "./ExtendedAdvertisementStorage.sol";
 import "./ExtendedFinance.sol";
-
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
 
@@ -118,7 +118,7 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
         uint price = _getStorage().getCampaignPriceById(_bidId);
         uint budget = _getStorage().getCampaignBudgetById(_bidId);
         address owner = _getStorage().getCampaignOwnerById(_bidId);
-        uint maxConversions = division(budget,price);
+        uint maxConversions = SafeMath.div(budget,price);
         uint effectiveConversions;
         uint totalPay;
         uint newBudget;
@@ -129,8 +129,9 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
             effectiveConversions = maxConversions;
         }
 
-        totalPay = price*effectiveConversions;
-        newBudget = budget - totalPay;
+        totalPay = SafeMath.mul(price,effectiveConversions);
+        
+        newBudget = SafeMath.sub(budget,totalPay);
 
         _getFinance().pay(owner, msg.sender, totalPay);
         _getStorage().setCampaignBudgetById(_bidId, newBudget);

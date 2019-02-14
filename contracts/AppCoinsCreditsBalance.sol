@@ -1,7 +1,8 @@
-pragma solidity ^0.4.24;
+pragma solidity 0.4.24;
 
 import "./AppCoins.sol";
 import "./Base/Whitelist.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 contract AppCoinsCreditsBalance is Whitelist {
 
@@ -66,8 +67,10 @@ contract AppCoinsCreditsBalance is Whitelist {
     function depositFunds(uint _amount, bytes _merkleTreeHash)
         public
         onlyIfWhitelisted("depositFunds", msg.sender){
+        
         registerBalanceProof(_merkleTreeHash);
-        balance = balance + _amount;
+
+        balance = SafeMath.add(balance,_amount);
 
         require(appc.allowance(msg.sender, address(this)) >= _amount);
         appc.transferFrom(msg.sender, address(this), _amount);
@@ -86,7 +89,7 @@ contract AppCoinsCreditsBalance is Whitelist {
         require(balance >= _amount);
         registerBalanceProof(_merkleTreeHash);
         appc.transfer(msg.sender, _amount);
-        balance = balance - _amount;
+        balance = SafeMath.sub(balance,_amount);
         emit Withdraw(_amount);
     }
 
