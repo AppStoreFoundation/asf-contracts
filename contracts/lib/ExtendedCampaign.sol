@@ -3,7 +3,6 @@ pragma solidity 0.4.24;
 library ExtendedCampaignLibrary {
     struct ExtendedInfo{
         bytes32 bidId;
-        address rewardManager;
         string endpoint;
     }
 
@@ -23,21 +22,6 @@ library ExtendedCampaignLibrary {
         return _extendedInfo.bidId;
     }
 
-    /**
-    @notice Set reward manager address 
-    @param _rewardManager Address of the reward manager
-    */
-    function setRewardManager(ExtendedInfo storage _extendedInfo,  address _rewardManager) internal {
-        _extendedInfo.rewardManager = _rewardManager;
-    }
-
-    /**
-    @notice Get reward manager address
-    @return {'_rewardManager' : 'Address of the reward manager'} 
-    */
-    function getRewardManager(ExtendedInfo storage _extendedInfo) internal view returns(address _rewardManager) {
-        return _extendedInfo.rewardManager;
-    }
 
     /**
     @notice Set URL of the signing serivce

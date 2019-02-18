@@ -16,7 +16,6 @@ var testCampaign = {
     endDate: 600000,
     valid: true,
     owner: '0x1DD02B96E9D55E16c646d2F21CA93A705ac667Bf',
-    rewardManager: '0xb9dcbf8a52edc0c8dd9983fcc1d97b1f5d975ed7',
     endPoint: 'http://localhost/api/sign'
 };
 
@@ -36,7 +35,6 @@ contract('ExtendedAdvertisementStorage', function(accounts) {
             testCampaign.endDate,
             testCampaign.valid,
             testCampaign.owner,
-            testCampaign.rewardManager,
             testCampaign.endPoint
         );
 
@@ -56,7 +54,6 @@ contract('ExtendedAdvertisementStorage', function(accounts) {
             testCampaign.endDate,
             testCampaign.valid,
             testCampaign.owner,
-            testCampaign.rewardManager,
             testCampaign.endPoint,
             { from: allowedAddress }
         );
@@ -107,7 +104,6 @@ contract('ExtendedAdvertisementStorage', function(accounts) {
                 testCampaign.endDate,
                 testCampaign.valid,
                 testCampaign.owner,
-                testCampaign.rewardManager,
                 testCampaign.endPoint,
                 { from: invalidAddress }
             )
@@ -188,17 +184,6 @@ contract('ExtendedAdvertisementStorage', function(accounts) {
         });
     });
 
-    it('should update a campaign reward manager address of an existing campaign', async () => {
-
-        await extendedAdvertisementStorageInstance.setRewardManagerById.sendTransaction(
-            testCampaign.bidId,
-            accounts[9]
-        );
-
-        var newRewardManager = await extendedAdvertisementStorageInstance.getRewardManagerById.call(testCampaign.bidId);
-        expect(newRewardManager).to.equal(accounts[9],'Reward Manager account was not updated');
-
-    })
 
     it('should revert if a campaign end date is set to a campaign that does not exist', async () => {
         await TestUtils.expectErrorMessageTest("Campaign does not exist", () => {

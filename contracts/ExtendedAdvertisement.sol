@@ -23,7 +23,6 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
     event ExtendedCampaignInfo
         (
             bytes32 bidId,
-            address rewardManager,
             string endPoint
     );
 
@@ -51,7 +50,6 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
     avaliable to users.
     @param endDate Date (in miliseconds) on which the campaign will no longer be avaliable to users.
     @param endPoint URL of the signing serivce
-    @param rewardManager Entity receiving rewards considering a single register PoA submission
     */
     function createCampaign (
         string packageName,
@@ -61,7 +59,6 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
         uint budget,
         uint startDate,
         uint endDate,
-        address rewardManager,
         string endPoint)
         external
         {
@@ -83,7 +80,6 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
             newCampaign.endDate,
             newCampaign.valid,
             newCampaign.owner,
-            rewardManager,
             endPoint);
 
         emit CampaignInformation(
@@ -94,7 +90,7 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
             countries,
             vercodes);
 
-        emit ExtendedCampaignInfo(newCampaign.bidId, rewardManager, endPoint);
+        emit ExtendedCampaignInfo(newCampaign.bidId, endPoint);
     }
 
     /**

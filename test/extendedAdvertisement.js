@@ -82,7 +82,7 @@ contract('ExtendedAdvertisement', function(accounts) {
 
   		await appcInstance.approve(addInstance.address,campaignBudget);
 
-  		await addInstance.createCampaign(packageName,countryList,[1,2],campaignPrice,campaignPrice,startDate,endDate, accounts[8], endPoint);
+  		await addInstance.createCampaign(packageName,countryList,[1,2],campaignPrice,campaignPrice,startDate,endDate, endPoint);
 
   		await appcInstance.transfer(accounts[1],campaignBudget);
   		countryList.push(convertCountryCodeToIndex("PT"))
@@ -90,7 +90,7 @@ contract('ExtendedAdvertisement', function(accounts) {
   		countryList.push(convertCountryCodeToIndex("FR"))
   		countryList.push(convertCountryCodeToIndex("PA"))
   		await appcInstance.approve(addInstance.address,campaignBudget, { from: accounts[1]});
-  		await addInstance.createCampaign(packageName,countryList,[1,2],campaignPrice,campaignBudget,startDate,endDate, accounts[8], endPoint,  { from : accounts[1]});
+  		await addInstance.createCampaign(packageName,countryList,[1,2],campaignPrice,campaignBudget,startDate,endDate,  endPoint,  { from : accounts[1]});
 
 
   		examplePoA = new Object();
@@ -142,7 +142,7 @@ contract('ExtendedAdvertisement', function(accounts) {
 		var eventsInfo = addInstance.allEvents();
 		var packageName1 = "com.instagram.android";
 
-		await addInstance.createCampaign(packageName1,countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980, accounts[8], endPoint);
+		await addInstance.createCampaign(packageName1,countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980, endPoint);
 
 		var eventStorageLog = await new Promise(
 				function(resolve, reject){
@@ -185,7 +185,7 @@ contract('ExtendedAdvertisement', function(accounts) {
 		countryList.push(convertCountryCodeToIndex("PA"))
  		var eventsInfo = addInstance.allEvents();
 		var packageName1 = "com.instagram.android";
- 		await addInstance.createCampaign(packageName1,countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980, accounts[8], endPoint);
+ 		await addInstance.createCampaign(packageName1,countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980, endPoint);
 
 		var eventNumber = -1;
 		var eventInfoLog = await new Promise(
@@ -266,7 +266,7 @@ contract('ExtendedAdvertisement', function(accounts) {
 			var countryList = [];
 			countryList.push(convertCountryCodeToIndex("GB"));
 			countryList.push(convertCountryCodeToIndex("FR"));
-			await addInstance.createCampaign.sendTransaction("org.telegram.messenger",countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980, accounts[8], endPoint);
+			await addInstance.createCampaign.sendTransaction("org.telegram.messenger",countryList,[1,2],campaignPrice,campaignBudget,20,1922838059980, endPoint);
 		})
 
 		var newUserBalance = await TestUtils.getBalance(accounts[0]);
@@ -310,20 +310,20 @@ contract('ExtendedAdvertisement', function(accounts) {
 
 	});
 
-	it('should revert bulkRegisterPoA and emit an error event when the campaing is invalid', async () => {
+	it('should revert registerPoA and emit an error event when the campaing is invalid', async () => {
 
 
 		await addInstance.cancelCampaign(examplePoA.bid);
 
 		var events = addInstance.allEvents();
 
-		await addInstance.bulkRegisterPoA(examplePoA.bid, msg, objSign1.signature, 1, { from: accounts[1] });
+		await addInstance.bulkRegisterPoA(examplePoA.bid,objSign1.messageHash, objSign1.signature,1,{from: accounts[1]});
 
 		var eventLog = await new Promise(function (resolve,reject){
 			events.watch(function(error,log){ events.stopWatching(); resolve(log); });
 		})
 
-		expect(eventLog.event).to.equal("BulkPoARegistered","Event should be a BulkPoARegistered");
+		expect(eventLog.event).to.equal("BulkPoARegistered","Event should be a BulkRegisterPoA");
 		expect(JSON.parse(eventLog.args._effectiveConversions)).to.equal(0,'No PoA should be converted');
 	});
 
@@ -355,7 +355,7 @@ contract('ExtendedAdvertisement', function(accounts) {
 
 		await appcInstance.approve(addInstance.address,campaignBudget, {from: accounts[1]});
 
-		await addInstance.createCampaign(packageName,countryList,[1,2],campaignPrice,campaignBudget,startDate,endDate, accounts[8], endPoint, { from : accounts[1]});
+		await addInstance.createCampaign(packageName,countryList,[1,2],campaignPrice,campaignBudget,startDate,endDate, endPoint, { from : accounts[1]});
 		var newBid = web3.utils.toHex("0x0000000000000000000000000000000000000000000000000000000000000003");
 		var bidIdList = await addInstance.getBidIdList.call();
 
