@@ -12,7 +12,6 @@ contract ERC20Interface {
     event Transfer(address indexed _from, address indexed _to, uint256 _value);
 }
 
-
 contract AppCoins is ERC20Interface{
     // Public variables of the token
     address public owner;

@@ -1,16 +1,16 @@
-pragma solidity ^0.4.24;
+pragma solidity 0.4.24;
 
 import "./Base/StorageUser.sol";
 import "./Base/Whitelist.sol";
 import "./Base/BaseAdvertisement.sol";
-import "./Base/Signature.sol";
 import "./ExtendedAdvertisementStorage.sol";
 import "./ExtendedFinance.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
+contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
 
-contract ExtendedAdvertisement is BaseAdvertisement, Whitelist, Signature {
-
-    event BulkPoARegistered(bytes32 bidId, bytes32 rootHash, bytes signedrootHash, uint256 newPoAs, uint256 convertedPoAs);
+    event BulkPoARegistered(bytes32 _bidId, bytes _rootHash, bytes _signature, uint256 _newHashes, uint256 _effectiveConversions);
+    event SinglePoARegistered(bytes32 _bidId, bytes _timestampAndHash, bytes _signature);
     event CampaignInformation
         (
             bytes32 bidId,
@@ -18,8 +18,12 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist, Signature {
             string ipValidator,
             string packageName,
             uint[3] countries,
-            uint[] vercodes,
-            string endpoint
+            uint[] vercodes
+    );
+    event ExtendedCampaignInfo
+        (
+            bytes32 bidId,
+            string endPoint
     );
 
     constructor(address _addrAppc, address _addrAdverStorage, address _addrAdverFinance) public
@@ -84,8 +88,9 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist, Signature {
             "", // ipValidator field
             packageName,
             countries,
-            vercodes,
-            endPoint);
+            vercodes);
+
+        emit ExtendedCampaignInfo(newCampaign.bidId, endPoint);
     }
 
     /**
@@ -96,48 +101,42 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist, Signature {
         event containing the campaign id, root hash, signed root hash, number of new hashes since
         the last submission and the effective number of conversions.
 
-    @param bidId Campaign id for which the Proof of attention root hash refferes to
-    @param rootHash Root hash of all submitted proof of attention to a given campaign
-    @param signedRootHash Root hash signed by the signing service of the campaign
-    @param newHashes Number of new proof of attention hashes since last submission
+    @param _bidId Campaign id for which the Proof of attention root hash refferes to
+    @param _rootHash Root hash of all submitted proof of attention to a given campaign
+    @param _signature Root hash signed by the signing service of the campaign
+    @param _newHashes Number of new proof of attention hashes since last submission
     */
-    function bulkRegisterPoA(bytes32 bidId, bytes32 rootHash, bytes signedRootHash, uint256 newHashes)
+    function bulkRegisterPoA(bytes32 _bidId, bytes _rootHash, bytes _signature, uint256 _newHashes)
         public
-        onlyIfWhitelisted("createCampaign",msg.sender)
+        onlyIfWhitelisted("createCampaign", msg.sender)
         {
 
-        address addressSig = recoverSigner(rootHash, signedRootHash);
-
-        if (msg.sender != addressSig) {
-            emit Error("bulkRegisterPoA","Invalid signature");
-            return;
-        }
-
-        uint price = _getStorage().getCampaignPriceById(bidId);
-        uint budget = _getStorage().getCampaignBudgetById(bidId);
-        address owner = _getStorage().getCampaignOwnerById(bidId);
-        uint maxConversions = division(budget,price);
+        uint price = _getStorage().getCampaignPriceById(_bidId);
+        uint budget = _getStorage().getCampaignBudgetById(_bidId);
+        address owner = _getStorage().getCampaignOwnerById(_bidId);
+        uint maxConversions = SafeMath.div(budget,price);
         uint effectiveConversions;
         uint totalPay;
         uint newBudget;
 
-        if (maxConversions >= newHashes){
-            effectiveConversions = newHashes;
+        if (maxConversions >= _newHashes){
+            effectiveConversions = _newHashes;
         } else {
             effectiveConversions = maxConversions;
         }
 
-        totalPay = price*effectiveConversions;
-        newBudget = budget - totalPay;
+        totalPay = SafeMath.mul(price,effectiveConversions);
+        
+        newBudget = SafeMath.sub(budget,totalPay);
 
-        _getFinance().pay(owner,msg.sender,totalPay);
-        _getStorage().setCampaignBudgetById(bidId,newBudget);
+        _getFinance().pay(owner, msg.sender, totalPay);
+        _getStorage().setCampaignBudgetById(_bidId, newBudget);
 
         if(newBudget < price){
-            _getStorage().setCampaignValidById(bidId,false);
+            _getStorage().setCampaignValidById(_bidId, false);
         }
 
-        emit BulkPoARegistered(bidId,rootHash,signedRootHash,newHashes,effectiveConversions);
+        emit BulkPoARegistered(_bidId, _rootHash, _signature, _newHashes, effectiveConversions);
     }
 
     /**
