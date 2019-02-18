@@ -1,17 +1,19 @@
-pragma solidity ^0.4.24;
+pragma solidity 0.4.24;
 
 import "./Base/BaseAdvertisementStorage.sol";
+import { ExtendedCampaignLibrary } from "./lib/ExtendedCampaign.sol";
 
 contract ExtendedAdvertisementStorage is BaseAdvertisementStorage {
+    using ExtendedCampaignLibrary for ExtendedCampaignLibrary.ExtendedInfo;
 
-    mapping (bytes32 => string) campaignEndPoints;
-
-    event ExtendedCampaignEndPointCreated(
+    mapping (bytes32 => ExtendedCampaignLibrary.ExtendedInfo) public extendedCampaignInfo;
+    
+    event ExtendedCampaignCreated(
         bytes32 bidId,
         string endPoint
     );
 
-    event ExtendedCampaignEndPointUpdated(
+    event ExtendedCampaignUpdated(
         bytes32 bidId,
         string endPoint
     );
@@ -92,12 +94,16 @@ contract ExtendedAdvertisementStorage is BaseAdvertisementStorage {
         bool newCampaign = (getCampaignOwnerById(_bidId) == 0x0);
         _setCampaign(_bidId, _price, _budget, _startDate, _endDate, _valid, _owner);
         
-        campaignEndPoints[_bidId] = _endPoint;
+        ExtendedCampaignLibrary.ExtendedInfo storage extendedInfo = extendedCampaignInfo[_bidId];
+        extendedInfo.setBidId(_bidId);
+        extendedInfo.setEndpoint(_endPoint);
+
+        extendedCampaignInfo[_bidId] = extendedInfo;
 
         if(newCampaign){
-            emit ExtendedCampaignEndPointCreated(_bidId,_endPoint);
+            emit ExtendedCampaignCreated(_bidId,_endPoint);
         } else {
-            emit ExtendedCampaignEndPointUpdated(_bidId,_endPoint);
+            emit ExtendedCampaignUpdated(_bidId,_endPoint);
         }
     }
 
@@ -109,8 +115,9 @@ contract ExtendedAdvertisementStorage is BaseAdvertisementStorage {
     @return { "_endPoint": "URL for the signing web service"}
     */
 
-    function getCampaignEndPointById(bytes32 _bidId) public returns (string _endPoint){
-        return campaignEndPoints[_bidId];
+    function getCampaignEndPointById(bytes32 _bidId) 
+        public returns (string _endPoint){
+        return extendedCampaignInfo[_bidId].getEndpoint();
     }
 
     /**
@@ -125,8 +132,8 @@ contract ExtendedAdvertisementStorage is BaseAdvertisementStorage {
         onlyIfCampaignExists("setCampaignEndPointById",_bidId)
         onlyIfWhitelisted("setCampaignEndPointById",msg.sender) 
         {
-        campaignEndPoints[_bidId] = _endPoint;
-        emit ExtendedCampaignEndPointUpdated(_bidId,_endPoint);
+        extendedCampaignInfo[_bidId].setEndpoint(_endPoint);
+        emit ExtendedCampaignUpdated(_bidId, _endPoint);
     }
 
 }

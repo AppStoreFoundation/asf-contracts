@@ -418,18 +418,6 @@ contract('Advertisement', function(accounts) {
 
 	})
 
-    // TODO: enable this test after we start verifying nouces when registering PoAs.
-	// it('should revert registerPoA and emit an error event if nounces do not generate correct leading zeros', async function () {
-    //
-    //     var userInitBalance = await TestUtils.getBalance(accounts[0]);
-    //
-	// 	await TestUtils.expectErrorMessageTest("Incorrect nounces for submited proof of attention", async () => {
-	// 		await addInstance.registerPoA(wrongNoncePoA.packageName,wrongNoncePoA.bid,wrongNoncePoA.timestamp,wrongNoncePoA.nonce,accounts[1],accounts[2],walletName, countryCode);
-	// 	});
-	// 	var newUserBalance = await TestUtils.getBalance(accounts[0]);
-	// 	expect(userInitBalance).to.be.equal(newUserBalance);
-    //
-	// })
 
 	it('should revert registerPoA and emit an error event if PoA pairs are not exactly 12', async () => {
 		var userInitBalance = await TestUtils.getBalance(accounts[0]);

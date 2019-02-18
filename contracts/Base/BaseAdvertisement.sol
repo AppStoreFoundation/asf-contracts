@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity 0.4.24;
 
 import "../AppCoins.sol";
 import "./BaseFinance.sol";
@@ -13,14 +13,14 @@ import "./Ownable.sol";
  */
 contract BaseAdvertisement is StorageUser,Ownable {
     
-    AppCoins appc;
-    BaseFinance advertisementFinance;
-    BaseAdvertisementStorage advertisementStorage;
+    AppCoins public appc;
+    BaseFinance public advertisementFinance;
+    BaseAdvertisementStorage public advertisementStorage;
 
-    mapping( bytes32 => mapping(address => uint256)) userAttributions;
+    mapping( bytes32 => mapping(address => uint256)) public userAttributions;
 
-    bytes32[] bidIdList;
-    bytes32 lastBidId = 0x0;
+    bytes32[] public bidIdList;
+    bytes32 public lastBidId = 0x0;
 
 
     /**
@@ -39,6 +39,30 @@ contract BaseAdvertisement is StorageUser,Ownable {
         lastBidId = advertisementStorage.getLastBidId();
     }
 
+
+
+    /**
+    @notice Import existing bidIds
+    @dev
+        Method to import existing BidId list from an existing BaseAdvertisement contract
+        Be careful, this function does not chcek for duplicates.
+    @param _addrAdvert Address of the existing Advertisement contract from which the bidIds
+     will be imported  
+    */
+
+    function importBidIds(address _addrAdvert) public onlyOwner("importBidIds") {
+
+        bytes32[] memory _bidIdsToImport = BaseAdvertisement(_addrAdvert).getBidIdList();
+        bytes32 _lastStorageBidId = advertisementStorage.getLastBidId();
+
+        for (uint i = 0; i < _bidIdsToImport.length; i++) {
+            bidIdList.push(_bidIdsToImport[i]);
+        }
+        
+        if(lastBidId < _lastStorageBidId) {
+            lastBidId = _lastStorageBidId;
+        }
+    }
 
     /**
     @notice Upgrade finance contract used by this contract
@@ -302,19 +326,6 @@ contract BaseAdvertisement is StorageUser,Ownable {
 
         uint nowInMilliseconds = now * 1000;
         return validity && startDate < nowInMilliseconds && endDate > nowInMilliseconds;
-    }
-
-     /**
-    @notice Returns the division of two numbers
-    @dev
-        Function used for division operations inside the smartcontract
-    @param numerator Numerator part of the division
-    @param denominator Denominator part of the division
-    @return { "result" : "Result of the division"}
-    */
-    function division(uint numerator, uint denominator) public view returns (uint result) {
-        uint _quotient = numerator / denominator;
-        return _quotient;
     }
 
     /**

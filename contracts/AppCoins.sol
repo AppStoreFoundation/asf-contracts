@@ -1,7 +1,7 @@
 // AppCoins contract with share splitting among different wallets
 // Not fully ERC20 compliant due to tests purposes
 
-pragma solidity ^0.4.21;
+pragma solidity 0.4.24;
 
 contract ERC20Interface {
     function name() public view returns(bytes32);
@@ -11,6 +11,7 @@ contract ERC20Interface {
     function transferFrom(address _from, address _to, uint256 _value) public returns (uint);
     event Transfer(address indexed _from, address indexed _to, uint256 _value);
 }
+
 
 contract AppCoins is ERC20Interface{
     // Public variables of the token

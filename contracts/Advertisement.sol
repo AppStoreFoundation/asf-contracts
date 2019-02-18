@@ -1,4 +1,4 @@
-pragma solidity ^0.4.21;
+pragma solidity 0.4.24;
 
 
 import  { CampaignLibrary } from "./lib/CampaignLibrary.sol";
@@ -9,6 +9,7 @@ import "./AdvertisementFinance.sol";
 import "./Base/BaseFinance.sol";
 import "./Base/BaseAdvertisement.sol";
 import "./AppCoins.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 /**
 @title Advertisement contract
@@ -26,7 +27,7 @@ contract Advertisement is BaseAdvertisement {
         uint walletDailyConversions;
     }
 
-    uint constant expectedPoALength = 12;
+    uint public constant expectedPoALength = 12;
 
     ValidationRules public rules;
 
@@ -41,8 +42,8 @@ contract Advertisement is BaseAdvertisement {
             uint[] vercodes
     );
 
-   
-    function Advertisement (address _addrAppc, address _addrAdverStorage, address _addrAdverFinance) public 
+
+    function Advertisement (address _addrAppc, address _addrAdverStorage, address _addrAdverFinance) public
         BaseAdvertisement(_addrAppc,_addrAdverStorage,_addrAdverFinance) {
         rules = ValidationRules(false, true, true, 2, 1);
     }
@@ -76,10 +77,10 @@ contract Advertisement is BaseAdvertisement {
         uint startDate,
         uint endDate)
         external {
-            
+
         CampaignLibrary.Campaign memory newCampaign = _generateCampaign(packageName, countries, vercodes, price, budget, startDate, endDate);
 
-        if(newCampaign.owner == 0x0){ 
+        if(newCampaign.owner == 0x0){
             // campaign was not generated correctly (revert)
             return;
         }
@@ -160,15 +161,9 @@ contract Advertisement is BaseAdvertisement {
             }
         }
 
-        /* if(!areNoncesValid(bytes(packageName), timestampList, nonces)){
-            emit Error(
-                "registerPoA","Incorrect nounces for submited proof of attention");
-            return;
-        } */
-        
         // using the same variable as to the for loop to avoid stack too deep error
         i = getUserAttribution(bidId,msg.sender);
-        
+
         if(i>0){
             emit Error(
                 "registerPoA","User already registered a proof of attention for this campaign");
@@ -182,7 +177,7 @@ contract Advertisement is BaseAdvertisement {
         emit PoARegistered(bidId, packageName, timestampList, nonces, walletName, countryCode);
     }
 
-    
+
     /**
     @notice Internal function to distribute payouts
     @dev
@@ -206,9 +201,9 @@ contract Advertisement is BaseAdvertisement {
         require(budget >= price);
 
         //transfer to user, appstore and oem
-        _getFinance().pay(campaignOwner,user,division(price * devShare, 100));
-        _getFinance().pay(campaignOwner,appstore,division(price * appstoreShare, 100));
-        _getFinance().pay(campaignOwner,oem,division(price * oemShare, 100));
+        _getFinance().pay(campaignOwner,user,SafeMath.div(price * devShare, 100));
+        _getFinance().pay(campaignOwner,appstore,SafeMath.div(price * appstoreShare, 100));
+        _getFinance().pay(campaignOwner,oem,SafeMath.div(price * oemShare, 100));
 
         //subtract from campaign
         uint newBudget = budget - price;
