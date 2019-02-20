@@ -114,22 +114,19 @@ contract BaseAdvertisement is StorageUser,Ownable {
         advertisementStorage = BaseAdvertisementStorage(addrAdverStorage);
     }
 
-
     /**
     @notice Get Advertisement Storage Address used by this contract
     @dev
         This function is required to upgrade Advertisement contract address on Advertisement
-        Finance contract. This function can only be called by the Advertisement Finance
-        contract registered in this contract.
+        Finance contract.
     @return {
-        "storageContract" : "Address of the Advertisement Storage contract used by this contract"
+        "_storage" : "Address of the Advertisement Storage contract used by this contract"
         }
     */
 
-    function getStorageAddress() public view returns(address storageContract) {
-        require (msg.sender == address(advertisementFinance));
+    function getStorageAddress() external view returns(address _storage) {
 
-        return address(advertisementStorage);
+        return advertisementStorage;
     }
 
 

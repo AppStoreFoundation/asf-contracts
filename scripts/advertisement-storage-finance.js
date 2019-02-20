@@ -1,6 +1,6 @@
-const AdvertisementStorage = artifacts.require("./AdvertisementStorage.sol");
-const AdvertisementFinance = artifacts.require("./AdvertisementFinance.sol");
-const Advertisement = artifacts.require("./Advertisement.sol");
+const AdvertisementStorage = artifacts.require("./ExtendedAdvertisementStorage.sol");
+const AdvertisementFinance = artifacts.require("./ExtendedFinance.sol");
+const Advertisement = artifacts.require("./ExtendedAdvertisement.sol");
 const network = process.argv[5] || 'development';
 const web3 = require('web3');
 
@@ -14,19 +14,19 @@ module.exports = function(callback) {
         case 'development':
             storageInstance = AdvertisementStorage.at(process.env.ADVERTISEMENT_STORAGE_DEVELOPMENT_ADDRESS);
             financeInstance = AdvertisementFinance.at(process.env.ADVERTISEMENT_FINANCE_DEVELOPMENT_ADDRESS);
-            advertisementAddress = process.env.ADVERTISEMENT_DEVELOPMENT_ADDRESS;
+            advertisementAddress = process.env.EXTENDED_ADVERTISEMENT_MAINNET_ADDRESS;
             break;
 
         case 'ropsten':
-            storageInstance = AdvertisementStorage.at(process.env.ADVERTISEMENT_STORAGE_ROPSTEN_ADDRESS);
-            financeInstance = AdvertisementFinance.at(process.env.ADVERTISEMENT_FINANCE_ROPSTEN_ADDRESS);
-            advertisementAddress = process.env.ADVERTISEMENT_ROPSTEN_ADDRESS;
+            storageInstance = AdvertisementStorage.at(process.env.EXTENDED_ADVERTISEMENT_STORAGE_ROPSTEN_ADDRESS);
+            financeInstance = AdvertisementFinance.at(process.env.EXTENDED_ADVERTISEMENT_FINANCE_ROPSTEN_ADDRESS);
+            advertisementAddress = process.env.EXTENDED_ADVERTISEMENT_ROPSTEN_ADDRESS;
             break;
 
         case 'main':
             storageInstance = AdvertisementStorage.at(process.env.ADVERTISEMENT_STORAGE_MAINNET_ADDRESS);
             financeInstance = AdvertisementFinance.at(process.env.ADVERTISEMENT_FINANCE_MAINNET_ADDRESS);
-            advertisementAddress = process.env.ADVERTISEMENT_MAINNET_ADDRESS;
+            advertisementAddress = process.env.EXTENDED_ADVERTISEMENT_MAINNET_ADDRESS;
             break;
 
         default:
@@ -45,13 +45,15 @@ module.exports = function(callback) {
     }
 
     const addAdvertisementContractAddressToFinance = function(newAdvertisementAddress) {
-        financeInstance.setAdsContractAddress(newAdvertisementAddress).then(function(error, success) {
+        financeInstance.setAllowedAddress(newAdvertisementAddress).then(function(error, success) {
             console.log(`New Advertisement address ${newAdvertisementAddress} added to the finance!`);
+        }).catch((ceas) => {
+            console.log(ceas)
         })
     }
 
     //  TODO this need to be async
     addAdvertisementContractAddressToFinance(advertisementAddress);
-    addNewAdvertisementToStorage(advertisementAddress);
+    //addNewAdvertisementToStorage(advertisementAddress);
 
 };
