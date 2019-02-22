@@ -1,11 +1,11 @@
-pragma solidity ^0.4.24;
+pragma solidity 0.4.24;
 
 import "./Base/StorageUser.sol";
 import "./Base/Whitelist.sol";
 import "./Base/BaseAdvertisement.sol";
 import "./ExtendedAdvertisementStorage.sol";
 import "./ExtendedFinance.sol";
-
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
 
@@ -23,7 +23,6 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
     event ExtendedCampaignInfo
         (
             bytes32 bidId,
-            address rewardManager,
             string endPoint
     );
 
@@ -51,7 +50,6 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
     avaliable to users.
     @param endDate Date (in miliseconds) on which the campaign will no longer be avaliable to users.
     @param endPoint URL of the signing serivce
-    @param rewardManager Entity receiving rewards considering a single register PoA submission
     */
     function createCampaign (
         string packageName,
@@ -61,7 +59,6 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
         uint budget,
         uint startDate,
         uint endDate,
-        address rewardManager,
         string endPoint)
         external
         {
@@ -83,7 +80,6 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
             newCampaign.endDate,
             newCampaign.valid,
             newCampaign.owner,
-            rewardManager,
             endPoint);
 
         emit CampaignInformation(
@@ -94,7 +90,7 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
             countries,
             vercodes);
 
-        emit ExtendedCampaignInfo(newCampaign.bidId, rewardManager, endPoint);
+        emit ExtendedCampaignInfo(newCampaign.bidId, endPoint);
     }
 
     /**
@@ -118,7 +114,7 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
         uint price = _getStorage().getCampaignPriceById(_bidId);
         uint budget = _getStorage().getCampaignBudgetById(_bidId);
         address owner = _getStorage().getCampaignOwnerById(_bidId);
-        uint maxConversions = division(budget,price);
+        uint maxConversions = SafeMath.div(budget,price);
         uint effectiveConversions;
         uint totalPay;
         uint newBudget;
@@ -129,8 +125,9 @@ contract ExtendedAdvertisement is BaseAdvertisement, Whitelist {
             effectiveConversions = maxConversions;
         }
 
-        totalPay = price*effectiveConversions;
-        newBudget = budget - totalPay;
+        totalPay = SafeMath.mul(price,effectiveConversions);
+        
+        newBudget = SafeMath.sub(budget,totalPay);
 
         _getFinance().pay(owner, msg.sender, totalPay);
         _getStorage().setCampaignBudgetById(_bidId, newBudget);

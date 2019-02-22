@@ -1,7 +1,7 @@
 // AppCoins contract with share splitting among different wallets
 // Not fully ERC20 compliant due to tests purposes
 
-pragma solidity ^0.4.21;
+pragma solidity 0.4.24;
 
 contract ERC20Interface {
     function name() public view returns(bytes32);

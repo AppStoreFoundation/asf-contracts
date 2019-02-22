@@ -1,7 +1,8 @@
-pragma solidity ^0.4.19;
+pragma solidity 0.4.24;
 
 import "./Base/Whitelist.sol";
 import { Shares } from "./lib/Shares.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 contract AppCoins {
     mapping (address => mapping (address => uint256)) public allowance;
@@ -14,15 +15,7 @@ contract AppCoins {
 @dev Base interface to implement In-app-billing functions.
 */
 contract AppCoinsIABInterface {
-    /**
-    @notice Returns the division of two numbers
-    @dev
-        Function used for division operations inside the smartcontract
-    @param _numerator Numerator part of the division
-    @param _denominator Denominator part of the division
-    @return { "result" : "Result of the division"}
-    */
-    function division(uint _numerator, uint _denominator) public view returns (uint result);
+
     /**
     @notice Function to register a in-app-billing operation
     @dev
@@ -84,20 +77,6 @@ contract AppCoinsIAB is AppCoinsIABInterface, Whitelist {
         }
     }
 
-     /**
-    @notice Returns the division of two numbers
-    @dev
-        Function used for division operations inside the smartcontract
-    @param _numerator Numerator part of the division
-    @param _denominator Denominator part of the division
-    @return { "result" : "Result of the division"}
-    */
-    function division(uint _numerator, uint _denominator) public view returns (uint result) {
-        uint quotient = _numerator / _denominator;
-        return quotient;
-    }
-
-
     function buy(string _packageName, string _sku, uint256 _amount, address _addr_appc, address _dev, address _appstore, address _oem, bytes2 _countryCode) public view returns (bool) {
         require(_addr_appc != 0x0);
         require(_dev != 0x0);
@@ -112,9 +91,9 @@ contract AppCoinsIAB is AppCoinsIABInterface, Whitelist {
         }
 
         uint[] memory amounts = new uint[](3);
-        amounts[0] = division(_amount * Shares.getDevShare(), 100);
-        amounts[1] = division(_amount * Shares.getAppStoreShare(), 100);
-        amounts[2] = division(_amount * Shares.getOEMShare(), 100);
+        amounts[0] = SafeMath.div(_amount * Shares.getDevShare(), 100);
+        amounts[1] = SafeMath.div(_amount * Shares.getAppStoreShare(), 100);
+        amounts[2] = SafeMath.div(_amount * Shares.getOEMShare(), 100);
 
         uint remaining = _amount - (amounts[0] + amounts[1] + amounts[2]);
 
