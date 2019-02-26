@@ -100,7 +100,13 @@ def get_imported_files(initialdir,imports,dependencies,alreadyImported):
     return total_new_imports
 
 if __name__ == "__main__":
-    
+
+    if len(sys.argv) < 3:
+        print('use Flattener.py origin.sol dest.sol')
+        print('\torigin.sol is the original file which will be flattened')
+        print('\tdest.sol is the path of the new flattened code')
+        exit(1)
+
     dependencies = dict()
     filePath = os.path.abspath(sys.argv[1])
     directoryPath = os.path.split(filePath)[0]
